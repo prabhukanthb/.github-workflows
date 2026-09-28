@@ -37,7 +37,7 @@ export default function ForgotPassword() {
   return (
     <div className="auth-wrap">
       <div className="panel auth-card">
-        <div className="kicker">New Kalyanamala</div>
+        <div className="kicker">Telugu Kalyanamala</div>
         <h2>Reset password</h2>
         {error && <div className="error">{error}</div>}
         {message && <div className="ok">{message}</div>}

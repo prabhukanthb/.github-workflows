@@ -44,7 +44,7 @@ export default function Register() {
   return (
     <div className="auth-wrap">
       <form className="panel auth-card" onSubmit={submit}>
-        <div className="kicker">New Kalyanamala</div>
+        <div className="kicker">Telugu Kalyanamala</div>
         <h2>Register</h2>
         <p>Registration is {REGISTRATION_FEE}. Parents may create the login in the candidate’s name. Payment is collected by the Vijayawada office.</p>
         {error && <div className="error">{error}</div>}

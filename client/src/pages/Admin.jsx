@@ -10,8 +10,6 @@ export default function Admin() {
   const [summary, setSummary] = useState(null);
   const [profiles, setProfiles] = useState([]);
   const [filter, setFilter] = useState('pending');
-  const [creating, setCreating] = useState(false);
-  const [form, setForm] = useState(profileToForm());
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const isAdmin = user?.role === 'admin' || user?.role === 'subadmin';
@@ -46,21 +44,6 @@ export default function Admin() {
     }
   };
 
-  const create = async (event) => {
-    event.preventDefault();
-    setError('');
-    setMessage('');
-    try {
-      const data = await api.adminCreate(form, token);
-      setMessage(`${fullName(data.profile)} published as ${data.profile.profileId}.`);
-      setCreating(false);
-      setForm(profileToForm());
-      load();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
   return (
     <div className="page">
       <div className="kicker">Vijayawada office</div>
@@ -79,24 +62,20 @@ export default function Admin() {
           ))}
         </div>
       )}
+      <div className="panel create-banner">
+        <div>
+          <h2>Create a profile</h2>
+          <p>Add a bride or groom biodata for a family. Office staff do not have a member profile.</p>
+        </div>
+        <Link to="/admin/create" className="btn-gold">Create profile</Link>
+      </div>
       <div className="actions" style={{ marginBottom: 16 }}>
-        <button type="button" className="btn-gold" onClick={() => setCreating((value) => !value)}>
-          {creating ? 'Close form' : 'Add a profile'}
-        </button>
         {['pending', 'approved', 'rejected', 'draft', 'all'].map((item) => (
           <button key={item} type="button" className={filter === item ? 'btn-maroon' : 'btn-gold'} onClick={() => setFilter(item)}>
             {item}
           </button>
         ))}
       </div>
-      {creating && (
-        <form className="panel" style={{ marginBottom: 20 }} onSubmit={create}>
-          <h2>New member</h2>
-          <BiodataForm form={form} setForm={setForm} includeAccount />
-          <p>If you leave password empty, the member can login with Member@12345 and should change it.</p>
-          <button className="btn-maroon" type="submit">Publish profile</button>
-        </form>
-      )}
       <div style={{ overflowX: 'auto' }}>
         <table className="admin">
           <thead>
@@ -134,6 +113,49 @@ export default function Admin() {
         </table>
       </div>
       <p style={{ marginTop: 16 }}><Link to="/browse">Open search</Link></p>
+    </div>
+  );
+}
+
+export function CreateProfile() {
+  const { token, user, isAuthenticated, loading } = useAuth();
+  const [form, setForm] = useState(profileToForm());
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const isAdmin = user?.role === 'admin' || user?.role === 'subadmin';
+
+  if (loading) return <div className="page">Loading…</div>;
+  if (!isAuthenticated || !isAdmin) return <Navigate to="/" replace />;
+
+  const create = async (event) => {
+    event.preventDefault();
+    setBusy(true);
+    setError('');
+    setMessage('');
+    try {
+      const data = await api.adminCreate(form, token);
+      setMessage(`${fullName(data.profile)} is in search as ${data.profile.profileId}. You can add another family now.`);
+      setForm(profileToForm());
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="page">
+      <div className="kicker">Vijayawada office</div>
+      <h2>Create profile</h2>
+      <p><Link to="/admin">Back to the office list</Link></p>
+      {error && <div className="error">{error}</div>}
+      {message && <div className="ok">{message}</div>}
+      <form className="panel" onSubmit={create}>
+        <BiodataForm form={form} setForm={setForm} includeAccount />
+        <p>Leave the password empty and the family can login with Member@12345, then change it.</p>
+        <button className="btn-maroon" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Create profile'}</button>
+      </form>
     </div>
   );
 }

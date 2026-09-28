@@ -155,7 +155,7 @@ function validateBiodata(profile) {
 }
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, service: 'new-kalyanamala' });
+  res.json({ ok: true, service: 'telugu-kalyanamala' });
 });
 
 app.post('/api/auth/register', async (req, res) => {
@@ -208,7 +208,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
   const user = findLogin(req.body.emailOrPhone);
   const message = 'If this account is registered, you can set a new password with the reset code from the Vijayawada office.';
   if (!user) return res.json({ message });
-  const token = `NK${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+  const token = `TK${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
   await update((state) => ({
     ...state,
     resets: [...state.resets.filter((item) => item.userId !== user.id), {
@@ -494,5 +494,5 @@ if (fs.existsSync(dist)) {
 
 await initDb();
 app.listen(PORT, () => {
-  console.log(`New Kalyanamala API listening on ${PORT}`);
+  console.log(`Telugu Kalyanamala API listening on ${PORT}`);
 });

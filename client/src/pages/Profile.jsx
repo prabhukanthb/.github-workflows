@@ -36,6 +36,7 @@ export default function Profile() {
 
   if (loading) return <div className="page">Loading…</div>;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (user?.role === 'admin' || user?.role === 'subadmin') return <Navigate to="/admin" replace />;
 
   const save = async (event) => {
     event.preventDefault();
@@ -62,7 +63,7 @@ export default function Profile() {
 
   return (
     <div className="page">
-      <div className="kicker">New Kalyanamala</div>
+      <div className="kicker">Telugu Kalyanamala</div>
       <h2>My biodata</h2>
       <p>
         Status: <strong>{status || 'draft'}</strong>

@@ -46,7 +46,7 @@ export default function Browse() {
   if (!isAuthenticated) {
     return (
       <div className="page" style={{ maxWidth: 680 }}>
-        <div className="kicker">New Kalyanamala</div>
+        <div className="kicker">Telugu Kalyanamala</div>
         <h2>Search profiles</h2>
         <p>Register to view Mala matches. Registration is {REGISTRATION_FEE}. Parents may create the login. Phone numbers stay private.</p>
         <div className="actions">
@@ -62,7 +62,7 @@ export default function Browse() {
 
   return (
     <div className="page">
-      <div className="kicker">New Kalyanamala</div>
+      <div className="kicker">Telugu Kalyanamala</div>
       <h2>Browse profiles</h2>
       {error && <div className="error">{error}</div>}
       {!isAdmin && viewer?.gender && viewerAge && (

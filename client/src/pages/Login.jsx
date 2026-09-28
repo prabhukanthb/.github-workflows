@@ -27,7 +27,7 @@ export default function Login() {
   return (
     <div className="auth-wrap">
       <form className="panel auth-card" onSubmit={submit}>
-        <div className="kicker">New Kalyanamala</div>
+        <div className="kicker">Telugu Kalyanamala</div>
         <h2>Login</h2>
         {error && <div className="error">{error}</div>}
         <label htmlFor="login-id">Email or phone</label>

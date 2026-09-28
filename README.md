@@ -1,6 +1,6 @@
-# New Kalyanamala
+# Telugu Kalyanamala
 
-Matrimony site for Mala families, run by Kalyanamala Seva Samstha from its Vijayawada office. Families register, complete a biodata, and search brides and grooms. Phone numbers stay hidden until both families agree through the office.
+Matrimony site for Mala families, run by Kalyanamala Seva Samstha from its Vijayawada office. The home page carries the line “Introduction is Ours - Inspection is yours.” Families register, complete a biodata, and search brides and grooms. Phone numbers stay hidden until both families agree through the office.
 
 ## Run locally
 
@@ -28,6 +28,6 @@ These accounts are created the first time the API starts.
 | Bride (Anitha) | anitha.demo@example.com | Member@12345 |
 | Groom (Suresh) | suresh.demo@example.com | Member@12345 |
 
-A bride sees older grooms. A groom sees brides of the same age or younger. One biodata is waiting in the admin list so the office can approve it.
+A bride sees older grooms. A groom sees brides of the same age or younger. Office staff do not get a member profile. After login they see **Create profile**, which opens the biodata form.
 
 Reset the demo data with `npm run seed`.

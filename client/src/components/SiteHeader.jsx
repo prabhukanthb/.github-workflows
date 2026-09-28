@@ -39,7 +39,7 @@ export default function SiteHeader() {
       </div>
       <div className="site-header-inner">
         <Link to="/" className="site-logo" onClick={() => setOpen(false)}>
-          <span className="site-mark" aria-hidden="true">NK</span>
+          <span className="site-mark" aria-hidden="true">TK</span>
           {BRAND}
         </Link>
         <nav className={open ? 'site-nav open' : 'site-nav'} aria-label="Main">
@@ -52,10 +52,12 @@ export default function SiteHeader() {
               <Link key={item.label} to={item.to} onClick={() => setOpen(false)}>{item.label}</Link>
             )
           ))}
+          {isAuthenticated && !isAdmin && (
+            <Link to="/profile" onClick={() => setOpen(false)}>My Profile</Link>
+          )}
+          {isAdmin && <Link to="/admin" onClick={() => setOpen(false)}>Office</Link>}
           {isAuthenticated && (
             <>
-              <Link to="/profile" onClick={() => setOpen(false)}>My Profile</Link>
-              {isAdmin && <Link to="/admin" onClick={() => setOpen(false)}>Admin</Link>}
               <span>Hi, {user.firstName}</span>
               <button type="button" className="btn-ghost" onClick={() => { logout(); setOpen(false); navigate('/'); }}>Logout</button>
             </>
@@ -65,6 +67,9 @@ export default function SiteHeader() {
           )}
         </nav>
         <div className="header-cta">
+          {isAdmin && (
+            <Link to="/admin/create" className="btn-gold" onClick={() => setOpen(false)}>Create profile</Link>
+          )}
           {!isAuthenticated && (
             <Link to="/register" className="btn-gold" onClick={() => setOpen(false)}>{REGISTER_CTA}</Link>
           )}

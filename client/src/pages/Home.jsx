@@ -6,6 +6,7 @@ import { fullName } from '../siteConfig';
 import {
   BRANCH_ADDRESS_LINES,
   BRAND,
+  MOTTO,
   CITIES,
   EMAIL,
   HELPLINE_DISPLAY,
@@ -36,7 +37,7 @@ const FEATURE_PHOTOS = [
 
 const FAQ = [
   {
-    q: 'Is New Kalyanamala only for the Mala community?',
+    q: 'Is Telugu Kalyanamala only for the Mala community?',
     a: 'Yes. This service is exclusively for Mala families — Hindu, Christian, Ambedkarist and Buddhist — so parents can search among people who share community, language and family values.'
   },
   {
@@ -122,6 +123,7 @@ export default function Home() {
             hopes blossom,<br />
             and <em>lifelong bonds</em> begin.
           </h1>
+          <p className="home-motto">{MOTTO}</p>
           <p className="lede verse">
             For fifteen years in <strong>Vijayawada</strong>, <strong>{BRAND}</strong> has lovingly brought together
             hearts, hopes, and families within the <strong>Mala community</strong>.
@@ -236,7 +238,7 @@ export default function Home() {
           <h2>Brides and grooms we introduce</h2>
           <p className="sub">
             {isAuthenticated
-              ? 'A sample of members currently on New Kalyanamala.'
+              ? `A sample of members currently on ${BRAND}.`
               : `Register to see biodata. Registration is ${REGISTRATION_FEE}. Phone numbers stay private.`}
           </p>
           <div className="carousel">

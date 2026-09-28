@@ -1,4 +1,5 @@
-export const BRAND = 'New Kalyanamala';
+export const BRAND = 'Telugu Kalyanamala';
+export const MOTTO = 'Introduction is Ours - Inspection is yours';
 export const ORG = 'Kalyanamala Seva Samstha';
 export const YEARS_OF_SERVICE = 15;
 export const REGISTRATION_FEE = '₹3,000/-';

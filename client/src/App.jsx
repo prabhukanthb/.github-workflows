@@ -9,7 +9,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ChangePassword from './pages/ChangePassword';
 import Browse from './pages/Browse';
 import Profile from './pages/Profile';
-import Admin from './pages/Admin';
+import Admin, { CreateProfile } from './pages/Admin';
 import { Privacy, Refund, Terms } from './pages/Legal';
 import { useAuth } from './AuthContext';
 
@@ -29,6 +29,7 @@ function Shell() {
             <Route path="/browse" element={<Browse />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/create" element={<CreateProfile />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/refund" element={<Refund />} />

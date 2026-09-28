@@ -28,7 +28,7 @@ export default function ChangePassword() {
   return (
     <div className="auth-wrap">
       <form className="panel auth-card" onSubmit={submit}>
-        <div className="kicker">New Kalyanamala</div>
+        <div className="kicker">Telugu Kalyanamala</div>
         <h2>Change password</h2>
         {error && <div className="error">{error}</div>}
         {message && <div className="ok">{message}</div>}

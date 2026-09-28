@@ -1,8 +1,8 @@
 {
-  "name": "new-kalyanamala",
+  "name": "telugu-kalyanamala",
   "version": "1.0.0",
   "private": true,
-  "description": "New Kalyanamala matrimony — families search within the Mala community.",
+  "description": "Telugu Kalyanamala matrimony — families search within the Mala community.",
   "type": "module",
   "scripts": {
     "dev": "concurrently -k \"node server/index.js\" \"vite\"",
