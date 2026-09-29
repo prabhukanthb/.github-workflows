@@ -18,9 +18,9 @@ app.use(cors());
 app.use(express.json({ limit: '4mb' }));
 app.use((req, res, next) => {
   const host = String(req.headers.host || '').split(':')[0].toLowerCase();
-  const aliases = new Set(['www.telugukalyanamala.com', 'telugukalyanamala.org', 'www.telugukalyanamala.org']);
+  const aliases = new Set(['telugukalyanamala.com', 'telugukalyanamala.org', 'www.telugukalyanamala.org']);
   if (!aliases.has(host)) return next();
-  return res.redirect(301, `https://telugukalyanamala.com${req.originalUrl}`);
+  return res.redirect(301, `https://www.telugukalyanamala.com${req.originalUrl}`);
 });
 app.use(async (_req, res, next) => {
   try {
