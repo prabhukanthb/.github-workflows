@@ -1,3 +1,4 @@
+import './webcrypto.js';
 import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
