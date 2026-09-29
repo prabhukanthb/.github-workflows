@@ -537,8 +537,7 @@ if (fs.existsSync(dist)) {
 export default app;
 
 if (!process.env.VERCEL) {
-  await initDb();
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`Telugu Kalyanamala API listening on ${PORT}`);
   });
 }
