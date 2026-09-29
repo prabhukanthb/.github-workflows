@@ -1,8 +1,24 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { assertTeluguCloudinary, TELUGU_PHOTO_FOLDER } from './deployGuard.js';
 
+function cloudinaryValue(name) {
+  return String(process.env[name] || '').trim();
+}
+
+export function cloudinaryStatus() {
+  const present = {
+    CLOUDINARY_CLOUD_NAME: Boolean(cloudinaryValue('CLOUDINARY_CLOUD_NAME')),
+    CLOUDINARY_API_KEY: Boolean(cloudinaryValue('CLOUDINARY_API_KEY')),
+    CLOUDINARY_API_SECRET: Boolean(cloudinaryValue('CLOUDINARY_API_SECRET'))
+  };
+  return {
+    present,
+    missing: Object.keys(present).filter((name) => !present[name])
+  };
+}
+
 export function photosConfigured() {
-  return Boolean(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET);
+  return cloudinaryStatus().missing.length === 0;
 }
 
 export async function uploadTeluguPhoto(dataUrl) {

@@ -6,7 +6,7 @@ import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { ageFromDob, cityMatches, formatProfileId, fullName, isOppositeMatch } from './match.js';
-import { photosConfigured, uploadTeluguPhoto } from './photos.js';
+import { cloudinaryStatus, photosConfigured, uploadTeluguPhoto } from './photos.js';
 import { TELUGU_DOMAINS } from './deployGuard.js';
 import { getDb, initDb, presentProfile, publicUser, update } from './store.js';
 
@@ -188,7 +188,8 @@ app.get('/api/health', (_req, res) => {
     service: 'telugu-kalyanamala',
     domains: TELUGU_DOMAINS,
     storage: process.env.MONGODB_URI ? 'mongodb:telugu-kalyanamala' : 'file',
-    photos: photosConfigured() ? 'cloudinary:telugu-kalyanamala' : 'url'
+    photos: photosConfigured() ? 'cloudinary:telugu-kalyanamala' : 'url',
+    cloudinaryMissing: cloudinaryStatus().missing
   });
 });
 
