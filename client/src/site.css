@@ -792,6 +792,15 @@ textarea {
   grid-column: 1 / -1;
 }
 
+.photo-preview {
+  display: block;
+  width: 160px;
+  height: 200px;
+  object-fit: cover;
+  margin-top: 10px;
+  border-radius: 10px;
+}
+
 .form-section {
   margin: 18px 0 0;
   font-family: var(--serif);

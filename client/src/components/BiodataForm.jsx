@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { api } from '../api';
+import { useAuth } from '../AuthContext';
 import { EDUCATION, EMPLOYMENT, MARITAL, MOTHER_TONGUES, RELIGIONS } from '../siteConfig';
 
 export function profileToForm(profile = {}, user = {}) {
@@ -80,8 +82,39 @@ function AddressFields({ title, prefix, form, setForm }) {
   );
 }
 
+async function fileToDataUrl(file) {
+  const bitmap = await createImageBitmap(file);
+  const max = 1400;
+  const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL('image/jpeg', 0.85);
+}
+
 export default function BiodataForm({ form, setForm, includeAccount = false }) {
+  const { token } = useAuth();
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoError, setPhotoError] = useState('');
   const set = (name) => (event) => setForm({ ...form, [name]: event.target.value });
+
+  const uploadPhoto = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    setPhotoBusy(true);
+    setPhotoError('');
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      const data = await api.uploadPhoto(dataUrl, token);
+      setForm({ ...form, photoUrl: data.url });
+    } catch (err) {
+      setPhotoError(err.message);
+    } finally {
+      setPhotoBusy(false);
+    }
+  };
 
   return (
     <div className="form-grid">
@@ -203,8 +236,11 @@ export default function BiodataForm({ form, setForm, includeAccount = false }) {
         <textarea value={form.partnerRequirement} onChange={set('partnerRequirement')} />
       </div>
       <div className="wide">
-        <label>Photo URL (optional)</label>
-        <input value={form.photoUrl} onChange={set('photoUrl')} placeholder="https://" />
+        <label>Photo</label>
+        <input type="file" accept="image/jpeg,image/png,image/webp" onChange={uploadPhoto} disabled={photoBusy} />
+        {photoBusy && <p>Uploading to Cloudinary…</p>}
+        {photoError && <p className="error">{photoError}</p>}
+        {form.photoUrl && <img className="photo-preview" src={form.photoUrl} alt="" />}
       </div>
     </div>
   );

@@ -4,9 +4,9 @@ import { api } from './api';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem('nk_token') || '');
+  const [token, setToken] = useState(() => localStorage.getItem('tk_token') || '');
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(Boolean(localStorage.getItem('nk_token')));
+  const [loading, setLoading] = useState(Boolean(localStorage.getItem('tk_token')));
 
   useEffect(() => {
     if (!token) {
@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
         if (active) setUser(data.user);
       })
       .catch(() => {
-        localStorage.removeItem('nk_token');
+        localStorage.removeItem('tk_token');
         if (active) {
           setToken('');
           setUser(null);
@@ -41,20 +41,20 @@ export function AuthProvider({ children }) {
     isAuthenticated: Boolean(token && user),
     async login(emailOrPhone, password) {
       const data = await api.login({ emailOrPhone, password });
-      localStorage.setItem('nk_token', data.token);
+      localStorage.setItem('tk_token', data.token);
       setUser(data.user);
       setToken(data.token);
       return data.user;
     },
     async register(payload) {
       const data = await api.register(payload);
-      localStorage.setItem('nk_token', data.token);
+      localStorage.setItem('tk_token', data.token);
       setUser(data.user);
       setToken(data.token);
       return data.user;
     },
     logout() {
-      localStorage.removeItem('nk_token');
+      localStorage.removeItem('tk_token');
       setToken('');
       setUser(null);
     }

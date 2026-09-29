@@ -32,5 +32,6 @@ export const api = {
   adminSummary: (token) => request('/api/admin/summary', { token }),
   adminProfiles: (token) => request('/api/admin/profiles', { token }),
   adminCreate: (body, token) => request('/api/admin/profiles', { method: 'POST', body, token }),
-  adminUpdate: (id, body, token) => request(`/api/admin/profiles/${id}`, { method: 'PATCH', body, token })
+  adminUpdate: (id, body, token) => request(`/api/admin/profiles/${id}`, { method: 'PATCH', body, token }),
+  uploadPhoto: (dataUrl, token) => request('/api/uploads', { method: 'POST', body: { dataUrl }, token })
 };
