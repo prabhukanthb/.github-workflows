@@ -3,9 +3,17 @@ import assert from 'node:assert/strict';
 import { assertTeluguCloudinary, assertTeluguMongoUri } from './deployGuard.js';
 
 test('accepts only the telugu-kalyanamala database', () => {
-  assert.doesNotThrow(() => {
-    assertTeluguMongoUri('mongodb+srv://user:pass@cluster.mongodb.net/telugu-kalyanamala?retryWrites=true');
-  });
+  assert.equal(
+    assertTeluguMongoUri('  "mongodb+srv://user:pass@cluster.mongodb.net/telugu-kalyanamala?retryWrites=true"  '),
+    'mongodb+srv://user:pass@cluster.mongodb.net/telugu-kalyanamala?retryWrites=true'
+  );
+});
+
+test('refuses a connection string that does not start with mongodb', () => {
+  assert.throws(
+    () => assertTeluguMongoUri('MONGODB_URI=cluster0.pjkheex.mongodb.net/telugu-kalyanamala'),
+    /mongodb\+srv:\/\//
+  );
 });
 
 test('refuses a missing database name', () => {

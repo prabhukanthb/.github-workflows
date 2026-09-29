@@ -18,8 +18,7 @@ function usesMongo() {
 
 async function collection() {
   if (mongoCollection) return mongoCollection;
-  const uri = process.env.MONGODB_URI;
-  assertTeluguMongoUri(uri);
+  const uri = assertTeluguMongoUri(process.env.MONGODB_URI);
   const client = new MongoClient(uri);
   await client.connect();
   mongoCollection = client.db(TELUGU_DB).collection('site');
