@@ -792,6 +792,20 @@ textarea {
   grid-column: 1 / -1;
 }
 
+.form-section {
+  margin: 18px 0 0;
+  font-family: var(--serif);
+  color: var(--maroon-mid);
+  font-size: 22px;
+}
+
+.address-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 14px;
+  margin-top: 8px;
+}
+
 .notice {
   background: #EEF6FB;
   border: 1px solid var(--line);
@@ -939,6 +953,7 @@ table.admin th {
 
 @media (max-width: 700px) {
   .form-grid,
+  .address-fields,
   .stats,
   .detail-list {
     grid-template-columns: 1fr;

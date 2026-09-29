@@ -81,8 +81,8 @@ function blankProfile(userId) {
     industry: '',
     income: '',
     incomeCurrency: 'INR',
-    currentAddress: { streetName: '', city: '', state: 'Andhra Pradesh', country: 'India', pinCode: '' },
-    presentAddress: { streetName: '', city: '', state: 'Andhra Pradesh', country: 'India', pinCode: '' },
+    currentAddress: { pinCode: '', streetName: '', city: '', district: '', state: 'Andhra Pradesh', country: 'India' },
+    presentAddress: { pinCode: '', streetName: '', city: '', district: '', state: 'Andhra Pradesh', country: 'India' },
     nativePlace: '',
     fatherNativePlace: '',
     motherNativePlace: '',
@@ -96,14 +96,30 @@ function blankProfile(userId) {
   };
 }
 
-function readBiodata(body, current = {}) {
-  const address = {
-    streetName: String(body.streetName ?? current.currentAddress?.streetName ?? '').trim(),
-    city: String(body.city ?? current.currentAddress?.city ?? '').trim(),
-    state: String(body.state ?? current.currentAddress?.state ?? 'Andhra Pradesh').trim(),
-    country: 'India',
-    pinCode: String(body.pinCode ?? current.currentAddress?.pinCode ?? '').replace(/\D/g, '').slice(0, 6)
+function readAddress(body, prefix, fallback = {}) {
+  const value = (field, legacy) => {
+    const key = `${prefix}${field}`;
+    if (Object.prototype.hasOwnProperty.call(body, key) && body[key] != null) return String(body[key]);
+    if (prefix === 'current' && Object.prototype.hasOwnProperty.call(body, legacy) && body[legacy] != null) {
+      return String(body[legacy]);
+    }
+    if (fallback[legacy] != null) return String(fallback[legacy]);
+    return '';
   };
+  const pinCode = value('PinCode', 'pinCode').replace(/\D/g, '').slice(0, 6);
+  return {
+    pinCode,
+    streetName: value('StreetName', 'streetName').trim(),
+    city: value('City', 'city').trim(),
+    district: value('District', 'district').trim(),
+    state: value('State', 'state').trim() || 'Andhra Pradesh',
+    country: value('Country', 'country').trim() || 'India'
+  };
+}
+
+function readBiodata(body, current = {}) {
+  const address = readAddress(body, 'current', current.currentAddress || {});
+  const presentAddress = readAddress(body, 'present', current.presentAddress || {});
   const photoUrl = String(body.photoUrl ?? current.photos?.[0]?.url ?? '').trim();
   return {
     gender: body.gender ?? current.gender,
@@ -130,7 +146,7 @@ function readBiodata(body, current = {}) {
     industry: String(body.industry ?? current.industry ?? '').trim(),
     income: body.income === '' || body.income == null ? current.income : Number(body.income),
     currentAddress: address,
-    presentAddress: { ...address },
+    presentAddress,
     nativePlace: String(body.nativePlace ?? current.nativePlace ?? address.city).trim(),
     fatherNativePlace: String(body.fatherNativePlace ?? current.fatherNativePlace ?? '').trim(),
     motherNativePlace: String(body.motherNativePlace ?? current.motherNativePlace ?? '').trim(),
@@ -150,6 +166,7 @@ function validateBiodata(profile) {
   if (!profile.occupation) missing.push('occupation');
   if (!profile.currentAddress?.city) missing.push('city');
   if (profile.currentAddress?.pinCode && !/^[0-9]{6}$/.test(profile.currentAddress.pinCode)) missing.push('6-digit PIN code');
+  if (profile.presentAddress?.pinCode && !/^[0-9]{6}$/.test(profile.presentAddress.pinCode)) missing.push('6-digit present PIN code');
   if (!profile.aboutMe) missing.push('about the candidate');
   return missing;
 }

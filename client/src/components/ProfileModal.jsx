@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { ageFromDob, fullName, maritalLabel } from '../siteConfig';
 
+function addressLine(address) {
+  if (!address) return '';
+  return [address.pinCode, address.streetName, address.city, address.district, address.state, address.country]
+    .map((part) => String(part || '').trim())
+    .filter(Boolean)
+    .join(', ');
+}
+
 export default function ProfileModal({ profile, onClose, onInterest }) {
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
@@ -36,7 +44,8 @@ export default function ProfileModal({ profile, onClose, onInterest }) {
             <span>Marital status</span><div>{maritalLabel(profile.maritalStatus)}</div>
             <span>Education</span><div>{profile.highestEducation} · {profile.fieldOfStudy}</div>
             <span>Work</span><div>{profile.occupation}{profile.jobLocation ? ` · ${profile.jobLocation}` : ''}</div>
-            <span>City</span><div>{profile.currentAddress?.city}</div>
+            <span>Current address</span><div>{addressLine(profile.currentAddress)}</div>
+            <span>Present address</span><div>{addressLine(profile.presentAddress)}</div>
             <span>Family</span><div>{profile.fatherOccupation} / {profile.motherOccupation}</div>
           </div>
           <p>{profile.aboutMe}</p>

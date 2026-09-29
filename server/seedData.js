@@ -2,11 +2,12 @@ const photo = (id) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=800&q=70`;
 
 const address = (city, state, pin) => ({
+  pinCode: pin,
   streetName: '',
   city,
+  district: '',
   state,
-  country: 'India',
-  pinCode: pin
+  country: 'India'
 });
 
 export function buildSeed({ officeHash, memberHash }) {

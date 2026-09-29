@@ -1,5 +1,5 @@
 import React from 'react';
-import { CITIES, EDUCATION, EMPLOYMENT, MARITAL, MOTHER_TONGUES, RELIGIONS } from '../siteConfig';
+import { EDUCATION, EMPLOYMENT, MARITAL, MOTHER_TONGUES, RELIGIONS } from '../siteConfig';
 
 export function profileToForm(profile = {}, user = {}) {
   return {
@@ -22,9 +22,18 @@ export function profileToForm(profile = {}, user = {}) {
     companyName: profile.companyName || '',
     income: profile.income ?? '',
     jobLocation: profile.jobLocation || '',
-    city: profile.currentAddress?.city || '',
-    state: profile.currentAddress?.state || 'Andhra Pradesh',
-    pinCode: profile.currentAddress?.pinCode || '',
+    currentPinCode: profile.currentAddress?.pinCode || '',
+    currentStreetName: profile.currentAddress?.streetName || '',
+    currentCity: profile.currentAddress?.city || '',
+    currentDistrict: profile.currentAddress?.district || '',
+    currentState: profile.currentAddress?.state || 'Andhra Pradesh',
+    currentCountry: profile.currentAddress?.country || 'India',
+    presentPinCode: profile.presentAddress?.pinCode || '',
+    presentStreetName: profile.presentAddress?.streetName || '',
+    presentCity: profile.presentAddress?.city || '',
+    presentDistrict: profile.presentAddress?.district || '',
+    presentState: profile.presentAddress?.state || 'Andhra Pradesh',
+    presentCountry: profile.presentAddress?.country || 'India',
     fatherName: profile.fatherName || '',
     fatherOccupation: profile.fatherOccupation || '',
     motherName: profile.motherName || '',
@@ -33,6 +42,42 @@ export function profileToForm(profile = {}, user = {}) {
     partnerRequirement: profile.partnerRequirement || '',
     photoUrl: profile.photos?.[0]?.url || ''
   };
+}
+
+function AddressFields({ title, prefix, form, setForm }) {
+  const set = (name) => (event) => setForm({ ...form, [name]: event.target.value });
+  const pin = `${prefix}PinCode`;
+  return (
+    <div className="wide address-block">
+      <h3 className="form-section">{title}</h3>
+      <div className="address-fields">
+        <div>
+          <label>PIN code</label>
+          <input value={form[pin] || ''} inputMode="numeric" onChange={(event) => setForm({ ...form, [pin]: event.target.value.replace(/\D/g, '').slice(0, 6) })} />
+        </div>
+        <div>
+          <label>Street name</label>
+          <input value={form[`${prefix}StreetName`] || ''} onChange={set(`${prefix}StreetName`)} />
+        </div>
+        <div>
+          <label>City</label>
+          <input value={form[`${prefix}City`] || ''} onChange={set(`${prefix}City`)} required={prefix === 'current'} />
+        </div>
+        <div>
+          <label>District</label>
+          <input value={form[`${prefix}District`] || ''} onChange={set(`${prefix}District`)} />
+        </div>
+        <div>
+          <label>State</label>
+          <input value={form[`${prefix}State`] || ''} onChange={set(`${prefix}State`)} />
+        </div>
+        <div>
+          <label>Country</label>
+          <input value={form[`${prefix}Country`] || ''} onChange={set(`${prefix}Country`)} />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function BiodataForm({ form, setForm, includeAccount = false }) {
@@ -131,21 +176,8 @@ export default function BiodataForm({ form, setForm, includeAccount = false }) {
         <label>Work location</label>
         <input value={form.jobLocation} onChange={set('jobLocation')} />
       </div>
-      <div>
-        <label>City</label>
-        <select value={form.city} onChange={set('city')} required>
-          <option value="">Select</option>
-          {CITIES.map((city) => <option key={city}>{city}</option>)}
-        </select>
-      </div>
-      <div>
-        <label>State</label>
-        <input value={form.state} onChange={set('state')} />
-      </div>
-      <div>
-        <label>PIN code</label>
-        <input value={form.pinCode} onChange={(e) => setForm({ ...form, pinCode: e.target.value.replace(/\D/g, '').slice(0, 6) })} />
-      </div>
+      <AddressFields title="Current address" prefix="current" form={form} setForm={setForm} />
+      <AddressFields title="Present address" prefix="present" form={form} setForm={setForm} />
       <div>
         <label>Father’s name</label>
         <input value={form.fatherName} onChange={set('fatherName')} />
