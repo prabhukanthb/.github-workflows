@@ -198,6 +198,7 @@ export default function BiodataForm({ form, setForm, includeAccount = false }) {
           <input value={form.alternativePhone || ''} inputMode="numeric" onChange={(e) => setForm({ ...form, alternativePhone: e.target.value.replace(/\D/g, '').slice(0, 10) })} />
         </div>
       )}
+      <h3 className="form-section wide">Basic Details</h3>
       <div>
         <label>Looking to introduce</label>
         <select value={form.gender} onChange={set('gender')} required>
@@ -234,6 +235,7 @@ export default function BiodataForm({ form, setForm, includeAccount = false }) {
           {HEIGHT_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
         </select>
       </div>
+      <h3 className="form-section wide">Religion & Family</h3>
       <div>
         <label>Sub-community</label>
         <select value={form.religion} onChange={set('religion')}>
@@ -268,6 +270,31 @@ export default function BiodataForm({ form, setForm, includeAccount = false }) {
           {MARITAL.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
         </select>
       </div>
+      <div>
+        <label>Father’s name</label>
+        <input value={form.fatherName} onChange={set('fatherName')} />
+      </div>
+      <div>
+        <label>Father’s occupation</label>
+        <input value={form.fatherOccupation} onChange={set('fatherOccupation')} />
+      </div>
+      <div>
+        <label>Father’s native place</label>
+        <input value={form.fatherNativePlace || ''} onChange={set('fatherNativePlace')} />
+      </div>
+      <div>
+        <label>Mother’s name</label>
+        <input value={form.motherName} onChange={set('motherName')} />
+      </div>
+      <div>
+        <label>Mother’s occupation</label>
+        <input value={form.motherOccupation} onChange={set('motherOccupation')} />
+      </div>
+      <div>
+        <label>Mother’s native place</label>
+        <input value={form.motherNativePlace || ''} onChange={set('motherNativePlace')} />
+      </div>
+      <h3 className="form-section wide">Education & Professional</h3>
       <div>
         <label>Education</label>
         <select value={form.highestEducation} onChange={set('highestEducation')} required>
@@ -311,30 +338,7 @@ export default function BiodataForm({ form, setForm, includeAccount = false }) {
       </div>
       <AddressFields title="Current address" prefix="current" form={form} setForm={setForm} />
       <AddressFields title="Present address" prefix="present" form={form} setForm={setForm} />
-      <div>
-        <label>Father’s name</label>
-        <input value={form.fatherName} onChange={set('fatherName')} />
-      </div>
-      <div>
-        <label>Father’s occupation</label>
-        <input value={form.fatherOccupation} onChange={set('fatherOccupation')} />
-      </div>
-      <div>
-        <label>Father’s native place</label>
-        <input value={form.fatherNativePlace || ''} onChange={set('fatherNativePlace')} />
-      </div>
-      <div>
-        <label>Mother’s name</label>
-        <input value={form.motherName} onChange={set('motherName')} />
-      </div>
-      <div>
-        <label>Mother’s occupation</label>
-        <input value={form.motherOccupation} onChange={set('motherOccupation')} />
-      </div>
-      <div>
-        <label>Mother’s native place</label>
-        <input value={form.motherNativePlace || ''} onChange={set('motherNativePlace')} />
-      </div>
+      <h3 className="form-section wide">About & Preferences</h3>
       <div className="wide">
         <label>About the candidate</label>
         <textarea value={form.aboutMe} onChange={set('aboutMe')} required />
