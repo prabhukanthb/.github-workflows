@@ -53,6 +53,6 @@ These accounts are created the first time the API starts.
 | Bride (Anitha) | anitha.demo@example.com | Member@12345 |
 | Groom (Suresh) | suresh.demo@example.com | Member@12345 |
 
-A bride sees older grooms. A groom sees brides of the same age or younger. Office staff do not get a member profile. After login they see **Create profile**, which opens the biodata form.
+A bride sees older grooms. A groom sees brides of the same age or younger. Office staff do not get a member profile. After login they see **Create profile**, which opens the biodata form. On the Office page, **Add an office login** creates another admin or a subadmin. Leave the password empty and it becomes the first 4 letters of the first name, `@`, and the last 4 digits of the mobile.
 
 Reset the demo data with `npm run seed`.

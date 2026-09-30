@@ -4,31 +4,19 @@ import { api } from '../api';
 
 export default function ForgotPassword() {
   const [emailOrPhone, setEmailOrPhone] = useState('');
-  const [token, setToken] = useState('');
-  const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [hint, setHint] = useState('');
   const [error, setError] = useState('');
 
   const requestCode = async (event) => {
     event.preventDefault();
     setError('');
     setMessage('');
+    setHint('');
     try {
       const data = await api.forgot({ emailOrPhone });
       setMessage(data.message);
-      if (data.resetToken) setToken(data.resetToken);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  const reset = async (event) => {
-    event.preventDefault();
-    setError('');
-    try {
-      const data = await api.reset({ token, password });
-      setMessage(data.message);
-      setPassword('');
+      setHint(data.passwordHint || '');
     } catch (err) {
       setError(err.message);
     }
@@ -39,19 +27,13 @@ export default function ForgotPassword() {
       <div className="panel auth-card">
         <div className="kicker">Telugu Kalyanamala</div>
         <h2>Reset password</h2>
+        <p>Enter the registered email or mobile. The password becomes the first 4 letters of the first name, then @, then the last 4 digits of that mobile.</p>
         {error && <div className="error">{error}</div>}
-        {message && <div className="ok">{message}</div>}
+        {message && <div className="ok">{message}{hint ? ` Format: ${hint}.` : ''}</div>}
         <form onSubmit={requestCode}>
           <label htmlFor="forgot-id">Email or phone</label>
           <input id="forgot-id" value={emailOrPhone} onChange={(e) => setEmailOrPhone(e.target.value)} required />
-          <button className="btn-maroon" style={{ marginTop: 14 }} type="submit">Get reset code</button>
-        </form>
-        <form onSubmit={reset}>
-          <label htmlFor="reset-token">Reset code</label>
-          <input id="reset-token" value={token} onChange={(e) => setToken(e.target.value)} required />
-          <label htmlFor="reset-password">New password</label>
-          <input id="reset-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-          <button className="btn-gold" style={{ marginTop: 14 }} type="submit">Save new password</button>
+          <button className="btn-maroon" style={{ marginTop: 14 }} type="submit">Reset password</button>
         </form>
         <p><Link to="/login">Back to login</Link></p>
       </div>

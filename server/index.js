@@ -6,6 +6,7 @@ import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { ageFromDob, cityMatches, formatProfileId, fullName, isOppositeMatch } from './match.js';
+import { PASSWORD_HINT, defaultPassword, toIncomeRupees } from './passwords.js';
 import { cloudinaryStatus, photosConfigured, uploadTeluguPhoto } from './photos.js';
 import { TELUGU_DOMAINS } from './deployGuard.js';
 import { getDb, initDb, presentProfile, publicUser, update } from './store.js';
@@ -64,6 +65,11 @@ function adminOnly(req, res, next) {
 function findLogin(value) {
   const key = String(value || '').trim().toLowerCase();
   return getDb().users.find((user) => user.email === key || user.phone === key);
+}
+
+function optionalPhone(value) {
+  if (value == null || value === '') return null;
+  return String(value).replace(/\D/g, '').slice(0, 10);
 }
 
 function blankProfile(userId) {
@@ -161,7 +167,7 @@ function readBiodata(body, current = {}) {
     jobTitle: String(body.jobTitle ?? body.occupation ?? current.jobTitle ?? '').trim(),
     jobLocation: String(body.jobLocation ?? current.jobLocation ?? '').trim(),
     industry: String(body.industry ?? current.industry ?? '').trim(),
-    income: body.income === '' || body.income == null ? current.income : Number(body.income),
+    income: body.income === '' || body.income == null ? current.income : toIncomeRupees(body.income),
     currentAddress: address,
     presentAddress,
     nativePlace: String(body.nativePlace ?? current.nativePlace ?? address.city).trim(),
@@ -256,20 +262,24 @@ app.post('/api/auth/login', async (req, res) => {
 
 app.post('/api/auth/forgot-password', async (req, res) => {
   const user = findLogin(req.body.emailOrPhone);
-  const message = 'If this account is registered, you can set a new password with the reset code from the Vijayawada office.';
-  if (!user) return res.json({ message });
-  const token = `TK${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+  if (!user) {
+    return res.status(404).json({ message: 'No account found with that registered email or mobile number. Contact the office if you need help.' });
+  }
+  let temporaryPassword;
+  try {
+    temporaryPassword = defaultPassword(user.firstName, user.phone);
+  } catch (err) {
+    return res.status(400).json({ message: err.message });
+  }
+  const passwordHash = await bcrypt.hash(temporaryPassword, 8);
   await update((state) => ({
     ...state,
-    resets: [...state.resets.filter((item) => item.userId !== user.id), {
-      userId: user.id,
-      token,
-      expiresAt: Date.now() + 1000 * 60 * 30
-    }]
+    users: state.users.map((item) => (item.id === user.id ? { ...item, passwordHash } : item))
   }));
-  const payload = { message };
-  if (process.env.NODE_ENV !== 'production') payload.resetToken = token;
-  return res.json(payload);
+  return res.json({
+    message: 'Your password was reset to the default format. Contact the Vijayawada office if you still cannot login.',
+    passwordHint: PASSWORD_HINT
+  });
 });
 
 app.post('/api/auth/reset-password', async (req, res) => {
@@ -319,8 +329,17 @@ app.put('/api/profiles/me', auth, async (req, res) => {
   if (missing.length) return res.status(400).json({ message: `Please add: ${missing.join(', ')}.` });
   next.approvalStatus = 'pending';
   next.showInSearch = false;
+  const phonePatch = Object.prototype.hasOwnProperty.call(req.body, 'alternativePhone')
+    ? optionalPhone(req.body.alternativePhone)
+    : undefined;
+  if (phonePatch && phonePatch.length !== 10) {
+    return res.status(400).json({ message: 'Alternate mobile must be 10 digits.' });
+  }
   await update((state) => ({
     ...state,
+    users: phonePatch === undefined ? state.users : state.users.map((item) => (
+      item.id === req.user.id ? { ...item, alternativePhone: phonePatch } : item
+    )),
     profiles: state.profiles.map((item) => (item.id === current.id ? next : item))
   }));
   res.json({
@@ -473,7 +492,20 @@ app.post('/api/admin/profiles', auth, adminOnly, async (req, res) => {
   const biodata = readBiodata(req.body, {});
   const missing = validateBiodata(biodata);
   if (missing.length) return res.status(400).json({ message: `Please add: ${missing.join(', ')}.` });
-  const passwordHash = await bcrypt.hash(String(req.body.password || 'Member@12345'), 8);
+  const alternativePhone = optionalPhone(req.body.alternativePhone);
+  if (alternativePhone && alternativePhone.length !== 10) {
+    return res.status(400).json({ message: 'Alternate mobile must be 10 digits.' });
+  }
+  let temporaryPassword = String(req.body.password || '');
+  if (!temporaryPassword) {
+    try {
+      temporaryPassword = defaultPassword(firstName, phone);
+    } catch (err) {
+      return res.status(400).json({ message: err.message });
+    }
+  }
+  if (temporaryPassword.length < 8) return res.status(400).json({ message: 'Password must be at least 8 characters.' });
+  const passwordHash = await bcrypt.hash(temporaryPassword, 8);
   let created;
   await update((state) => {
     const seq = state.seq + 1;
@@ -481,6 +513,7 @@ app.post('/api/admin/profiles', auth, adminOnly, async (req, res) => {
       id: `u-${Date.now()}`,
       email,
       phone,
+      alternativePhone,
       firstName,
       lastName: surname,
       surname,
@@ -503,7 +536,56 @@ app.post('/api/admin/profiles', auth, adminOnly, async (req, res) => {
       profiles: [...state.profiles, created]
     };
   });
-  res.status(201).json({ profile: presentProfile(created, getDb().users, { contact: true }) });
+  res.status(201).json({
+    profile: presentProfile(created, getDb().users, { contact: true }),
+    temporaryPassword,
+    passwordHint: PASSWORD_HINT
+  });
+});
+
+app.get('/api/admin/staff', auth, adminOnly, (_req, res) => {
+  const staff = getDb().users
+    .filter((user) => user.role === 'admin' || user.role === 'subadmin')
+    .map(publicUser);
+  res.json({ staff });
+});
+
+app.post('/api/admin/staff', auth, adminOnly, async (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const phone = String(req.body.phone || '').replace(/\D/g, '');
+  const firstName = String(req.body.firstName || '').trim();
+  const surname = String(req.body.surname || '').trim();
+  const role = req.body.role === 'admin' || req.body.role === 'subadmin' ? req.body.role : '';
+  if (!role) return res.status(400).json({ message: 'Choose Admin or Subadmin.' });
+  if (!email.includes('@') || phone.length !== 10 || firstName.length < 2 || surname.length < 2) {
+    return res.status(400).json({ message: 'Office login needs email, 10-digit phone, first name and surname.' });
+  }
+  if (getDb().users.some((user) => user.email === email || user.phone === phone)) {
+    return res.status(409).json({ message: 'This email or phone is already registered.' });
+  }
+  let temporaryPassword = String(req.body.password || '');
+  if (!temporaryPassword) {
+    try {
+      temporaryPassword = defaultPassword(firstName, phone);
+    } catch (err) {
+      return res.status(400).json({ message: err.message });
+    }
+  }
+  if (temporaryPassword.length < 8) return res.status(400).json({ message: 'Password must be at least 8 characters.' });
+  const passwordHash = await bcrypt.hash(temporaryPassword, 8);
+  const user = {
+    id: `u-${Date.now()}`,
+    email,
+    phone,
+    firstName,
+    lastName: surname,
+    surname,
+    passwordHash,
+    role,
+    status: 'active'
+  };
+  await update((state) => ({ ...state, users: [...state.users, user] }));
+  res.status(201).json({ user: publicUser(user), temporaryPassword, passwordHint: PASSWORD_HINT });
 });
 
 app.patch('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
@@ -511,6 +593,17 @@ app.patch('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
   if (!current) return res.status(404).json({ message: 'Profile not found' });
   const status = req.body.approvalStatus;
   let next = { ...current, ...readBiodata(req.body, current) };
+  const phonePatch = Object.prototype.hasOwnProperty.call(req.body, 'alternativePhone')
+    ? optionalPhone(req.body.alternativePhone)
+    : undefined;
+  if (phonePatch && phonePatch.length !== 10) {
+    return res.status(400).json({ message: 'Alternate mobile must be 10 digits.' });
+  }
+  const usersWithPhone = (users) => (
+    phonePatch === undefined ? users : users.map((item) => (
+      item.id === current.userId ? { ...item, alternativePhone: phonePatch } : item
+    ))
+  );
   if (status === 'approved' || status === 'rejected' || status === 'pending') {
     next.approvalStatus = status;
     next.showInSearch = status === 'approved';
@@ -521,6 +614,7 @@ app.patch('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
       await update((state) => ({
         ...state,
         seq,
+        users: usersWithPhone(state.users),
         profiles: state.profiles.map((item) => (item.id === current.id ? next : item))
       }));
       return res.json({ profile: presentProfile(next, getDb().users, { contact: true }) });
@@ -528,6 +622,7 @@ app.patch('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
   }
   await update((state) => ({
     ...state,
+    users: usersWithPhone(state.users),
     profiles: state.profiles.map((item) => (item.id === current.id ? next : item))
   }));
   return res.json({ profile: presentProfile(next, getDb().users, { contact: true }) });

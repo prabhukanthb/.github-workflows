@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import BiodataForm, { profileToForm } from '../components/BiodataForm';
@@ -10,16 +10,19 @@ export default function Admin() {
   const [summary, setSummary] = useState(null);
   const [profiles, setProfiles] = useState([]);
   const [filter, setFilter] = useState('pending');
+  const [staff, setStaff] = useState([]);
+  const [staffForm, setStaffForm] = useState({ firstName: '', surname: '', email: '', phone: '', role: 'subadmin', password: '' });
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const isAdmin = user?.role === 'admin' || user?.role === 'subadmin';
 
   const load = () => {
     if (!token) return;
-    Promise.all([api.adminSummary(token), api.adminProfiles(token)])
-      .then(([summaryData, profileData]) => {
+    Promise.all([api.adminSummary(token), api.adminProfiles(token), api.adminStaff(token)])
+      .then(([summaryData, profileData, staffData]) => {
         setSummary(summaryData);
         setProfiles(profileData.profiles || []);
+        setStaff(staffData.staff || []);
       })
       .catch((err) => setError(err.message));
   };
@@ -62,6 +65,59 @@ export default function Admin() {
           ))}
         </div>
       )}
+      <form className="panel" onSubmit={async (event) => {
+        event.preventDefault();
+        setError('');
+        setMessage('');
+        try {
+          const data = await api.adminCreateStaff(staffForm, token);
+          setMessage(`${data.user.firstName} can login as ${data.user.role} with ${data.user.email} and password ${data.temporaryPassword}.`);
+          setStaffForm({ firstName: '', surname: '', email: '', phone: '', role: 'subadmin', password: '' });
+          load();
+        } catch (err) {
+          setError(err.message);
+        }
+      }}>
+        <h2>Add an office login</h2>
+        <p>Create an admin or a subadmin. Leave the password empty to use the first 4 letters of the first name, @, and the last 4 digits of the mobile.</p>
+        <div className="form-grid">
+          <div>
+            <label>First name</label>
+            <input value={staffForm.firstName} onChange={(event) => setStaffForm({ ...staffForm, firstName: event.target.value })} required />
+          </div>
+          <div>
+            <label>Surname</label>
+            <input value={staffForm.surname} onChange={(event) => setStaffForm({ ...staffForm, surname: event.target.value })} required />
+          </div>
+          <div>
+            <label>Email</label>
+            <input type="email" value={staffForm.email} onChange={(event) => setStaffForm({ ...staffForm, email: event.target.value })} required />
+          </div>
+          <div>
+            <label>Phone</label>
+            <input inputMode="numeric" value={staffForm.phone} onChange={(event) => setStaffForm({ ...staffForm, phone: event.target.value.replace(/\D/g, '').slice(0, 10) })} required />
+          </div>
+          <div>
+            <label>Role</label>
+            <select value={staffForm.role} onChange={(event) => setStaffForm({ ...staffForm, role: event.target.value })}>
+              <option value="admin">Admin</option>
+              <option value="subadmin">Subadmin</option>
+            </select>
+          </div>
+          <div>
+            <label>Password</label>
+            <input type="text" value={staffForm.password} onChange={(event) => setStaffForm({ ...staffForm, password: event.target.value })} placeholder="Optional" />
+          </div>
+        </div>
+        <button className="btn-maroon" style={{ marginTop: 16 }} type="submit">Create office login</button>
+        {staff.length > 0 && (
+          <ul>
+            {staff.map((item) => (
+              <li key={item.id}>{item.firstName} {item.surname} · {item.email} · {item.phone} · {item.role}</li>
+            ))}
+          </ul>
+        )}
+      </form>
       <div className="panel create-banner">
         <div>
           <h2>Create a profile</h2>
@@ -100,6 +156,7 @@ export default function Admin() {
                 </td>
                 <td>{profile.approvalStatus}</td>
                 <td className="actions">
+                  <Link to={`/admin/profiles/${profile.id}/edit`}>Edit</Link>
                   {profile.approvalStatus !== 'approved' && (
                     <button type="button" className="btn-maroon" onClick={() => decide(profile, 'approved')}>Approve</button>
                   )}
@@ -135,7 +192,7 @@ export function CreateProfile() {
     setMessage('');
     try {
       const data = await api.adminCreate(form, token);
-      setMessage(`${fullName(data.profile)} is in search as ${data.profile.profileId}. You can add another family now.`);
+      setMessage(`${fullName(data.profile)} is in search as ${data.profile.profileId}. Login ${data.profile.email} with password ${data.temporaryPassword}.`);
       setForm(profileToForm());
     } catch (err) {
       setError(err.message);
@@ -153,9 +210,69 @@ export function CreateProfile() {
       {message && <div className="ok">{message}</div>}
       <form className="panel" onSubmit={create}>
         <BiodataForm form={form} setForm={setForm} includeAccount />
-        <p>Leave the password empty and the family can login with Member@12345, then change it.</p>
+        <p>Leave the password empty and the family can login with the first 4 letters of the first name, @, and the last 4 digits of the mobile.</p>
         <button className="btn-maroon" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Create profile'}</button>
       </form>
+    </div>
+  );
+}
+
+export function EditProfile() {
+  const { id } = useParams();
+  const { token, user, isAuthenticated, loading } = useAuth();
+  const [form, setForm] = useState(null);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
+  const isAdmin = user?.role === 'admin' || user?.role === 'subadmin';
+
+  useEffect(() => {
+    if (!token || !isAdmin) return undefined;
+    let active = true;
+    api.profile(id, token)
+      .then((data) => {
+        if (active) setForm(profileToForm(data.profile));
+      })
+      .catch((err) => {
+        if (active) setError(err.message);
+      });
+    return () => {
+      active = false;
+    };
+  }, [token, isAdmin, id]);
+
+  if (loading) return <div className="page">Loading…</div>;
+  if (!isAuthenticated || !isAdmin) return <Navigate to="/" replace />;
+
+  const save = async (event) => {
+    event.preventDefault();
+    setBusy(true);
+    setError('');
+    setMessage('');
+    try {
+      const data = await api.adminUpdate(id, form, token);
+      setMessage(`${fullName(data.profile)} was saved.`);
+      setForm(profileToForm(data.profile));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="page">
+      <div className="kicker">Vijayawada office</div>
+      <h2>Edit profile</h2>
+      <p><Link to="/admin">Back to the office list</Link></p>
+      {error && <div className="error">{error}</div>}
+      {message && <div className="ok">{message}</div>}
+      {!form ? <p>Loading biodata…</p> : (
+        <form className="panel" onSubmit={save}>
+          <BiodataForm form={form} setForm={setForm} includeAccount={false} />
+          <button className="btn-maroon" style={{ marginTop: 16 }} type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save profile'}</button>
+        </form>
+      )}
     </div>
   );
 }

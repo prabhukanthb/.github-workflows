@@ -92,6 +92,7 @@ export function publicUser(user) {
     id: user.id,
     email: user.email,
     phone: user.phone,
+    alternativePhone: user.alternativePhone || '',
     firstName: user.firstName,
     lastName: user.lastName,
     surname: user.surname,
@@ -108,6 +109,7 @@ export function presentProfile(profile, users, { contact = false } = {}) {
     lastName: owner?.lastName || '',
     surname: owner?.surname || '',
     email: contact ? owner?.email : undefined,
-    phone: contact ? owner?.phone : undefined
+    phone: contact ? owner?.phone : undefined,
+    alternativePhone: contact ? (owner?.alternativePhone || '') : undefined
   };
 }
