@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import BiodataForm, { profileToForm } from '../components/BiodataForm';
+import ProfileSheet from '../components/ProfileSheet';
 import { ageFromDob, fullName } from '../siteConfig';
 
 export default function Admin() {
@@ -12,6 +13,7 @@ export default function Admin() {
   const [filter, setFilter] = useState('pending');
   const [staff, setStaff] = useState([]);
   const [staffForm, setStaffForm] = useState({ firstName: '', surname: '', email: '', phone: '', role: 'subadmin', password: '' });
+  const [viewing, setViewing] = useState(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const isAdmin = user?.role === 'admin' || user?.role === 'subadmin';
@@ -78,11 +80,11 @@ export default function Admin() {
           setError(err.message);
         }
       }}>
-        <h2>Add an office login</h2>
-        <p>Create an admin or a subadmin. Leave the password empty to use the first 4 letters of the first name, @, and the last 4 digits of the mobile.</p>
+        <h2>Create admin and subadmin logins</h2>
+        <p>These logins open the office and can add profiles. A profile added by an admin or subadmin is approved immediately and appears in search. Leave the password empty to use the first 4 letters of the full name, @, and the last 4 digits of the mobile.</p>
         <div className="form-grid">
           <div>
-            <label>First name</label>
+            <label>Full Name</label>
             <input value={staffForm.firstName} onChange={(event) => setStaffForm({ ...staffForm, firstName: event.target.value })} required />
           </div>
           <div>
@@ -156,6 +158,7 @@ export default function Admin() {
                 </td>
                 <td>{profile.approvalStatus}</td>
                 <td className="actions">
+                  <button type="button" className="btn-maroon" onClick={() => setViewing(profile)}>View</button>
                   <Link to={`/admin/profiles/${profile.id}/edit`}>Edit</Link>
                   {profile.approvalStatus !== 'approved' && (
                     <button type="button" className="btn-maroon" onClick={() => decide(profile, 'approved')}>Approve</button>
@@ -170,6 +173,9 @@ export default function Admin() {
         </table>
       </div>
       <p style={{ marginTop: 16 }}><Link to="/browse">Open search</Link></p>
+      {viewing && (
+        <ProfileSheet profile={viewing} allowDownload onClose={() => setViewing(null)} />
+      )}
     </div>
   );
 }
@@ -177,6 +183,8 @@ export default function Admin() {
 export function CreateProfile() {
   const { token, user, isAuthenticated, loading } = useAuth();
   const [form, setForm] = useState(profileToForm());
+  const [created, setCreated] = useState(null);
+  const [viewing, setViewing] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -192,7 +200,9 @@ export function CreateProfile() {
     setMessage('');
     try {
       const data = await api.adminCreate(form, token);
-      setMessage(`${fullName(data.profile)} is in search as ${data.profile.profileId}. Login ${data.profile.email} with password ${data.temporaryPassword}.`);
+      setCreated(data.profile);
+      setViewing(true);
+      setMessage(`${fullName(data.profile)} is approved and in search as ${data.profile.profileId}. Login ${data.profile.email} with password ${data.temporaryPassword}.`);
       setForm(profileToForm());
     } catch (err) {
       setError(err.message);
@@ -208,11 +218,19 @@ export function CreateProfile() {
       <p><Link to="/admin">Back to the office list</Link></p>
       {error && <div className="error">{error}</div>}
       {message && <div className="ok">{message}</div>}
+      {created && (
+        <p>
+          <button type="button" className="btn-maroon" onClick={() => setViewing(true)}>View profile</button>
+        </p>
+      )}
       <form className="panel" onSubmit={create}>
         <BiodataForm form={form} setForm={setForm} includeAccount />
-        <p>Leave the password empty and the family can login with the first 4 letters of the first name, @, and the last 4 digits of the mobile.</p>
+        <p>Leave the password empty and the family can login with the first 4 letters of the full name, @, and the last 4 digits of the mobile. Profiles created here are approved immediately.</p>
         <button className="btn-maroon" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Create profile'}</button>
       </form>
+      {viewing && created && (
+        <ProfileSheet profile={created} allowDownload onClose={() => setViewing(false)} />
+      )}
     </div>
   );
 }
@@ -221,6 +239,8 @@ export function EditProfile() {
   const { id } = useParams();
   const { token, user, isAuthenticated, loading } = useAuth();
   const [form, setForm] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [viewing, setViewing] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -231,7 +251,10 @@ export function EditProfile() {
     let active = true;
     api.profile(id, token)
       .then((data) => {
-        if (active) setForm(profileToForm(data.profile));
+        if (active) {
+          setProfile(data.profile);
+          setForm(profileToForm(data.profile));
+        }
       })
       .catch((err) => {
         if (active) setError(err.message);
@@ -251,6 +274,7 @@ export function EditProfile() {
     setMessage('');
     try {
       const data = await api.adminUpdate(id, form, token);
+      setProfile(data.profile);
       setMessage(`${fullName(data.profile)} was saved.`);
       setForm(profileToForm(data.profile));
     } catch (err) {
@@ -267,11 +291,19 @@ export function EditProfile() {
       <p><Link to="/admin">Back to the office list</Link></p>
       {error && <div className="error">{error}</div>}
       {message && <div className="ok">{message}</div>}
+      {profile && (
+        <p>
+          <button type="button" className="btn-maroon" onClick={() => setViewing(true)}>View profile</button>
+        </p>
+      )}
       {!form ? <p>Loading biodata…</p> : (
         <form className="panel" onSubmit={save}>
           <BiodataForm form={form} setForm={setForm} includeAccount={false} />
           <button className="btn-maroon" style={{ marginTop: 16 }} type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save profile'}</button>
         </form>
+      )}
+      {viewing && profile && (
+        <ProfileSheet profile={profile} allowDownload onClose={() => setViewing(false)} />
       )}
     </div>
   );

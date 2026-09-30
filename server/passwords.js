@@ -1,5 +1,5 @@
 export const PASSWORD_HINT =
-  'first 4 letters of the first name, then @, then the last 4 digits of the registered mobile';
+  'first 4 letters of the full name, then @, then the last 4 digits of the registered mobile';
 
 export function defaultPassword(name, phone) {
   const namePart = String(name || '').replace(/[^a-zA-Z]/g, '').slice(0, 4) || 'User';

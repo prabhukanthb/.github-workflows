@@ -3,11 +3,14 @@ import { Link, Navigate } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import BiodataForm, { profileToForm } from '../components/BiodataForm';
+import ProfileSheet from '../components/ProfileSheet';
 import { fullName } from '../siteConfig';
 
 export default function Profile() {
   const { token, isAuthenticated, loading, user } = useAuth();
   const [form, setForm] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [viewing, setViewing] = useState(false);
   const [status, setStatus] = useState('');
   const [profileId, setProfileId] = useState('');
   const [interests, setInterests] = useState([]);
@@ -21,6 +24,7 @@ export default function Profile() {
     Promise.all([api.myProfile(token), api.interests(token)])
       .then(([profileData, interestData]) => {
         if (!active) return;
+        setProfile(profileData.profile);
         setForm(profileToForm(profileData.profile, user));
         setStatus(profileData.profile.approvalStatus);
         setProfileId(profileData.profile.profileId || '');
@@ -45,6 +49,7 @@ export default function Profile() {
     setMessage('');
     try {
       const data = await api.saveProfile(form, token);
+      setProfile(data.profile);
       setStatus(data.profile.approvalStatus);
       setMessage(data.message);
     } catch (err) {
@@ -70,6 +75,11 @@ export default function Profile() {
         {profileId ? ` · Profile ID ${profileId}` : ''}
         {' · '}<Link to="/change-password">Change password</Link>
       </p>
+      {profile && (
+        <p>
+          <button type="button" className="btn-maroon" onClick={() => setViewing(true)}>View my profile</button>
+        </p>
+      )}
       <div className="notice">Phone numbers are hidden from other families. The Vijayawada office reviews every biodata before it appears in search.</div>
       {error && <div className="error">{error}</div>}
       {message && <div className="ok">{message}</div>}
@@ -80,6 +90,10 @@ export default function Profile() {
             {busy ? 'Saving…' : 'Submit for review'}
           </button>
         </form>
+      )}
+
+      {viewing && profile && (
+        <ProfileSheet profile={profile} onClose={() => setViewing(false)} />
       )}
 
       <h2 style={{ marginTop: 36 }}>Interests</h2>

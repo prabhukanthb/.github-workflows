@@ -224,7 +224,7 @@ app.post('/api/auth/register', async (req, res) => {
   const password = String(req.body.password || '');
   const confirm = String(req.body.confirmPassword || '');
   if (!email.includes('@') || phone.length !== 10 || firstName.length < 2 || surname.length < 2) {
-    return res.status(400).json({ message: 'Enter a valid email, 10-digit phone, first name and surname.' });
+    return res.status(400).json({ message: 'Enter a valid email, 10-digit phone, full name and surname.' });
   }
   if (password.length < 8) return res.status(400).json({ message: 'Password must be at least 8 characters.' });
   if (password !== confirm) return res.status(400).json({ message: 'Passwords do not match.' });
@@ -486,7 +486,7 @@ app.post('/api/admin/profiles', auth, adminOnly, async (req, res) => {
   const firstName = String(req.body.firstName || '').trim();
   const surname = String(req.body.surname || '').trim();
   if (!email.includes('@') || phone.length !== 10 || firstName.length < 2 || surname.length < 2) {
-    return res.status(400).json({ message: 'Member needs email, 10-digit phone, first name and surname.' });
+    return res.status(400).json({ message: 'Member needs email, 10-digit phone, full name and surname.' });
   }
   if (getDb().users.some((user) => user.email === email || user.phone === phone)) {
     return res.status(409).json({ message: 'This email or phone is already registered.' });
@@ -560,7 +560,7 @@ app.post('/api/admin/staff', auth, adminOnly, async (req, res) => {
   const role = req.body.role === 'admin' || req.body.role === 'subadmin' ? req.body.role : '';
   if (!role) return res.status(400).json({ message: 'Choose Admin or Subadmin.' });
   if (!email.includes('@') || phone.length !== 10 || firstName.length < 2 || surname.length < 2) {
-    return res.status(400).json({ message: 'Office login needs email, 10-digit phone, first name and surname.' });
+    return res.status(400).json({ message: 'Office login needs email, 10-digit phone, full name and surname.' });
   }
   if (getDb().users.some((user) => user.email === email || user.phone === phone)) {
     return res.status(409).json({ message: 'This email or phone is already registered.' });

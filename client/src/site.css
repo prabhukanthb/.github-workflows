@@ -961,6 +961,157 @@ table.admin th {
   border-color: var(--maroon);
 }
 
+.sheet-dialog {
+  width: min(920px, 100%);
+}
+
+.sheet-card {
+  position: relative;
+  overflow: hidden;
+  background: var(--cream);
+  border: 3px solid var(--gold);
+  color: var(--ink);
+}
+
+.sheet-watermark {
+  position: absolute;
+  inset: -18% -10%;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  transform: rotate(-18deg);
+  pointer-events: none;
+  opacity: 0.14;
+}
+
+.sheet-watermark div {
+  display: flex;
+  justify-content: space-around;
+  gap: 28px;
+}
+
+.sheet-watermark span {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--maroon-deep);
+  white-space: nowrap;
+}
+
+.sheet-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.sheet-head,
+.sheet-foot {
+  background: var(--maroon-deep);
+  color: var(--cream);
+}
+
+.sheet-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 22px;
+}
+
+.sheet-kicker {
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.sheet-brand {
+  font-family: var(--serif);
+  font-size: 28px;
+}
+
+.sheet-id {
+  background: #fff;
+  color: var(--maroon-mid);
+  border-radius: 8px;
+  padding: 8px 14px;
+  text-align: right;
+}
+
+.sheet-id span {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.sheet-id strong {
+  font-family: var(--serif);
+  font-size: 22px;
+}
+
+.sheet-body {
+  display: flex;
+  gap: 16px;
+  padding: 18px 22px 8px;
+  align-items: stretch;
+}
+
+.sheet-copy {
+  flex: 1.4;
+  min-width: 0;
+}
+
+.sheet-copy h2 {
+  margin: 0 0 8px;
+  font-family: var(--serif);
+  color: var(--maroon-mid);
+}
+
+.sheet-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(228, 224, 210, 0.9);
+  font-size: 15px;
+}
+
+.sheet-row span {
+  color: var(--muted);
+}
+
+.sheet-note {
+  margin: 12px 0 0;
+}
+
+.sheet-photo {
+  flex: 0.8;
+  min-height: 280px;
+  background: var(--maroon-deep);
+  color: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--serif);
+  font-size: 64px;
+  border: 4px solid var(--gold);
+}
+
+.sheet-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.sheet-foot {
+  padding: 12px 22px;
+  text-align: center;
+  font-weight: 700;
+}
+
 .stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

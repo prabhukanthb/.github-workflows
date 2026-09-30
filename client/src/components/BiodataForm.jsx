@@ -167,7 +167,7 @@ export default function BiodataForm({ form, setForm, includeAccount = false }) {
       {includeAccount && (
         <>
           <div>
-            <label>First name</label>
+            <label>Full Name</label>
             <input value={form.firstName} onChange={set('firstName')} required />
           </div>
           <div>

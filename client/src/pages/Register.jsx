@@ -54,7 +54,7 @@ export default function Register() {
         <input id="reg-phone" inputMode="numeric" value={form.phone} onChange={(e) => digits('phone', e.target.value)} required />
         <label htmlFor="reg-alt">Alternate mobile (optional)</label>
         <input id="reg-alt" inputMode="numeric" value={form.alternativePhone} onChange={(e) => digits('alternativePhone', e.target.value)} />
-        <label htmlFor="reg-first">First name</label>
+        <label htmlFor="reg-first">Full Name</label>
         <input id="reg-first" value={form.firstName} onChange={(e) => set('firstName', e.target.value)} required />
         <label htmlFor="reg-surname">Surname</label>
         <input id="reg-surname" value={form.surname} onChange={(e) => set('surname', e.target.value)} required />
