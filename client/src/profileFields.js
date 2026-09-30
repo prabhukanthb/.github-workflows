@@ -49,7 +49,8 @@ export async function lookupIndianPincode(pin) {
   if (!Array.isArray(offices) || !offices.length) return null;
   const office = offices.find((item) => item?.DeliveryStatus === 'Delivery') || offices[0];
   return {
-    city: String(office?.Block || office?.Name || office?.District || '').trim(),
+    area: String(office?.Name || '').trim(),
+    city: String(office?.Block || office?.District || '').trim(),
     district: String(office?.District || '').trim(),
     state: String(office?.State || '').trim(),
     country: String(office?.Country || 'India').trim() || 'India'

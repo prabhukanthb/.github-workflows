@@ -16,7 +16,6 @@ import {
   ORG,
   REGISTER_CTA,
   REGISTRATION_FEE,
-  RENEWAL_FEE,
   SUB_COMMUNITIES,
   WHATSAPP_HREF,
   YEARS_OF_SERVICE
@@ -50,7 +49,7 @@ const FAQ = [
   },
   {
     q: 'What does registration cost?',
-    a: `Registration is ${REGISTRATION_FEE}. Annual renewal is ${RENEWAL_FEE}. Call the Vijayawada office if you have questions about payment.`
+    a: `Registration is ${REGISTRATION_FEE}. Call the Vijayawada office if you have questions about payment.`
   }
 ];
 
@@ -62,7 +61,7 @@ export default function Home() {
   const [profiles, setProfiles] = useState([]);
   const [search, setSearch] = useState({
     looking: 'bride',
-    ageMin: '21',
+    ageMin: '18',
     ageMax: '32',
     community: '',
     tongue: 'Telugu',
@@ -280,7 +279,7 @@ export default function Home() {
       <section className="band" id="membership">
         <div className="section">
           <h2>Membership</h2>
-          <p className="sub">One Vijayawada office. Registration and yearly renewal.</p>
+          <p className="sub">One Vijayawada office. Registration is {REGISTRATION_FEE}.</p>
           <div className="plans">
             <article className="plan-card featured">
               <h3>Registration</h3>
@@ -291,16 +290,6 @@ export default function Home() {
                 <li>Helpline support from Vijayawada</li>
               </ul>
               <Link to="/register" className="btn-gold">{REGISTER_CTA}</Link>
-            </article>
-            <article className="plan-card">
-              <h3>Annual renewal</h3>
-              <p>{RENEWAL_FEE}</p>
-              <ul>
-                <li>Keep the profile active for another year</li>
-                <li>Continue introductions with our team</li>
-                <li>Same privacy and Vijayawada support</li>
-              </ul>
-              <a href="#contact" className="btn-maroon">Talk to us</a>
             </article>
           </div>
         </div>
@@ -415,7 +404,7 @@ export default function Home() {
 
       <section className="band-maroon cta-band">
         <h2>Begin a careful search for your son or daughter</h2>
-        <p>Registration is {REGISTRATION_FEE}. Annual renewal is {RENEWAL_FEE}. Talk to {ORG} in Vijayawada whenever you need a person, not only a website.</p>
+        <p>Registration is {REGISTRATION_FEE}. Talk to {ORG} in Vijayawada whenever you need a person, not only a website.</p>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginTop: 18 }}>
           <Link to="/register" className="btn-gold">{REGISTER_CTA}</Link>
           <a href={HELPLINE_TEL} className="btn-ghost">Call {HELPLINE_DISPLAY}</a>

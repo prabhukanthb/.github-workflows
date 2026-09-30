@@ -15,6 +15,12 @@ test('a bride sees only older grooms', () => {
   assert.equal(isOppositeMatch(bride, { gender: 'female', dateOfBirth: '1995-01-01' }, today), false);
 });
 
+test('a candidate is 18 on that birthday and 17 the day before', () => {
+  const today = new Date(2026, 8, 30);
+  assert.equal(ageFromDob('2008-09-30', today), 18);
+  assert.equal(ageFromDob('2008-10-01', today), 17);
+});
+
 test('a groom sees brides of the same age or younger', () => {
   const groom = { gender: 'male', dateOfBirth: '1996-01-15' };
   const today = new Date('2026-09-28');

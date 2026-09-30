@@ -3,7 +3,6 @@ export const MOTTO = 'Introduction is Ours - Inspection is yours';
 export const ORG = 'Kalyanamala Seva Samstha';
 export const YEARS_OF_SERVICE = 15;
 export const REGISTRATION_FEE = '₹3,000/-';
-export const RENEWAL_FEE = '₹1,500/-';
 export const REGISTER_CTA = 'Register';
 export const HELPLINE_DISPLAY = '94405 45049';
 export const HELPLINE_TEL = 'tel:+919440545049';
@@ -62,15 +61,24 @@ export function maritalLabel(value) {
   return MARITAL.find((item) => item.value === value)?.label || value || '';
 }
 
-export function ageFromDob(dob) {
+export function ageFromDob(dob, today = new Date()) {
   if (!dob) return null;
-  const birth = new Date(dob);
-  if (Number.isNaN(birth.getTime())) return null;
-  const today = new Date();
-  let age = today.getFullYear() - birth.getFullYear();
-  const month = today.getMonth() - birth.getMonth();
-  if (month < 0 || (month === 0 && today.getDate() < birth.getDate())) age -= 1;
+  const match = String(dob).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]) - 1;
+  const day = Number(match[3]);
+  let age = today.getFullYear() - year;
+  const monthGap = today.getMonth() - month;
+  if (monthGap < 0 || (monthGap === 0 && today.getDate() < day)) age -= 1;
   return age;
+}
+
+export function maxDobFor18(today = new Date()) {
+  const year = today.getFullYear() - 18;
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 export function fullName(profile) {

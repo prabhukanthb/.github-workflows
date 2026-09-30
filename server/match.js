@@ -1,10 +1,23 @@
 export function ageFromDob(dob, today = new Date()) {
   if (!dob) return null;
-  const birth = new Date(dob);
-  if (Number.isNaN(birth.getTime())) return null;
-  let age = today.getFullYear() - birth.getFullYear();
-  const month = today.getMonth() - birth.getMonth();
-  if (month < 0 || (month === 0 && today.getDate() < birth.getDate())) age -= 1;
+  const match = String(dob).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  let year;
+  let month;
+  let day;
+  if (match) {
+    year = Number(match[1]);
+    month = Number(match[2]) - 1;
+    day = Number(match[3]);
+  } else {
+    const birth = new Date(dob);
+    if (Number.isNaN(birth.getTime())) return null;
+    year = birth.getFullYear();
+    month = birth.getMonth();
+    day = birth.getDate();
+  }
+  let age = today.getFullYear() - year;
+  const monthGap = today.getMonth() - month;
+  if (monthGap < 0 || (monthGap === 0 && today.getDate() < day)) age -= 1;
   return age;
 }
 

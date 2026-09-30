@@ -4,6 +4,7 @@ const photo = (id) =>
 const address = (city, state, pin) => ({
   pinCode: pin,
   streetName: '',
+  area: '',
   city,
   district: '',
   state,

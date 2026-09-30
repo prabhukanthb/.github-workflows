@@ -1,5 +1,5 @@
 import React from 'react';
-import { BRAND, EMAIL, ORG, REGISTRATION_FEE, RENEWAL_FEE } from '../siteConfig';
+import { BRAND, EMAIL, ORG, REGISTRATION_FEE } from '../siteConfig';
 
 function LegalPage({ title, children }) {
   return (
@@ -29,7 +29,7 @@ export function Terms() {
 export function Refund() {
   return (
     <LegalPage title="Refund Policy">
-      <p>Registration is {REGISTRATION_FEE}. Annual renewal is {RENEWAL_FEE}. Fees are explained by the Vijayawada office before payment. Refunds are considered by that office case by case. Email {EMAIL}.</p>
+      <p>Registration is {REGISTRATION_FEE}. Fees are explained by the Vijayawada office before payment. Refunds are considered by that office case by case. Email {EMAIL}.</p>
     </LegalPage>
   );
 }

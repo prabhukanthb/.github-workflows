@@ -3,7 +3,7 @@ import { ageFromDob, fullName, maritalLabel } from '../siteConfig';
 
 function addressLine(address) {
   if (!address) return '';
-  return [address.pinCode, address.streetName, address.city, address.district, address.state, address.country]
+  return [address.pinCode, address.streetName, address.area, address.city, address.district, address.state, address.country]
     .map((part) => String(part || '').trim())
     .filter(Boolean)
     .join(', ');
@@ -39,7 +39,8 @@ export default function ProfileModal({ profile, onClose, onInterest }) {
           <div className="detail-list">
             <span>Age</span><div>{ageFromDob(profile.dateOfBirth)}</div>
             <span>Height</span><div>{profile.heightFeet} ft {profile.heightInches} in</div>
-            <span>Community</span><div>{profile.religion} Mala</div>
+            <span>Caste</span><div>Mala</div>
+            <span>Community</span><div>{profile.religion}</div>
             <span>Mother tongue</span><div>{profile.motherTongue}</div>
             <span>Marital status</span><div>{maritalLabel(profile.maritalStatus)}</div>
             <span>Education</span><div>{profile.highestEducation} · {profile.fieldOfStudy}</div>

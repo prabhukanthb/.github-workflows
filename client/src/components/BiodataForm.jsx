@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import { HEIGHT_OPTIONS, SUB_CASTES, heightToValue, incomeToLacsInput, lookupIndianPincode } from '../profileFields';
-import { EDUCATION, EMPLOYMENT, MARITAL, MOTHER_TONGUES, RELIGIONS } from '../siteConfig';
+import { EDUCATION, EMPLOYMENT, MARITAL, MOTHER_TONGUES, RELIGIONS, ageFromDob, maxDobFor18 } from '../siteConfig';
 
 export function profileToForm(profile = {}, user = {}) {
   return {
@@ -18,6 +18,7 @@ export function profileToForm(profile = {}, user = {}) {
     heightInches: profile.heightInches ?? 4,
     height: heightToValue(profile.heightFeet ?? 5, profile.heightInches ?? 4),
     religion: profile.religion || 'Hindu',
+    caste: 'Mala',
     subCaste: profile.subCaste || 'SC',
     siblingsCount: profile.siblingsCount === 0 || profile.siblingsCount ? String(profile.siblingsCount) : '0',
     motherTongue: profile.motherTongue || 'Telugu',
@@ -33,12 +34,14 @@ export function profileToForm(profile = {}, user = {}) {
     jobLocation: profile.jobLocation || '',
     currentPinCode: profile.currentAddress?.pinCode || '',
     currentStreetName: profile.currentAddress?.streetName || '',
+    currentArea: profile.currentAddress?.area || '',
     currentCity: profile.currentAddress?.city || '',
     currentDistrict: profile.currentAddress?.district || '',
     currentState: profile.currentAddress?.state || 'Andhra Pradesh',
     currentCountry: profile.currentAddress?.country || 'India',
     presentPinCode: profile.presentAddress?.pinCode || '',
     presentStreetName: profile.presentAddress?.streetName || '',
+    presentArea: profile.presentAddress?.area || '',
     presentCity: profile.presentAddress?.city || '',
     presentDistrict: profile.presentAddress?.district || '',
     presentState: profile.presentAddress?.state || 'Andhra Pradesh',
@@ -75,12 +78,13 @@ function AddressFields({ title, prefix, form, setForm }) {
       }
       setForm({
         ...draft,
+        [`${prefix}Area`]: found.area || draft[`${prefix}Area`],
         [`${prefix}City`]: found.city || draft[`${prefix}City`],
         [`${prefix}District`]: found.district || draft[`${prefix}District`],
         [`${prefix}State`]: found.state || draft[`${prefix}State`],
         [`${prefix}Country`]: found.country || draft[`${prefix}Country`]
       });
-      setPinNote('City, district, state and country filled from the PIN.');
+      setPinNote('Area, city, district, state and country filled from the PIN.');
     } catch {
       setPinNote('PIN lookup is unavailable. Type the city and district.');
     }
@@ -98,6 +102,10 @@ function AddressFields({ title, prefix, form, setForm }) {
         <div>
           <label>Street name</label>
           <input value={form[`${prefix}StreetName`] || ''} onChange={set(`${prefix}StreetName`)} />
+        </div>
+        <div>
+          <label>Area</label>
+          <input value={form[`${prefix}Area`] || ''} onChange={set(`${prefix}Area`)} />
         </div>
         <div>
           <label>City</label>
@@ -200,7 +208,12 @@ export default function BiodataForm({ form, setForm, includeAccount = false }) {
       </div>
       <div>
         <label>Date of birth</label>
-        <input type="date" value={form.dateOfBirth} onChange={set('dateOfBirth')} required />
+        <input type="date" max={maxDobFor18()} value={form.dateOfBirth} onChange={set('dateOfBirth')} required />
+        {form.dateOfBirth && (
+          <p className="pin-note">
+            {ageFromDob(form.dateOfBirth) >= 18 ? `Age ${ageFromDob(form.dateOfBirth)}` : 'The candidate must be 18 or older.'}
+          </p>
+        )}
       </div>
       <div>
         <label>Height</label>
@@ -232,6 +245,10 @@ export default function BiodataForm({ form, setForm, includeAccount = false }) {
         <select value={form.motherTongue} onChange={set('motherTongue')}>
           {MOTHER_TONGUES.map((item) => <option key={item}>{item}</option>)}
         </select>
+      </div>
+      <div>
+        <label>Caste</label>
+        <input value="Mala" readOnly disabled />
       </div>
       <div>
         <label>Sub caste</label>
