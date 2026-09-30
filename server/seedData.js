@@ -11,12 +11,27 @@ const address = (city, state, pin) => ({
   country: 'India'
 });
 
+export const OFFICE_EMAIL = 'admin@example.com';
+export const OFFICE_PHONE = '9241512415';
+
+export function withOfficePhone(state) {
+  const users = state?.users;
+  if (!Array.isArray(users)) return state;
+  const index = users.findIndex((user) => user.id === 'u-admin' || user.email === OFFICE_EMAIL);
+  if (index < 0 || users[index].phone === OFFICE_PHONE) return state;
+  const taken = users.some((user, i) => i !== index && user.phone === OFFICE_PHONE);
+  if (taken) return state;
+  const nextUsers = users.slice();
+  nextUsers[index] = { ...users[index], phone: OFFICE_PHONE };
+  return { ...state, users: nextUsers };
+}
+
 export function buildSeed({ officeHash, memberHash }) {
   const users = [
     {
       id: 'u-admin',
-      email: 'admin@example.com',
-      phone: '9440545049',
+      email: OFFICE_EMAIL,
+      phone: OFFICE_PHONE,
       firstName: 'Office',
       lastName: 'Admin',
       surname: 'Admin',

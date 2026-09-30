@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
 import { MongoClient } from 'mongodb';
-import { buildSeed } from './seedData.js';
+import { buildSeed, withOfficePhone } from './seedData.js';
 import { assertTeluguMongoUri, TELUGU_DB } from './deployGuard.js';
 
 const FILE = path.join(process.cwd(), 'data', 'db.json');
@@ -65,25 +65,35 @@ async function seed() {
   return db;
 }
 
+async function applyOfficePhone() {
+  const next = withOfficePhone(db);
+  if (next === db) return db;
+  db = next;
+  await persist();
+  return db;
+}
+
 export async function initDb() {
-  if (db && process.env.RESET_DB !== '1') return db;
+  if (db && process.env.RESET_DB !== '1') return applyOfficePhone();
   if (usesMongo()) {
     const col = await collection();
     if (process.env.RESET_DB !== '1') {
       const existing = await col.findOne({ _id: SITE_ID });
       if (existing?.state?.users && existing.site === SITE_ID) {
         db = existing.state;
-        return db;
+        return applyOfficePhone();
       }
     }
-    return seed();
+    await seed();
+    return applyOfficePhone();
   }
   const reset = process.env.RESET_DB === '1';
   if (!reset && fs.existsSync(FILE)) {
     db = JSON.parse(fs.readFileSync(FILE, 'utf8'));
-    return db;
+    return applyOfficePhone();
   }
-  return seed();
+  await seed();
+  return applyOfficePhone();
 }
 
 export function publicUser(user) {

@@ -53,6 +53,8 @@ These accounts are created the first time the API starts.
 | Bride (Anitha) | anitha.demo@example.com | Member@12345 |
 | Groom (Suresh) | suresh.demo@example.com | Member@12345 |
 
+The office account also logs in with phone `9241512415`.
+
 A bride sees older grooms. A groom sees brides of the same age or younger. Office staff do not get a member profile. After login they see **Create profile**, which opens the biodata form. On the Office page, **Create office login** adds another admin or a subadmin. Those logins can add profiles, and a profile they add is approved immediately. A member or the office can open the profile sheet, which carries a Telugu Kalyanamala watermark. Admin and subadmin can also download that sheet; the footer reads Contact B. John Ratnam 9440545049. Leave a new password empty and it becomes the first 4 letters of the full name, `@`, and the last 4 digits of the mobile.
 
 Reset the demo data with `npm run seed`.
