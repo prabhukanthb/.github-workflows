@@ -54,7 +54,7 @@ function AddressFields({ title, prefix, form, setForm }) {
       <h3 className="form-section">{title}</h3>
       <div className="address-fields">
         <div>
-          <label>PIN code</label>
+          <label>Pin code</label>
           <input value={form[pin] || ''} inputMode="numeric" onChange={(event) => setForm({ ...form, [pin]: event.target.value.replace(/\D/g, '').slice(0, 6) })} />
         </div>
         <div>

@@ -56,7 +56,7 @@ export default function ProfileModal({ profile, onClose, onInterest }) {
             <button type="button" className="btn-maroon" onClick={send} disabled={busy}>
               {busy ? 'Sending…' : 'Express interest'}
             </button>
-            <button type="button" className="btn-ghost" style={{ color: '#12355B', borderColor: '#1F6F8B' }} onClick={onClose}>Close</button>
+            <button type="button" className="btn-ghost btn-close" onClick={onClose}>Close</button>
           </div>
         </div>
       </div>

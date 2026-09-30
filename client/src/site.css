@@ -1,13 +1,14 @@
 :root {
-  --maroon: #12355B;
-  --maroon-mid: #1F6F8B;
-  --gold: #F26B4A;
-  --ink: #142033;
-  --muted: #4E6278;
-  --cream: #F3F7FB;
-  --paper: #ffffff;
-  --line: #D5E2EE;
-  --shadow: 0 12px 32px rgba(18, 53, 91, 0.1);
+  --maroon: #8E9C80;
+  --maroon-deep: #5E6B52;
+  --maroon-mid: #C42336;
+  --gold: #E89EB8;
+  --ink: #2C3328;
+  --muted: #5C6A50;
+  --cream: #F7F4EC;
+  --paper: #FBFBF6;
+  --line: #E4E0D2;
+  --shadow: 0 12px 32px rgba(94, 107, 82, 0.12);
   --serif: Georgia, 'Times New Roman', serif;
   --sans: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
@@ -38,8 +39,8 @@
 }
 
 .site-topbar {
-  background: #0B2340;
-  color: #E7F1F8;
+  background: var(--maroon-deep);
+  color: var(--cream);
   font-size: 14px;
   padding: 8px 18px;
   display: flex;
@@ -50,9 +51,13 @@
 }
 
 .site-topbar a {
-  color: var(--gold);
+  color: var(--cream);
   font-weight: 700;
   text-decoration: none;
+}
+
+.site-topbar a:hover {
+  color: var(--gold);
 }
 
 .site-header {
@@ -60,8 +65,9 @@
   top: 0;
   z-index: 40;
   background: var(--maroon);
-  color: #fff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  color: var(--ink);
+  box-shadow: 0 8px 24px rgba(94, 107, 82, 0.18);
+  border-bottom: 3px solid var(--gold);
 }
 
 .site-header-inner {
@@ -74,7 +80,7 @@
 }
 
 .site-logo {
-  color: #fff;
+  color: var(--ink);
   text-decoration: none;
   font-family: var(--serif);
   font-size: 22px;
@@ -90,8 +96,9 @@
   height: 32px;
   margin-right: 8px;
   border-radius: 50%;
-  background: var(--gold);
-  color: var(--maroon);
+  background: #fff;
+  color: var(--maroon-mid);
+  box-shadow: 0 0 0 2px var(--gold);
   font-family: var(--serif);
   font-size: 13px;
   font-weight: 700;
@@ -122,7 +129,7 @@
 
 .site-nav a,
 .site-nav button.linkish {
-  color: #fff;
+  color: var(--ink);
   text-decoration: none;
   background: none;
   border: none;
@@ -133,12 +140,19 @@
 
 .site-nav a:hover,
 .site-nav button.linkish:hover {
-  color: var(--gold);
+  color: var(--maroon-mid);
+}
+
+.site-nav .btn-ghost,
+.site-nav .btn-ghost:hover {
+  color: var(--ink);
+  border-color: rgba(44, 51, 40, 0.35);
 }
 
 .site-nav a.btn-gold,
 .site-nav a.btn-gold:hover {
-  color: var(--maroon);
+  color: #fff;
+  background: var(--maroon-mid);
   padding: 11px 18px;
 }
 
@@ -157,8 +171,12 @@
 }
 
 .btn-gold {
-  background: var(--gold);
-  color: var(--maroon);
+  background: var(--maroon-mid);
+  color: #fff;
+}
+
+.btn-gold:hover {
+  background: #a61d2d;
 }
 
 .btn-maroon {
@@ -176,8 +194,8 @@
   display: none;
   margin-left: auto;
   background: transparent;
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: var(--ink);
+  border: 1px solid rgba(44, 51, 40, 0.35);
   border-radius: 8px;
   padding: 8px 12px;
   font-weight: 700;
@@ -190,7 +208,7 @@
   display: flex;
   align-items: center;
   background:
-    linear-gradient(100deg, rgba(11, 35, 64, 0.9) 0%, rgba(18, 53, 91, 0.74) 52%, rgba(31, 111, 139, 0.42) 100%),
+    linear-gradient(100deg, rgba(60, 72, 48, 0.82) 0%, rgba(94, 107, 82, 0.62) 52%, rgba(142, 156, 128, 0.34) 100%),
     var(--hero-image) center/cover no-repeat;
 }
 
@@ -232,7 +250,7 @@
 
 .home-hero p.lede.verse strong {
   font-weight: 700;
-  color: #D7F4FF;
+  color: var(--gold);
 }
 
 .home-hero p.lede.verse em {
@@ -316,8 +334,9 @@
 }
 
 .band-maroon {
-  background: linear-gradient(120deg, var(--maroon), var(--maroon-mid));
+  background: var(--maroon-deep);
   color: #fff;
+  border-top: 4px solid var(--gold);
 }
 
 .counters {
@@ -428,7 +447,7 @@
   height: 220px;
   object-fit: cover;
   display: block;
-  background: #D5E3EE;
+  background: #E4E8DC;
 }
 
 .profile-card .meta,
@@ -546,7 +565,7 @@
 .faq-item button::after {
   content: '+';
   float: right;
-  color: var(--gold);
+  color: var(--maroon-mid);
   font-size: 22px;
   line-height: 1;
 }
@@ -572,8 +591,8 @@
 }
 
 .site-footer {
-  background: #0B2340;
-  color: #E7F1F8;
+  background: var(--maroon-deep);
+  color: var(--cream);
   padding: 40px 18px 24px;
 }
 
@@ -586,7 +605,7 @@
 }
 
 .site-footer a {
-  color: #E7F1F8;
+  color: var(--cream);
   text-decoration: none;
 }
 
@@ -600,7 +619,7 @@
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   padding-top: 16px;
   font-size: 14px;
-  color: #9BB0C7;
+  color: #D9D4C6;
 }
 
 .mobile-register {
@@ -683,7 +702,7 @@
     right: 0;
     bottom: 0;
     z-index: 50;
-    background: var(--maroon);
+    background: var(--maroon-deep);
     padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
     gap: 8px;
     box-shadow: 0 -8px 20px rgba(0, 0, 0, 0.2);
@@ -745,7 +764,7 @@
   font-size: 12px;
   letter-spacing: 1.6px;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--maroon-mid);
   font-weight: 700;
 }
 
@@ -770,7 +789,7 @@ textarea {
   width: 100%;
   padding: 10px 12px;
   margin-top: 6px;
-  border: 1px solid #C5D5E4;
+  border: 1px solid var(--line);
   border-radius: 8px;
   font: inherit;
   background: #fff;
@@ -810,14 +829,15 @@ textarea {
 
 .address-fields {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 14px;
+  grid-template-columns: 1fr;
+  gap: 4px;
   margin-top: 8px;
+  max-width: 520px;
 }
 
 .notice {
-  background: #EEF6FB;
-  border: 1px solid var(--line);
+  background: #FDF4F6;
+  border: 1px solid var(--gold);
   color: var(--ink);
   border-radius: 10px;
   padding: 12px 14px;
@@ -858,8 +878,8 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #12355B;
-  color: #E7F1F8;
+  background: var(--maroon-deep);
+  color: var(--cream);
   font-family: var(--serif);
   font-size: 42px;
 }
@@ -867,7 +887,7 @@ textarea {
 .modal-back {
   position: fixed;
   inset: 0;
-  background: rgba(42, 10, 20, 0.55);
+  background: rgba(44, 51, 40, 0.55);
   z-index: 80;
   display: flex;
   align-items: flex-start;
@@ -923,9 +943,14 @@ table.admin td {
 }
 
 table.admin th {
-  background: #12355B;
+  background: var(--maroon-deep);
   color: #fff;
   font-size: 14px;
+}
+
+.btn-close {
+  color: var(--maroon-deep);
+  border-color: var(--maroon);
 }
 
 .stats {
