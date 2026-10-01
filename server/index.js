@@ -442,7 +442,7 @@ app.post('/api/interests', auth, async (req, res) => {
   }));
   res.status(201).json({
     interest,
-    message: 'Interest noted. Phone numbers stay private until both families agree through the Vijayawada office.'
+    message: 'Interest noted. The Vijayawada office can see it on the admin dashboard. Phone numbers stay private until both families agree.'
   });
 });
 
@@ -469,7 +469,37 @@ app.get('/api/admin/summary', auth, adminOnly, (_req, res) => {
     profiles: state.profiles.length,
     pending: state.profiles.filter((item) => item.approvalStatus === 'pending').length,
     approved: state.profiles.filter((item) => item.approvalStatus === 'approved').length,
-    interests: state.interests.length
+    interests: state.interests.length,
+    pendingInterests: state.interests.filter((item) => item.status === 'pending').length
+  });
+});
+
+app.get('/api/admin/interests', auth, adminOnly, (_req, res) => {
+  const state = getDb();
+  const rows = [...state.interests].sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+  const party = (profile, user) => {
+    const view = profile ? presentProfile(profile, state.users, { contact: true }) : null;
+    return {
+      name: fullName(view || publicUser(user) || {}) || 'Member',
+      profileId: profile?.profileId || '',
+      phone: view?.phone || user?.phone || '',
+      email: view?.email || user?.email || ''
+    };
+  };
+  res.json({
+    interests: rows.map((item) => {
+      const fromProfile = state.profiles.find((profile) => profile.userId === item.fromUserId);
+      const toProfile = state.profiles.find((profile) => profile.id === item.toProfileId);
+      const fromUser = state.users.find((user) => user.id === item.fromUserId);
+      const toUser = state.users.find((user) => user.id === toProfile?.userId);
+      return {
+        id: item.id,
+        status: item.status,
+        createdAt: item.createdAt,
+        from: party(fromProfile, fromUser),
+        to: party(toProfile, toUser)
+      };
+    })
   });
 });
 

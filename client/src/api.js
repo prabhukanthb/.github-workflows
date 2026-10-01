@@ -30,6 +30,7 @@ export const api = {
   sendInterest: (profileId, token) => request('/api/interests', { method: 'POST', body: { profileId }, token }),
   respondInterest: (id, status, token) => request(`/api/interests/${id}/respond`, { method: 'POST', body: { status }, token }),
   adminSummary: (token) => request('/api/admin/summary', { token }),
+  adminInterests: (token) => request('/api/admin/interests', { token }),
   adminProfiles: (token) => request('/api/admin/profiles', { token }),
   adminCreate: (body, token) => request('/api/admin/profiles', { method: 'POST', body, token }),
   adminUpdate: (id, body, token) => request(`/api/admin/profiles/${id}`, { method: 'PATCH', body, token }),

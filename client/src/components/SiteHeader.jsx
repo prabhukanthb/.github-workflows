@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import { BRAND, HELPLINE_DISPLAY, HELPLINE_TEL, REGISTER_CTA } from '../siteConfig';
 
@@ -14,11 +15,30 @@ const NAV = [
 ];
 
 export default function SiteHeader() {
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout, user, token } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const [pendingInterests, setPendingInterests] = useState(0);
   const isAdmin = user?.role === 'admin' || user?.role === 'subadmin';
+
+  useEffect(() => {
+    if (!token || !isAdmin) {
+      setPendingInterests(0);
+      return undefined;
+    }
+    let active = true;
+    api.adminSummary(token)
+      .then((data) => {
+        if (active) setPendingInterests(data.pendingInterests || 0);
+      })
+      .catch(() => {
+        if (active) setPendingInterests(0);
+      });
+    return () => {
+      active = false;
+    };
+  }, [token, isAdmin, location.pathname]);
 
   const goHash = (id) => {
     setOpen(false);
@@ -55,7 +75,11 @@ export default function SiteHeader() {
           {isAuthenticated && !isAdmin && (
             <Link to="/profile" onClick={() => setOpen(false)}>My Profile</Link>
           )}
-          {isAdmin && <Link to="/admin" onClick={() => setOpen(false)}>Office</Link>}
+          {isAdmin && (
+            <Link to="/admin" onClick={() => setOpen(false)}>
+              Office{pendingInterests > 0 ? ` (${pendingInterests})` : ''}
+            </Link>
+          )}
           {isAuthenticated && (
             <>
               <span>Hi, {user.firstName}</span>
