@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { api } from '../api';
 import { fullName } from '../siteConfig';
@@ -7,16 +7,13 @@ import {
   BRANCH_ADDRESS_LINES,
   BRAND,
   MOTTO,
-  CITIES,
   EMAIL,
   HELPLINE_DISPLAY,
   HELPLINE_TEL,
   MAP_EMBED,
-  MOTHER_TONGUES,
   ORG,
   REGISTER_CTA,
   REGISTRATION_FEE,
-  SUB_COMMUNITIES,
   WHATSAPP_HREF,
   YEARS_OF_SERVICE
 } from '../siteConfig';
@@ -53,20 +50,18 @@ const FAQ = [
   }
 ];
 
+const PAGE_LINKS = [
+  { label: 'Membership', hash: 'membership' },
+  { label: 'Success Stories', hash: 'stories' },
+  { label: 'Services', hash: 'services' },
+  { label: 'Contact Us', hash: 'contact' }
+];
+
 export default function Home() {
-  const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, token } = useAuth();
   const [openFaq, setOpenFaq] = useState(0);
   const [profiles, setProfiles] = useState([]);
-  const [search, setSearch] = useState({
-    looking: 'bride',
-    ageMin: '18',
-    ageMax: '32',
-    community: '',
-    tongue: 'Telugu',
-    city: 'Vijayawada'
-  });
 
   useEffect(() => {
     const id = location.hash.replace('#', '');
@@ -107,12 +102,6 @@ export default function Home() {
       { id: 'nri', name: 'Groom', city: 'Guntur', work: 'IT professional', photo: FEATURE_PHOTOS[3] }
     ];
 
-  const submitSearch = (event) => {
-    event.preventDefault();
-    const params = new URLSearchParams(search);
-    navigate(`/browse?${params.toString()}`);
-  };
-
   return (
     <div>
       <section className="home-hero" style={{ '--hero-image': `url(${HERO_PHOTO})` }}>
@@ -131,50 +120,19 @@ export default function Home() {
             Guided by <strong>{ORG}</strong>, we help every candidate and every caring parent discover a meaningful bond —
             with <em>dignity</em> in every step, <em>privacy</em> in every moment, and a <em>trusted hand</em> to hold throughout the journey.
           </p>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 22 }}>
-            <Link to={isAuthenticated ? '/browse' : '/register'} className="btn-gold">{REGISTER_CTA}</Link>
+          <div className="hero-actions">
+            {!isAuthenticated && <Link to="/login" className="btn-gold">Login</Link>}
+            <Link to={isAuthenticated ? '/browse' : '/register'} className="btn-gold">{isAuthenticated ? 'View matches' : REGISTER_CTA}</Link>
             <a href={HELPLINE_TEL} className="btn-ghost">Call {HELPLINE_DISPLAY}</a>
           </div>
-          <form className="search-widget" onSubmit={submitSearch}>
-            <div>
-              <label htmlFor="looking">Looking for</label>
-              <select id="looking" value={search.looking} onChange={(e) => setSearch({ ...search, looking: e.target.value })}>
-                <option value="bride">Bride</option>
-                <option value="groom">Groom</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="ageMin">Age from</label>
-              <input id="ageMin" type="number" min="18" max="60" value={search.ageMin} onChange={(e) => setSearch({ ...search, ageMin: e.target.value })} />
-            </div>
-            <div>
-              <label htmlFor="ageMax">Age to</label>
-              <input id="ageMax" type="number" min="18" max="70" value={search.ageMax} onChange={(e) => setSearch({ ...search, ageMax: e.target.value })} />
-            </div>
-            <div>
-              <label htmlFor="community">Sub-community</label>
-              <select id="community" value={search.community} onChange={(e) => setSearch({ ...search, community: e.target.value })}>
-                {SUB_COMMUNITIES.map((item) => <option key={item.label} value={item.value}>{item.label}</option>)}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="tongue">Mother tongue</label>
-              <select id="tongue" value={search.tongue} onChange={(e) => setSearch({ ...search, tongue: e.target.value })}>
-                {MOTHER_TONGUES.map((tongue) => <option key={tongue} value={tongue}>{tongue}</option>)}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="city">City</label>
-              <select id="city" value={search.city} onChange={(e) => setSearch({ ...search, city: e.target.value })}>
-                {CITIES.map((city) => <option key={city} value={city}>{city}</option>)}
-              </select>
-            </div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <button type="submit" className="btn-maroon" style={{ width: '100%' }}>Search matches</button>
-            </div>
-          </form>
         </div>
       </section>
+
+      <nav className="page-links" aria-label="On this page">
+        {PAGE_LINKS.map((item) => (
+          <a key={item.hash} href={`#${item.hash}`}>{item.label}</a>
+        ))}
+      </nav>
 
       <div className="section" style={{ paddingTop: 0 }}>
         <div className="counters">
@@ -413,7 +371,7 @@ export default function Home() {
 
       {!isAuthenticated && (
         <div className="mobile-register">
-          <a className="btn-ghost" href={HELPLINE_TEL}>Call</a>
+          <Link className="btn-gold" to="/login">Login</Link>
           <Link className="btn-gold" to="/register">{REGISTER_CTA}</Link>
         </div>
       )}

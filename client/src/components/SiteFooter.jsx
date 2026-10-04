@@ -14,6 +14,10 @@ export default function SiteFooter() {
           <strong>Explore</strong>
           <p><Link to="/">Home</Link></p>
           <p><Link to="/browse">Search Profiles</Link></p>
+          <p><Link to="/#membership">Membership</Link></p>
+          <p><Link to="/#stories">Success Stories</Link></p>
+          <p><Link to="/#services">Services</Link></p>
+          <p><Link to="/#contact">Contact Us</Link></p>
           <p><Link to="/register">{REGISTER_CTA}</Link></p>
           <p><Link to="/login">Login</Link></p>
         </div>

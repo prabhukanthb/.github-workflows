@@ -263,6 +263,38 @@
   margin-bottom: 22px;
 }
 
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.page-links {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 22px 18px 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.page-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 12px;
+  text-align: center;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--maroon-mid);
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: var(--shadow);
+}
+
 .home-motto {
   display: inline-block;
   margin: 0 0 18px;
@@ -643,20 +675,14 @@
   .tag-grid,
   .safety-grid,
   .branch-grid,
-  .footer-grid {
+  .footer-grid,
+  .page-links,
+  .form-grid {
     grid-template-columns: 1fr 1fr;
-  }
-
-  .nav-login {
-    display: none;
   }
 
   .menu-toggle {
     display: inline-flex;
-  }
-
-  .site-nav.open .nav-login {
-    display: inline;
   }
 
   .site-nav {
@@ -690,7 +716,12 @@
   .tag-grid,
   .safety-grid,
   .branch-grid,
-  .footer-grid {
+  .footer-grid,
+  .page-links,
+  .form-grid,
+  .address-fields,
+  .stats,
+  .detail-list {
     grid-template-columns: 1fr;
   }
 
@@ -700,6 +731,52 @@
 
   .plan-card.featured {
     transform: none;
+  }
+
+  .site-logo {
+    font-size: 18px;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .site-header-inner {
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .header-cta {
+    flex: 1 1 100%;
+    margin-left: 0;
+  }
+
+  .header-cta .btn-gold {
+    flex: 1;
+  }
+
+  .sheet-body {
+    flex-direction: column;
+  }
+
+  .sheet-head {
+    align-items: flex-start;
+  }
+
+  .sheet-row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .panel,
+  .page,
+  .section {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
   }
 
   .mobile-register {
@@ -720,9 +797,9 @@
     text-align: center;
   }
 
-.site-shell {
-  padding-bottom: 72px;
-}
+  .site-shell {
+    padding-bottom: 72px;
+  }
 }
 
 .page {
@@ -1179,8 +1256,29 @@ table.admin th {
 @media (max-width: 700px) {
   .form-grid,
   .address-fields,
-  .stats,
-  .detail-list {
+  .detail-list,
+  .page-links {
     grid-template-columns: 1fr;
   }
+
+  .filters > * {
+    min-width: 0;
+    flex-basis: 100%;
+  }
+
+  .sheet-body,
+  .sheet-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sheet-row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .sheet-photo {
+    min-height: 220px;
+  }
 }
+

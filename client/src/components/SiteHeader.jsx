@@ -7,11 +7,7 @@ import { BRAND, HELPLINE_DISPLAY, HELPLINE_TEL, REGISTER_CTA } from '../siteConf
 const NAV = [
   { label: 'Home', to: '/' },
   { label: 'About Us', hash: 'about' },
-  { label: 'Search Profiles', to: '/browse' },
-  { label: 'Membership', hash: 'membership' },
-  { label: 'Success Stories', hash: 'stories' },
-  { label: 'Services', hash: 'services' },
-  { label: 'Contact Us', hash: 'contact' }
+  { label: 'Search Profiles', to: '/browse' }
 ];
 
 export default function SiteHeader() {
@@ -86,16 +82,16 @@ export default function SiteHeader() {
               <button type="button" className="btn-ghost" onClick={() => { logout(); setOpen(false); navigate('/'); }}>Logout</button>
             </>
           )}
-          {!isAuthenticated && (
-            <Link to="/login" className="nav-login" onClick={() => setOpen(false)}>Login</Link>
-          )}
         </nav>
         <div className="header-cta">
           {isAdmin && (
             <Link to="/admin/create" className="btn-gold" onClick={() => setOpen(false)}>Create profile</Link>
           )}
           {!isAuthenticated && (
-            <Link to="/register" className="btn-gold" onClick={() => setOpen(false)}>{REGISTER_CTA}</Link>
+            <>
+              <Link to="/login" className="btn-gold" onClick={() => setOpen(false)}>Login</Link>
+              <Link to="/register" className="btn-gold" onClick={() => setOpen(false)}>{REGISTER_CTA}</Link>
+            </>
           )}
           <button type="button" className="menu-toggle" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
             {open ? 'Close' : 'Menu'}
