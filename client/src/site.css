@@ -1156,7 +1156,7 @@ table.admin th {
   grid-template-columns: minmax(0, 50%) minmax(0, 50%);
   gap: 0;
   padding: 0;
-  align-items: stretch;
+  align-items: start;
 }
 
 .sheet-copy {
@@ -1190,15 +1190,24 @@ table.admin th {
 .sheet-photo {
   width: 100%;
   max-width: none;
-  min-height: 320px;
-  background: var(--maroon-deep);
+  height: auto;
+  min-height: 0;
+  align-self: start;
+  background: transparent;
   color: var(--cream);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   font-family: var(--serif);
   font-size: 64px;
   border: 4px solid var(--gold);
+  overflow: visible;
+}
+
+.sheet-photo:not(:has(img)) {
+  min-height: 320px;
+  background: var(--maroon-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sheet-photo img {
@@ -1206,6 +1215,7 @@ table.admin th {
   height: auto;
   max-height: none;
   object-fit: contain;
+  object-position: center top;
   display: block;
 }
 
@@ -1308,7 +1318,7 @@ table.admin a.btn-maroon {
 
   .sheet-body {
     grid-template-columns: minmax(0, 50%) minmax(0, 50%);
-    align-items: stretch;
+    align-items: start;
   }
 
   .sheet-row {
@@ -1319,7 +1329,8 @@ table.admin a.btn-maroon {
   .sheet-photo {
     width: 100%;
     max-width: none;
-    min-height: 220px;
+    min-height: 0;
+    height: auto;
   }
 
   .photo-carousel {

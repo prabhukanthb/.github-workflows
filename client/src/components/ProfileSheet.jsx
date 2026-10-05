@@ -80,7 +80,7 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
           if (body) {
             body.style.display = 'flex';
             body.style.flexDirection = 'row';
-            body.style.alignItems = 'stretch';
+            body.style.alignItems = 'flex-start';
             body.style.gap = '0';
             body.style.padding = '0';
             body.style.width = '100%';
@@ -96,6 +96,10 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
             photo.style.width = `${photoWidth}px`;
             photo.style.minWidth = `${photoWidth}px`;
             photo.style.maxWidth = `${photoWidth}px`;
+            photo.style.height = 'auto';
+            photo.style.minHeight = '0';
+            photo.style.alignSelf = 'flex-start';
+            photo.style.background = 'transparent';
             photo.style.boxSizing = 'border-box';
           }
           if (img) {
@@ -103,6 +107,7 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
             img.style.height = 'auto';
             img.style.maxHeight = 'none';
             img.style.objectFit = 'contain';
+            img.style.objectPosition = 'center top';
             img.style.display = 'block';
           }
         }
