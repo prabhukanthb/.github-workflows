@@ -32,6 +32,28 @@ export function heightToValue(feet, inches) {
   return `${f}.${i}`;
 }
 
+export function normalizePhotos(input) {
+  const source = Array.isArray(input) ? input : [];
+  const photos = [];
+  for (const item of source) {
+    const url = String(item?.url || '').trim();
+    if (!url || photos.some((photo) => photo.url === url)) continue;
+    photos.push({ url, isPrimary: Boolean(item?.isPrimary) });
+    if (photos.length === 3) break;
+  }
+  if (!photos.length) return [];
+  const primaryIndex = photos.findIndex((photo) => photo.isPrimary);
+  return photos.map((photo, index) => ({
+    url: photo.url,
+    isPrimary: primaryIndex === -1 ? index === 0 : index === primaryIndex
+  }));
+}
+
+export function mainPhotoUrl(photos) {
+  const list = normalizePhotos(photos);
+  return (list.find((photo) => photo.isPrimary) || list[0])?.url || '';
+}
+
 export function incomeToLacsInput(income) {
   const n = Number(income);
   if (!Number.isFinite(n) || n <= 0) return '';

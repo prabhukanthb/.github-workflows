@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { api } from '../api';
+import { mainPhotoUrl } from '../profileFields';
 import { fullName } from '../siteConfig';
 import {
   BRANCH_ADDRESS_LINES,
@@ -93,7 +94,7 @@ export default function Home() {
       name: fullName(profile),
       city: profile.currentAddress?.city || '',
       work: profile.occupation || profile.highestEducation || '',
-      photo: profile.photos?.[0]?.url || ''
+      photo: mainPhotoUrl(profile.photos)
     }))
     : [
       { id: 'vja', name: 'Bride', city: 'Vijayawada', work: 'Teacher', photo: FEATURE_PHOTOS[0] },

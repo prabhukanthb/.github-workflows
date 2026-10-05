@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { api } from '../api';
 import { useAuth } from '../AuthContext';
-import { HEIGHT_OPTIONS, SUB_CASTES, heightToValue, incomeToLacsInput, lookupIndianPincode } from '../profileFields';
+import { HEIGHT_OPTIONS, SUB_CASTES, heightToValue, incomeToLacsInput, lookupIndianPincode, normalizePhotos } from '../profileFields';
 import { EDUCATION, EMPLOYMENT, MARITAL, MOTHER_TONGUES, RELIGIONS, ageFromDob, maxDobFor18 } from '../siteConfig';
 
 export function profileToForm(profile = {}, user = {}) {
@@ -54,7 +54,7 @@ export function profileToForm(profile = {}, user = {}) {
     motherNativePlace: profile.motherNativePlace || '',
     aboutMe: profile.aboutMe || '',
     partnerRequirement: profile.partnerRequirement || '',
-    photoUrl: profile.photos?.[0]?.url || ''
+    photos: normalizePhotos(profile.photos)
   };
 }
 
@@ -143,23 +143,44 @@ export default function BiodataForm({ form, setForm, includeAccount = false }) {
   const { token } = useAuth();
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoError, setPhotoError] = useState('');
+  const [slide, setSlide] = useState(0);
   const set = (name) => (event) => setForm({ ...form, [name]: event.target.value });
+  const photos = normalizePhotos(form.photos);
+  const slideIndex = photos.length ? Math.min(slide, photos.length - 1) : 0;
 
   const uploadPhoto = async (event) => {
-    const file = event.target.files?.[0];
+    const files = [...(event.target.files || [])].slice(0, 3 - photos.length);
     event.target.value = '';
-    if (!file) return;
+    if (!files.length) return;
     setPhotoBusy(true);
     setPhotoError('');
     try {
-      const dataUrl = await fileToDataUrl(file);
-      const data = await api.uploadPhoto(dataUrl, token);
-      setForm({ ...form, photoUrl: data.url });
+      let next = photos;
+      for (const file of files) {
+        const dataUrl = await fileToDataUrl(file);
+        const data = await api.uploadPhoto(dataUrl, token);
+        next = normalizePhotos([...next, { url: data.url, isPrimary: next.length === 0 }]);
+      }
+      setForm({ ...form, photos: next });
+      setSlide(Math.max(0, next.length - 1));
     } catch (err) {
       setPhotoError(err.message);
     } finally {
       setPhotoBusy(false);
     }
+  };
+
+  const chooseMain = (index) => {
+    setForm({
+      ...form,
+      photos: photos.map((photo, photoIndex) => ({ ...photo, isPrimary: photoIndex === index }))
+    });
+  };
+
+  const removePhoto = (index) => {
+    const next = normalizePhotos(photos.filter((_, photoIndex) => photoIndex !== index));
+    setForm({ ...form, photos: next });
+    setSlide(Math.max(0, Math.min(slideIndex, next.length - 1)));
   };
 
   return (
@@ -348,11 +369,29 @@ export default function BiodataForm({ form, setForm, includeAccount = false }) {
         <textarea value={form.partnerRequirement} onChange={set('partnerRequirement')} />
       </div>
       <div className="wide">
-        <label>Photo</label>
-        <input type="file" accept="image/jpeg,image/png,image/webp" onChange={uploadPhoto} disabled={photoBusy} />
+        <label>Photos</label>
+        <p className="pin-note">Add up to 3 photos. They appear as a carousel. Choose one as the main photo.</p>
+        {photos.length > 0 && (
+          <div className="photo-carousel">
+            <button type="button" className="btn-ghost btn-close" onClick={() => setSlide((photos.length + slideIndex - 1) % photos.length)} aria-label="Previous photo">Previous</button>
+            <figure>
+              <img src={photos[slideIndex].url} alt="" />
+              <figcaption>{photos[slideIndex].isPrimary ? 'Main photo' : `Photo ${slideIndex + 1} of ${photos.length}`}</figcaption>
+              <div className="actions">
+                {!photos[slideIndex].isPrimary && (
+                  <button type="button" className="btn-maroon" onClick={() => chooseMain(slideIndex)}>Set as main</button>
+                )}
+                <button type="button" className="btn-gold" onClick={() => removePhoto(slideIndex)}>Remove</button>
+              </div>
+            </figure>
+            <button type="button" className="btn-ghost btn-close" onClick={() => setSlide((slideIndex + 1) % photos.length)} aria-label="Next photo">Next</button>
+          </div>
+        )}
+        {photos.length < 3 && (
+          <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={uploadPhoto} disabled={photoBusy} />
+        )}
         {photoBusy && <p>Uploading to Cloudinary…</p>}
         {photoError && <p className="error">{photoError}</p>}
-        {form.photoUrl && <img className="photo-preview" src={form.photoUrl} alt="" />}
       </div>
     </div>
   );

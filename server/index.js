@@ -5,7 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { ageFromDob, cityMatches, formatProfileId, fullName, isOppositeMatch } from './match.js';
+import { ageFromDob, cityMatches, formatProfileId, fullName, isOppositeMatch, nextProfileSequence, normalizePhotos } from './match.js';
 import { PASSWORD_HINT, defaultPassword, toIncomeRupees } from './passwords.js';
 import { cloudinaryStatus, photosConfigured, uploadTeluguPhoto } from './photos.js';
 import { TELUGU_DOMAINS } from './deployGuard.js';
@@ -144,7 +144,11 @@ function readAddress(body, prefix, fallback = {}) {
 function readBiodata(body, current = {}) {
   const address = readAddress(body, 'current', current.currentAddress || {});
   const presentAddress = readAddress(body, 'present', current.presentAddress || {});
-  const photoUrl = String(body.photoUrl ?? current.photos?.[0]?.url ?? '').trim();
+  const photos = Array.isArray(body.photos)
+    ? normalizePhotos(body.photos)
+    : body.photoUrl
+      ? normalizePhotos([{ url: body.photoUrl, isPrimary: true }])
+      : normalizePhotos(current.photos || []);
   return {
     gender: body.gender ?? current.gender,
     dateOfBirth: body.dateOfBirth ?? current.dateOfBirth,
@@ -177,7 +181,7 @@ function readBiodata(body, current = {}) {
     motherNativePlace: String(body.motherNativePlace ?? current.motherNativePlace ?? '').trim(),
     aboutMe: String(body.aboutMe ?? current.aboutMe ?? '').trim().slice(0, 2000),
     partnerRequirement: String(body.partnerRequirement ?? current.partnerRequirement ?? '').trim().slice(0, 1000),
-    photos: photoUrl ? [{ url: photoUrl, isPrimary: true }] : (current.photos || [])
+    photos
   };
 }
 
@@ -319,7 +323,14 @@ app.post('/api/auth/change-password', auth, async (req, res) => {
 
 app.get('/api/profiles/me', auth, (req, res) => {
   const profile = getDb().profiles.find((item) => item.userId === req.user.id);
-  if (!profile) return res.status(404).json({ message: 'Profile not found' });
+  if (!profile) {
+    const removed = (getDb().deletedProfiles || []).some((item) => item.userId === req.user.id);
+    return res.status(404).json({
+      message: removed
+        ? 'The office moved this profile to Deleted. This profile ID will not be used again.'
+        : 'Profile not found'
+    });
+  }
   res.json({ profile: presentProfile(profile, getDb().users, { contact: true }) });
 });
 
@@ -505,8 +516,10 @@ app.get('/api/admin/interests', auth, adminOnly, (_req, res) => {
 
 app.get('/api/admin/profiles', auth, adminOnly, (_req, res) => {
   const state = getDb();
+  const present = (item) => presentProfile(item, state.users, { contact: true });
   res.json({
-    profiles: state.profiles.map((item) => presentProfile(item, state.users, { contact: true }))
+    profiles: state.profiles.map(present),
+    deleted: (state.deletedProfiles || []).map(present)
   });
 });
 
@@ -540,7 +553,7 @@ app.post('/api/admin/profiles', auth, adminOnly, async (req, res) => {
   const passwordHash = await bcrypt.hash(temporaryPassword, 8);
   let created;
   await update((state) => {
-    const seq = state.seq + 1;
+    const seq = nextProfileSequence(state);
     const user = {
       id: `u-${Date.now()}`,
       email,
@@ -641,7 +654,7 @@ app.patch('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
     next.showInSearch = status === 'approved';
     next.rejectedReason = status === 'rejected' ? String(req.body.rejectedReason || 'Please contact the office.') : null;
     if (status === 'approved' && !next.profileId) {
-      const seq = getDb().seq + 1;
+      const seq = nextProfileSequence(getDb());
       next.profileId = formatProfileId(next.gender, seq);
       await update((state) => ({
         ...state,
@@ -658,6 +671,27 @@ app.patch('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
     profiles: state.profiles.map((item) => (item.id === current.id ? next : item))
   }));
   return res.json({ profile: presentProfile(next, getDb().users, { contact: true }) });
+});
+
+app.delete('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
+  const current = getDb().profiles.find((item) => item.id === req.params.id);
+  if (!current) return res.status(404).json({ message: 'Profile not found' });
+  const removed = {
+    ...current,
+    approvalStatus: 'deleted',
+    showInSearch: false,
+    deletedAt: new Date().toISOString(),
+    deletedBy: req.user.id
+  };
+  await update((state) => ({
+    ...state,
+    profiles: state.profiles.filter((item) => item.id !== current.id),
+    deletedProfiles: [...(state.deletedProfiles || []), removed]
+  }));
+  res.json({
+    profile: presentProfile(removed, getDb().users, { contact: true }),
+    message: `${removed.profileId || 'This profile'} was moved to Deleted. This profile ID will not be used again.`
+  });
 });
 
 const dist = path.join(process.cwd(), 'dist');

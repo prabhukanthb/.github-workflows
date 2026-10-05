@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import ProfileModal from '../components/ProfileModal';
+import { mainPhotoUrl } from '../profileFields';
 import { ageFromDob, fullName, REGISTER_CTA, REGISTRATION_FEE } from '../siteConfig';
 
 export default function Browse() {
@@ -85,7 +86,7 @@ export default function Browse() {
       <div className="profile-grid">
         {profiles.map((profile) => {
           const name = fullName(profile);
-          const photo = profile.photos?.[0]?.url;
+          const photo = mainPhotoUrl(profile.photos);
           return (
             <article key={profile.id} className="profile-card">
               {photo ? <img src={photo} alt="" /> : <div className="avatar">{name.slice(0, 1)}</div>}

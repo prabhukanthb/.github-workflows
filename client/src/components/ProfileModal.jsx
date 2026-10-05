@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { mainPhotoUrl } from '../profileFields';
 import { ageFromDob, fullName, maritalLabel } from '../siteConfig';
 
 function addressLine(address) {
@@ -13,7 +14,7 @@ export default function ProfileModal({ profile, onClose, onInterest }) {
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   if (!profile) return null;
-  const photo = profile.photos?.[0]?.url;
+  const photo = mainPhotoUrl(profile.photos);
   const name = fullName(profile);
 
   const send = async () => {

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { incomeToLacsInput } from '../profileFields';
+import { incomeToLacsInput, mainPhotoUrl } from '../profileFields';
 import { BRAND, ageFromDob, fullName, maritalLabel } from '../siteConfig';
 
 const CONTACT_LINE = 'Contact B. John Ratnam 9440545049';
@@ -52,7 +52,7 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
   const [error, setError] = useState('');
   if (!profile) return null;
   const name = fullName(profile);
-  const photo = profile.photos?.[0]?.url;
+  const photo = mainPhotoUrl(profile.photos);
   const age = ageFromDob(profile.dateOfBirth);
   const income = incomeToLacsInput(profile.income);
 
@@ -128,7 +128,7 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
                 <Row label="Present address" value={addressText(profile.presentAddress)} />
                 <Row label="Father" value={joinParts([profile.fatherName, profile.fatherOccupation, profile.fatherNativePlace])} />
                 <Row label="Mother" value={joinParts([profile.motherName, profile.motherOccupation, profile.motherNativePlace])} />
-                {profile.aboutMe && <p className="sheet-note">{profile.aboutMe}</p>}
+                {profile.aboutMe && <p className="sheet-note"><strong>About me. </strong>{profile.aboutMe}</p>}
                 {profile.partnerRequirement && <p className="sheet-note"><strong>Partner requirement. </strong>{profile.partnerRequirement}</p>}
               </div>
               <div className="sheet-photo">

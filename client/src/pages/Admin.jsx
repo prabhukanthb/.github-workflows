@@ -11,6 +11,7 @@ export default function Admin() {
   const [summary, setSummary] = useState(null);
   const [interests, setInterests] = useState([]);
   const [profiles, setProfiles] = useState([]);
+  const [deleted, setDeleted] = useState([]);
   const [filter, setFilter] = useState('pending');
   const [staff, setStaff] = useState([]);
   const [staffForm, setStaffForm] = useState({ firstName: '', surname: '', email: '', phone: '', role: 'subadmin', password: '' });
@@ -25,6 +26,7 @@ export default function Admin() {
       .then(([summaryData, profileData, staffData, interestData]) => {
         setSummary(summaryData);
         setProfiles(profileData.profiles || []);
+        setDeleted(profileData.deleted || []);
         setStaff(staffData.staff || []);
         setInterests(interestData.interests || []);
       })
@@ -38,13 +40,29 @@ export default function Admin() {
   if (loading) return <div className="page">Loading…</div>;
   if (!isAuthenticated || !isAdmin) return <Navigate to="/" replace />;
 
-  const visible = profiles.filter((profile) => filter === 'all' || profile.approvalStatus === filter);
+  const visible = filter === 'deleted'
+    ? deleted
+    : profiles.filter((profile) => filter === 'all' || profile.approvalStatus === filter);
 
   const decide = async (profile, approvalStatus) => {
     setError('');
     try {
       await api.adminUpdate(profile.id, { approvalStatus }, token);
       setMessage(approvalStatus === 'approved' ? `${fullName(profile)} is now in search.` : `${fullName(profile)} was not published.`);
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const remove = async (profile) => {
+    const label = `${fullName(profile)}${profile.profileId ? ` (${profile.profileId})` : ''}`;
+    if (!window.confirm(`Move ${label} to Deleted? This profile ID will not be used again.`)) return;
+    setError('');
+    try {
+      const data = await api.adminDelete(profile.id, token);
+      setMessage(data.message);
+      setFilter('deleted');
       load();
     } catch (err) {
       setError(err.message);
@@ -153,9 +171,16 @@ export default function Admin() {
         <Link to="/admin/create" className="btn-gold">Create profile</Link>
       </div>
       <div className="actions" style={{ marginBottom: 16 }}>
-        {['pending', 'approved', 'rejected', 'draft', 'all'].map((item) => (
-          <button key={item} type="button" className={filter === item ? 'btn-maroon' : 'btn-gold'} onClick={() => setFilter(item)}>
-            {item}
+        {[
+          ['pending', 'pending'],
+          ['approved', 'approved'],
+          ['rejected', 'rejected'],
+          ['draft', 'draft'],
+          ['all', 'all'],
+          ['deleted', 'Deleted']
+        ].map(([value, label]) => (
+          <button key={value} type="button" className={filter === value ? 'btn-maroon' : 'btn-gold'} onClick={() => setFilter(value)}>
+            {label}
           </button>
         ))}
       </div>
@@ -184,12 +209,17 @@ export default function Admin() {
                 <td>{profile.approvalStatus}</td>
                 <td className="actions">
                   <button type="button" className="btn-maroon" onClick={() => setViewing(profile)}>View</button>
-                  <Link to={`/admin/profiles/${profile.id}/edit`}>Edit</Link>
-                  {profile.approvalStatus !== 'approved' && (
-                    <button type="button" className="btn-maroon" onClick={() => decide(profile, 'approved')}>Approve</button>
-                  )}
-                  {profile.approvalStatus !== 'rejected' && (
-                    <button type="button" className="btn-gold" onClick={() => decide(profile, 'rejected')}>Hold</button>
+                  {filter !== 'deleted' && (
+                    <>
+                      <Link className="btn-gold" to={`/admin/profiles/${profile.id}/edit`}>Edit</Link>
+                      {profile.approvalStatus !== 'approved' && (
+                        <button type="button" className="btn-maroon" onClick={() => decide(profile, 'approved')}>Approve</button>
+                      )}
+                      {profile.approvalStatus !== 'rejected' && (
+                        <button type="button" className="btn-gold" onClick={() => decide(profile, 'rejected')}>Hold</button>
+                      )}
+                      <button type="button" className="btn-maroon" onClick={() => remove(profile)}>Delete</button>
+                    </>
                   )}
                 </td>
               </tr>

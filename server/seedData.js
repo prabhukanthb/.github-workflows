@@ -310,6 +310,7 @@ export function buildSeed({ officeHash, memberHash }) {
     seq: 10,
     users,
     profiles,
+    deletedProfiles: [],
     interests: [
       {
         id: 'i1',

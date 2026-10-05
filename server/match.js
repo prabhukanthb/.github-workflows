@@ -25,6 +25,37 @@ export function genderCode(gender) {
   return String(gender || '').toLowerCase() === 'female' ? 'F' : 'M';
 }
 
+export function normalizePhotos(input) {
+  const source = Array.isArray(input) ? input : [];
+  const photos = [];
+  for (const item of source) {
+    const url = String(item?.url || '').trim();
+    if (!url || photos.some((photo) => photo.url === url)) continue;
+    photos.push({ url, isPrimary: Boolean(item?.isPrimary) });
+    if (photos.length === 3) break;
+  }
+  if (!photos.length) return [];
+  const primaryIndex = photos.findIndex((photo) => photo.isPrimary);
+  return photos.map((photo, index) => ({
+    url: photo.url,
+    isPrimary: primaryIndex === -1 ? index === 0 : index === primaryIndex
+  }));
+}
+
+export function nextProfileSequence(state) {
+  const used = new Set();
+  for (const item of [...(state?.profiles || []), ...(state?.deletedProfiles || [])]) {
+    const match = String(item?.profileId || '').match(/(\d+)$/);
+    if (match) used.add(Number(match[1]));
+  }
+  let seq = Number(state?.seq) || 0;
+  do {
+    seq += 1;
+  } while (used.has(seq) && seq < 100000);
+  if (seq > 99999) throw new Error('No profile IDs left.');
+  return seq;
+}
+
 export function formatProfileId(gender, seq) {
   const n = Number(seq);
   if (!Number.isInteger(n) || n < 1 || n > 99999) {

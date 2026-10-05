@@ -1,10 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ageFromDob, cityMatches, formatProfileId, isOppositeMatch } from './match.js';
+import { ageFromDob, cityMatches, formatProfileId, isOppositeMatch, nextProfileSequence, normalizePhotos } from './match.js';
 
 test('formatProfileId pads gender and sequence', () => {
   assert.equal(formatProfileId('female', 1), 'F00001');
   assert.equal(formatProfileId('male', 42), 'M00042');
+});
+
+test('a deleted profile id is not issued again', () => {
+  const seq = nextProfileSequence({
+    seq: 12,
+    profiles: [{ profileId: 'F00013' }],
+    deletedProfiles: [{ profileId: 'F00012' }]
+  });
+  assert.equal(seq, 14);
+  assert.notEqual(formatProfileId('female', seq), 'F00012');
+});
+
+test('only one of three photos is the main photo', () => {
+  const photos = normalizePhotos([
+    { url: 'https://example.com/a.jpg', isPrimary: false },
+    { url: 'https://example.com/b.jpg', isPrimary: true },
+    { url: 'https://example.com/c.jpg', isPrimary: true },
+    { url: 'https://example.com/d.jpg', isPrimary: false }
+  ]);
+  assert.equal(photos.length, 3);
+  assert.deepEqual(photos.map((photo) => photo.isPrimary), [false, true, false]);
 });
 
 test('a bride sees only older grooms', () => {
