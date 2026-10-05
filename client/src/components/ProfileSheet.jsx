@@ -62,7 +62,7 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
     try {
       const { default: html2canvas } = await import('html2canvas');
       const cardWidth = 920;
-      const photoWidth = Math.round(cardWidth * 0.4);
+      const photoWidth = Math.round(cardWidth * 0.5);
       const canvas = await html2canvas(cardRef.current, {
         scale: 2,
         useCORS: true,

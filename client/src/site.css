@@ -754,7 +754,7 @@
   }
 
   .sheet-body {
-    grid-template-columns: minmax(0, 60%) minmax(0, 40%);
+    grid-template-columns: minmax(0, 50%) minmax(0, 50%);
   }
 
   .sheet-head {
@@ -1153,7 +1153,7 @@ table.admin th {
 
 .sheet-body {
   display: grid;
-  grid-template-columns: minmax(0, 60%) minmax(0, 40%);
+  grid-template-columns: minmax(0, 50%) minmax(0, 50%);
   gap: 0;
   padding: 0;
   align-items: stretch;
@@ -1307,7 +1307,7 @@ table.admin a.btn-maroon {
   }
 
   .sheet-body {
-    grid-template-columns: minmax(0, 60%) minmax(0, 40%);
+    grid-template-columns: minmax(0, 50%) minmax(0, 50%);
     align-items: stretch;
   }
 
