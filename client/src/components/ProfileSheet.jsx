@@ -61,10 +61,51 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
     setError('');
     try {
       const { default: html2canvas } = await import('html2canvas');
+      const cardWidth = 920;
+      const photoWidth = Math.round(cardWidth * 0.4);
       const canvas = await html2canvas(cardRef.current, {
         scale: 2,
         useCORS: true,
-        backgroundColor: '#F7F4EC'
+        backgroundColor: '#F7F4EC',
+        windowWidth: 1280,
+        onclone: (doc) => {
+          const card = doc.querySelector('.sheet-card');
+          if (!card) return;
+          card.style.width = `${cardWidth}px`;
+          card.style.maxWidth = `${cardWidth}px`;
+          const body = card.querySelector('.sheet-body');
+          const copy = card.querySelector('.sheet-copy');
+          const photo = card.querySelector('.sheet-photo');
+          const img = photo?.querySelector('img');
+          if (body) {
+            body.style.display = 'flex';
+            body.style.flexDirection = 'row';
+            body.style.alignItems = 'stretch';
+            body.style.gap = '0';
+            body.style.padding = '0';
+            body.style.width = '100%';
+          }
+          if (copy) {
+            copy.style.flex = '1 1 auto';
+            copy.style.width = `${cardWidth - photoWidth}px`;
+            copy.style.maxWidth = `${cardWidth - photoWidth}px`;
+            copy.style.minWidth = '0';
+          }
+          if (photo) {
+            photo.style.flex = `0 0 ${photoWidth}px`;
+            photo.style.width = `${photoWidth}px`;
+            photo.style.minWidth = `${photoWidth}px`;
+            photo.style.maxWidth = `${photoWidth}px`;
+            photo.style.boxSizing = 'border-box';
+          }
+          if (img) {
+            img.style.width = '100%';
+            img.style.height = 'auto';
+            img.style.maxHeight = 'none';
+            img.style.objectFit = 'contain';
+            img.style.display = 'block';
+          }
+        }
       });
       const link = document.createElement('a');
       link.download = `${BRAND.replace(/\s+/g, '-')}-${profile.profileId || 'profile'}.png`;

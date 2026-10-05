@@ -55,6 +55,16 @@ export default function Admin() {
     }
   };
 
+  const resetLogin = async (profile) => {
+    setError('');
+    try {
+      const data = await api.adminResetPassword(profile.id, token);
+      setMessage(data.message);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const remove = async (profile) => {
     const label = `${fullName(profile)}${profile.profileId ? ` (${profile.profileId})` : ''}`;
     if (!window.confirm(`Move ${label} to Deleted? This profile ID will not be used again.`)) return;
@@ -218,6 +228,7 @@ export default function Admin() {
                       {profile.approvalStatus !== 'rejected' && (
                         <button type="button" className="btn-gold" onClick={() => decide(profile, 'rejected')}>Hold</button>
                       )}
+                      <button type="button" className="btn-gold" onClick={() => resetLogin(profile)}>Reset password</button>
                       <button type="button" className="btn-maroon" onClick={() => remove(profile)}>Delete</button>
                     </>
                   )}

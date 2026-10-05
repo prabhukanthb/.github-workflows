@@ -6,7 +6,7 @@ import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { ageFromDob, cityMatches, formatProfileId, fullName, isOppositeMatch, nextProfileSequence, normalizePhotos } from './match.js';
-import { PASSWORD_HINT, defaultPassword, toIncomeRupees } from './passwords.js';
+import { PASSWORD_HINT, defaultPassword, matchesLogin, toIncomeRupees } from './passwords.js';
 import { cloudinaryStatus, photosConfigured, uploadTeluguPhoto } from './photos.js';
 import { TELUGU_DOMAINS } from './deployGuard.js';
 import { getDb, initDb, presentProfile, publicUser, update } from './store.js';
@@ -63,8 +63,7 @@ function adminOnly(req, res, next) {
 }
 
 function findLogin(value) {
-  const key = String(value || '').trim().toLowerCase();
-  return getDb().users.find((user) => user.email === key || user.phone === key);
+  return getDb().users.find((user) => matchesLogin(user, value));
 }
 
 function optionalPhone(value) {
@@ -283,8 +282,11 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     users: state.users.map((item) => (item.id === user.id ? { ...item, passwordHash } : item))
   }));
   return res.json({
-    message: 'Your password was reset to the default format. Contact the Vijayawada office if you still cannot login.',
-    passwordHint: PASSWORD_HINT
+    message: `Your password is now ${temporaryPassword}.`,
+    temporaryPassword,
+    passwordHint: PASSWORD_HINT,
+    fullName: user.firstName,
+    phone: user.phone
   });
 });
 
@@ -671,6 +673,30 @@ app.patch('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
     profiles: state.profiles.map((item) => (item.id === current.id ? next : item))
   }));
   return res.json({ profile: presentProfile(next, getDb().users, { contact: true }) });
+});
+
+app.post('/api/admin/profiles/:id/reset-password', auth, adminOnly, async (req, res) => {
+  const state = getDb();
+  const profile = state.profiles.find((item) => item.id === req.params.id)
+    || (state.deletedProfiles || []).find((item) => item.id === req.params.id);
+  const user = state.users.find((item) => item.id === profile?.userId);
+  if (!user) return res.status(404).json({ message: 'Profile not found' });
+  let temporaryPassword;
+  try {
+    temporaryPassword = defaultPassword(user.firstName, user.phone);
+  } catch (err) {
+    return res.status(400).json({ message: err.message });
+  }
+  const passwordHash = await bcrypt.hash(temporaryPassword, 8);
+  await update((current) => ({
+    ...current,
+    users: current.users.map((item) => (item.id === user.id ? { ...item, passwordHash } : item))
+  }));
+  res.json({
+    temporaryPassword,
+    passwordHint: PASSWORD_HINT,
+    message: `${user.firstName} can login with ${user.email} or ${user.phone}. The password is ${temporaryPassword}.`
+  });
 });
 
 app.delete('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {

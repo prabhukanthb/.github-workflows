@@ -5,18 +5,18 @@ import { api } from '../api';
 export default function ForgotPassword() {
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [message, setMessage] = useState('');
-  const [hint, setHint] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const requestCode = async (event) => {
     event.preventDefault();
     setError('');
     setMessage('');
-    setHint('');
+    setPassword('');
     try {
       const data = await api.forgot({ emailOrPhone });
+      setPassword(data.temporaryPassword || '');
       setMessage(data.message);
-      setHint(data.passwordHint || '');
     } catch (err) {
       setError(err.message);
     }
@@ -27,9 +27,14 @@ export default function ForgotPassword() {
       <div className="panel auth-card">
         <div className="kicker">Telugu Kalyanamala</div>
         <h2>Reset password</h2>
-        <p>Enter the registered email or mobile. The password becomes the first 4 letters of the full name, then @, then the last 4 digits of that mobile.</p>
+        <p>Enter the registered email or mobile. The password becomes the first 4 letters of the Full Name, then @, then the last 4 digits of the registered mobile. Full Name Prabhu and mobile 9876543210 becomes Prab@3210.</p>
         {error && <div className="error">{error}</div>}
-        {message && <div className="ok">{message}{hint ? ` Format: ${hint}.` : ''}</div>}
+        {password && (
+          <div className="ok">
+            Your password is now <strong>{password}</strong>. Use it on the login page.
+          </div>
+        )}
+        {!password && message && <div className="ok">{message}</div>}
         <form onSubmit={requestCode}>
           <label htmlFor="forgot-id">Email or phone</label>
           <input id="forgot-id" value={emailOrPhone} onChange={(e) => setEmailOrPhone(e.target.value)} required />

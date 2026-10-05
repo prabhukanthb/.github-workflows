@@ -35,6 +35,7 @@ export const api = {
   adminCreate: (body, token) => request('/api/admin/profiles', { method: 'POST', body, token }),
   adminUpdate: (id, body, token) => request(`/api/admin/profiles/${id}`, { method: 'PATCH', body, token }),
   adminDelete: (id, token) => request(`/api/admin/profiles/${id}`, { method: 'DELETE', token }),
+  adminResetPassword: (id, token) => request(`/api/admin/profiles/${id}/reset-password`, { method: 'POST', token }),
   profile: (id, token) => request(`/api/profiles/${id}`, { token }),
   adminStaff: (token) => request('/api/admin/staff', { token }),
   adminCreateStaff: (body, token) => request('/api/admin/staff', { method: 'POST', body, token }),

@@ -10,6 +10,25 @@ export function defaultPassword(name, phone) {
   return `${namePart}@${last4}`;
 }
 
+export function phoneDigits(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  if (digits.length === 10) return digits;
+  if (digits.length === 11 && digits.startsWith('0')) return digits.slice(1);
+  if (digits.length === 12 && digits.startsWith('91')) return digits.slice(2);
+  if (digits.length > 12) return digits.slice(-10);
+  return '';
+}
+
+export function matchesLogin(user, value) {
+  if (!user || user.status === 'deleted') return false;
+  const raw = String(value || '').trim().toLowerCase();
+  if (!raw) return false;
+  if (user.email && user.email.toLowerCase() === raw) return true;
+  const phone = phoneDigits(value);
+  if (!phone) return false;
+  return [user.phone, user.alternativePhone].some((item) => phoneDigits(item) === phone);
+}
+
 const LACS_THRESHOLD = 10000;
 
 export function toIncomeRupees(value) {
