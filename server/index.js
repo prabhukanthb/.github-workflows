@@ -646,11 +646,24 @@ app.patch('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
   if (phonePatch && phonePatch.length !== 10) {
     return res.status(400).json({ message: 'Alternate mobile must be 10 digits.' });
   }
-  const usersWithPhone = (users) => (
-    phonePatch === undefined ? users : users.map((item) => (
-      item.id === current.userId ? { ...item, alternativePhone: phonePatch } : item
-    ))
-  );
+  const usersWithAccount = (users) => users.map((item) => {
+    if (item.id !== current.userId) return item;
+    const nextUser = { ...item };
+    if (phonePatch !== undefined) nextUser.alternativePhone = phonePatch;
+    if (Object.prototype.hasOwnProperty.call(req.body, 'firstName')) nextUser.firstName = String(req.body.firstName || '').trim();
+    if (Object.prototype.hasOwnProperty.call(req.body, 'surname')) {
+      const surname = String(req.body.surname || '').trim();
+      nextUser.surname = surname;
+      nextUser.lastName = surname;
+    }
+    return nextUser;
+  });
+  if (Object.prototype.hasOwnProperty.call(req.body, 'firstName') && String(req.body.firstName || '').trim().length < 2) {
+    return res.status(400).json({ message: 'Full name must be at least 2 letters.' });
+  }
+  if (Object.prototype.hasOwnProperty.call(req.body, 'surname') && String(req.body.surname || '').trim().length < 2) {
+    return res.status(400).json({ message: 'Surname must be at least 2 letters.' });
+  }
   if (status === 'approved' || status === 'rejected' || status === 'pending') {
     next.approvalStatus = status;
     next.showInSearch = status === 'approved';
@@ -661,7 +674,7 @@ app.patch('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
       await update((state) => ({
         ...state,
         seq,
-        users: usersWithPhone(state.users),
+        users: usersWithAccount(state.users),
         profiles: state.profiles.map((item) => (item.id === current.id ? next : item))
       }));
       return res.json({ profile: presentProfile(next, getDb().users, { contact: true }) });
@@ -669,7 +682,7 @@ app.patch('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
   }
   await update((state) => ({
     ...state,
-    users: usersWithPhone(state.users),
+    users: usersWithAccount(state.users),
     profiles: state.profiles.map((item) => (item.id === current.id ? next : item))
   }));
   return res.json({ profile: presentProfile(next, getDb().users, { contact: true }) });

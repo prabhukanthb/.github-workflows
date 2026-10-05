@@ -139,7 +139,7 @@ async function fileToDataUrl(file) {
   return canvas.toDataURL('image/jpeg', 0.85);
 }
 
-export default function BiodataForm({ form, setForm, includeAccount = false }) {
+export default function BiodataForm({ form, setForm, includeAccount = false, includeName = false }) {
   const { token } = useAuth();
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoError, setPhotoError] = useState('');
@@ -185,7 +185,7 @@ export default function BiodataForm({ form, setForm, includeAccount = false }) {
 
   return (
     <div className="form-grid">
-      {includeAccount && (
+      {(includeAccount || includeName) && (
         <>
           <div>
             <label>Full Name</label>
@@ -195,6 +195,10 @@ export default function BiodataForm({ form, setForm, includeAccount = false }) {
             <label>Surname</label>
             <input value={form.surname} onChange={set('surname')} required />
           </div>
+        </>
+      )}
+      {includeAccount && (
+        <>
           <div>
             <label>Email</label>
             <input type="email" value={form.email} onChange={set('email')} required />

@@ -364,7 +364,7 @@ export function EditProfile() {
       )}
       {!form ? <p>Loading biodata…</p> : (
         <form className="panel" onSubmit={save}>
-          <BiodataForm form={form} setForm={setForm} includeAccount={false} />
+          <BiodataForm form={form} setForm={setForm} includeName />
           <button className="btn-maroon" style={{ marginTop: 16 }} type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save profile'}</button>
         </form>
       )}

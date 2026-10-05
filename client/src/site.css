@@ -1202,7 +1202,7 @@ table.admin th {
   overflow: visible;
 }
 
-.sheet-photo:not(:has(img)) {
+.sheet-photo-empty {
   min-height: 320px;
   background: var(--maroon-deep);
   display: flex;

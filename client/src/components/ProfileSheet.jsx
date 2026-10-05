@@ -46,6 +46,110 @@ function Row({ label, value }) {
   );
 }
 
+const SHEET = {
+  cream: '#F7F4EC',
+  deep: '#5E6B52',
+  blush: '#E89EB8',
+  scarlet: '#C42336',
+  ink: '#2C3328',
+  muted: '#5C6A50',
+  line: '#E4E0D2'
+};
+
+function applyDownloadStyles(card) {
+  const cardWidth = 920;
+  const photoWidth = Math.round(cardWidth * 0.5);
+  card.style.cssText = [
+    'position:relative',
+    'overflow:hidden',
+    `background:${SHEET.cream}`,
+    `border:3px solid ${SHEET.blush}`,
+    `color:${SHEET.ink}`,
+    `width:${cardWidth}px`,
+    'max-width:none',
+    'font-family:Georgia, Times New Roman, serif'
+  ].join(';');
+  const watermark = card.querySelector('.sheet-watermark');
+  if (watermark) watermark.remove();
+  const inner = card.querySelector('.sheet-inner');
+  if (inner) inner.style.cssText = 'position:relative;z-index:1;background:transparent;';
+  const head = card.querySelector('.sheet-head');
+  if (head) {
+    head.style.cssText = `display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 22px;background:${SHEET.deep};color:${SHEET.cream};`;
+  }
+  const kicker = card.querySelector('.sheet-kicker');
+  if (kicker) kicker.style.cssText = `letter-spacing:1.6px;text-transform:uppercase;font-size:12px;color:${SHEET.blush};font-weight:700;`;
+  const brand = card.querySelector('.sheet-brand');
+  if (brand) brand.style.cssText = 'font-family:Georgia, Times New Roman, serif;font-size:28px;color:#F7F4EC;';
+  const id = card.querySelector('.sheet-id');
+  if (id) id.style.cssText = `background:#fff;color:${SHEET.scarlet};border-radius:8px;padding:8px 14px;text-align:right;`;
+  const idLabel = card.querySelector('.sheet-id span');
+  if (idLabel) idLabel.style.cssText = 'display:block;font-size:12px;letter-spacing:1px;text-transform:uppercase;';
+  const idValue = card.querySelector('.sheet-id strong');
+  if (idValue) idValue.style.cssText = `font-family:Georgia, Times New Roman, serif;font-size:22px;color:${SHEET.scarlet};`;
+  const body = card.querySelector('.sheet-body');
+  if (body) {
+    body.style.cssText = 'display:flex;flex-direction:row;align-items:flex-start;gap:0;padding:0;width:100%;background:transparent;';
+  }
+  const copy = card.querySelector('.sheet-copy');
+  if (copy) {
+    copy.style.cssText = `flex:1 1 auto;width:${cardWidth - photoWidth}px;max-width:${cardWidth - photoWidth}px;min-width:0;padding:18px 16px 12px 22px;box-sizing:border-box;`;
+  }
+  const title = card.querySelector('.sheet-copy h2');
+  if (title) title.style.cssText = `margin:0 0 8px;font-family:Georgia, Times New Roman, serif;color:${SHEET.scarlet};font-size:32px;`;
+  card.querySelectorAll('.sheet-row').forEach((row) => {
+    row.style.cssText = `display:grid;grid-template-columns:140px minmax(0,1fr);gap:8px;padding:4px 0;border-bottom:1px solid ${SHEET.line};font-size:15px;font-family:Segoe UI, Arial, sans-serif;`;
+    const label = row.querySelector('span');
+    if (label) label.style.cssText = `color:${SHEET.muted};`;
+  });
+  card.querySelectorAll('.sheet-note').forEach((note) => {
+    note.style.cssText = 'margin:12px 0 0;font-family:Segoe UI, Arial, sans-serif;font-size:15px;line-height:1.45;';
+  });
+  const photo = card.querySelector('.sheet-photo');
+  if (photo) {
+    photo.style.cssText = [
+      `flex:0 0 ${photoWidth}px`,
+      `width:${photoWidth}px`,
+      `min-width:${photoWidth}px`,
+      `max-width:${photoWidth}px`,
+      'height:auto',
+      'min-height:0',
+      'align-self:flex-start',
+      'background:transparent',
+      'box-sizing:border-box',
+      `border:4px solid ${SHEET.blush}`,
+      'overflow:visible'
+    ].join(';');
+  }
+  const img = photo?.querySelector('img');
+  if (img) {
+    img.style.cssText = 'width:100%;height:auto;max-height:none;object-fit:contain;object-position:center top;display:block;';
+  }
+  const foot = card.querySelector('.sheet-foot');
+  if (foot) {
+    foot.style.cssText = `padding:12px 22px;text-align:center;font-weight:700;background:${SHEET.deep};color:${SHEET.cream};font-family:Segoe UI, Arial, sans-serif;`;
+  }
+}
+
+function paintWatermark(canvas) {
+  const ctx = canvas.getContext('2d');
+  ctx.save();
+  ctx.globalAlpha = 0.14;
+  ctx.fillStyle = SHEET.deep;
+  ctx.font = '700 42px Georgia, Times New Roman, serif';
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate(-18 * Math.PI / 180);
+  const label = BRAND;
+  const stepX = 460;
+  const stepY = 150;
+  for (let y = -canvas.height; y < canvas.height; y += stepY) {
+    for (let x = -canvas.width; x < canvas.width; x += stepX) {
+      ctx.fillText(label, x, y);
+    }
+  }
+  ctx.restore();
+}
+
 export default function ProfileSheet({ profile, onClose, allowDownload = false }) {
   const cardRef = useRef(null);
   const [busy, setBusy] = useState(false);
@@ -61,57 +165,17 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
     setError('');
     try {
       const { default: html2canvas } = await import('html2canvas');
-      const cardWidth = 920;
-      const photoWidth = Math.round(cardWidth * 0.5);
       const canvas = await html2canvas(cardRef.current, {
         scale: 2,
         useCORS: true,
-        backgroundColor: '#F7F4EC',
+        backgroundColor: SHEET.cream,
         windowWidth: 1280,
         onclone: (doc) => {
           const card = doc.querySelector('.sheet-card');
-          if (!card) return;
-          card.style.width = `${cardWidth}px`;
-          card.style.maxWidth = `${cardWidth}px`;
-          const body = card.querySelector('.sheet-body');
-          const copy = card.querySelector('.sheet-copy');
-          const photo = card.querySelector('.sheet-photo');
-          const img = photo?.querySelector('img');
-          if (body) {
-            body.style.display = 'flex';
-            body.style.flexDirection = 'row';
-            body.style.alignItems = 'flex-start';
-            body.style.gap = '0';
-            body.style.padding = '0';
-            body.style.width = '100%';
-          }
-          if (copy) {
-            copy.style.flex = '1 1 auto';
-            copy.style.width = `${cardWidth - photoWidth}px`;
-            copy.style.maxWidth = `${cardWidth - photoWidth}px`;
-            copy.style.minWidth = '0';
-          }
-          if (photo) {
-            photo.style.flex = `0 0 ${photoWidth}px`;
-            photo.style.width = `${photoWidth}px`;
-            photo.style.minWidth = `${photoWidth}px`;
-            photo.style.maxWidth = `${photoWidth}px`;
-            photo.style.height = 'auto';
-            photo.style.minHeight = '0';
-            photo.style.alignSelf = 'flex-start';
-            photo.style.background = 'transparent';
-            photo.style.boxSizing = 'border-box';
-          }
-          if (img) {
-            img.style.width = '100%';
-            img.style.height = 'auto';
-            img.style.maxHeight = 'none';
-            img.style.objectFit = 'contain';
-            img.style.objectPosition = 'center top';
-            img.style.display = 'block';
-          }
+          if (card) applyDownloadStyles(card);
         }
       });
+      paintWatermark(canvas);
       const link = document.createElement('a');
       link.download = `${BRAND.replace(/\s+/g, '-')}-${profile.profileId || 'profile'}.png`;
       link.href = canvas.toDataURL('image/png');
@@ -177,7 +241,7 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
                 {profile.aboutMe && <p className="sheet-note"><strong>About me. </strong>{profile.aboutMe}</p>}
                 {profile.partnerRequirement && <p className="sheet-note"><strong>Partner requirement. </strong>{profile.partnerRequirement}</p>}
               </div>
-              <div className="sheet-photo">
+              <div className={photo ? 'sheet-photo' : 'sheet-photo sheet-photo-empty'}>
                 {photo ? <img src={photo} alt="" crossOrigin="anonymous" /> : <div>{(name || 'T').slice(0, 1)}</div>}
               </div>
             </div>
