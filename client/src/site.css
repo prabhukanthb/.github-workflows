@@ -175,6 +175,41 @@
   color: #fff;
 }
 
+.btn-scan {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 11px 18px;
+  background: var(--maroon-deep);
+  color: var(--cream);
+  border: 2px solid var(--gold);
+}
+
+.btn-scan:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.scan-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  padding: 14px;
+  border: 2px dashed var(--maroon-deep);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.scan-box .pin-note,
+.scan-note {
+  margin: 0;
+  flex: 1 1 220px;
+}
+
 .btn-gold:hover {
   background: #a61d2d;
 }

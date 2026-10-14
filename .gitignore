@@ -1,6 +1,7 @@
 node_modules/
 dist/
 data/db.json
+eng.traineddata
 .DS_Store
 *.log
 .env

@@ -39,5 +39,6 @@ export const api = {
   profile: (id, token) => request(`/api/profiles/${id}`, { token }),
   adminStaff: (token) => request('/api/admin/staff', { token }),
   adminCreateStaff: (body, token) => request('/api/admin/staff', { method: 'POST', body, token }),
-  uploadPhoto: (dataUrl, token) => request('/api/uploads', { method: 'POST', body: { dataUrl }, token })
+  uploadPhoto: (dataUrl, token) => request('/api/uploads', { method: 'POST', body: { dataUrl }, token }),
+  scanBiodata: (dataUrl, token) => request('/api/admin/biodata-scan', { method: 'POST', body: { dataUrl }, token })
 };

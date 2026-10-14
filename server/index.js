@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { ageFromDob, cityMatches, formatProfileId, fullName, isOppositeMatch, nextProfileSequence, normalizePhotos } from './match.js';
 import { PASSWORD_HINT, defaultPassword, matchesLogin, toIncomeRupees } from './passwords.js';
+import { fieldsFromBiodataImage } from './biodataScan.js';
 import { cloudinaryStatus, photosConfigured, uploadTeluguPhoto } from './photos.js';
 import { TELUGU_DOMAINS } from './deployGuard.js';
 import { getDb, initDb, presentProfile, publicUser, update } from './store.js';
@@ -16,7 +17,7 @@ const SECRET = process.env.JWT_SECRET || 'dev-telugu-kalyanamala-secret-change-m
 const app = express();
 
 app.use(cors());
-app.use(express.json({ limit: '4mb' }));
+app.use(express.json({ limit: '8mb' }));
 app.use((req, res, next) => {
   const host = String(req.headers.host || '').split(':')[0].toLowerCase();
   const aliases = new Set(['telugukalyanamala.com', 'telugukalyanamala.org', 'www.telugukalyanamala.org']);
@@ -208,6 +209,18 @@ app.get('/api/health', (_req, res) => {
     photos: photosConfigured() ? 'cloudinary:telugu-kalyanamala' : 'url',
     cloudinaryMissing: cloudinaryStatus().missing
   });
+});
+
+app.post('/api/admin/biodata-scan', auth, adminOnly, async (req, res) => {
+  try {
+    const result = await fieldsFromBiodataImage(req.body?.dataUrl);
+    if (!result.found.length) {
+      return res.status(422).json({ message: 'Could not read biodata from this image. Use a clear JPEG or PNG.' });
+    }
+    return res.json(result);
+  } catch (err) {
+    return res.status(err.status || 400).json({ message: err.message || 'Could not read this image.' });
+  }
 });
 
 app.post('/api/uploads', auth, async (req, res) => {

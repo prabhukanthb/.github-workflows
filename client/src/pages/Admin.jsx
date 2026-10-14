@@ -290,7 +290,7 @@ export function CreateProfile() {
         </p>
       )}
       <form className="panel" onSubmit={create}>
-        <BiodataForm form={form} setForm={setForm} includeAccount />
+        <BiodataForm form={form} setForm={setForm} includeAccount allowScan />
         <p>Leave the password empty and the family can login with the first 4 letters of the full name, @, and the last 4 digits of the mobile. Profiles created here are approved immediately.</p>
         <button className="btn-maroon" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Create profile'}</button>
       </form>
@@ -364,7 +364,7 @@ export function EditProfile() {
       )}
       {!form ? <p>Loading biodata…</p> : (
         <form className="panel" onSubmit={save}>
-          <BiodataForm form={form} setForm={setForm} includeName />
+          <BiodataForm form={form} setForm={setForm} includeName allowScan />
           <button className="btn-maroon" style={{ marginTop: 16 }} type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save profile'}</button>
         </form>
       )}
