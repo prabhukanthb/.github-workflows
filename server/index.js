@@ -7,7 +7,6 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { ageFromDob, cityMatches, formatProfileId, fullName, isOppositeMatch, nextProfileSequence, normalizePhotos } from './match.js';
 import { PASSWORD_HINT, defaultPassword, matchesLogin, toIncomeRupees } from './passwords.js';
-import { fieldsFromBiodataImage } from './biodataScan.js';
 import { cloudinaryStatus, photosConfigured, uploadTeluguPhoto } from './photos.js';
 import { TELUGU_DOMAINS } from './deployGuard.js';
 import { getDb, initDb, presentProfile, publicUser, update } from './store.js';
@@ -17,7 +16,7 @@ const SECRET = process.env.JWT_SECRET || 'dev-telugu-kalyanamala-secret-change-m
 const app = express();
 
 app.use(cors());
-app.use(express.json({ limit: '8mb' }));
+app.use(express.json({ limit: '4mb' }));
 app.use((req, res, next) => {
   const host = String(req.headers.host || '').split(':')[0].toLowerCase();
   const aliases = new Set(['telugukalyanamala.com', 'telugukalyanamala.org', 'www.telugukalyanamala.org']);
@@ -59,6 +58,13 @@ function auth(req, res, next) {
 function adminOnly(req, res, next) {
   if (req.user.role !== 'admin' && req.user.role !== 'subadmin') {
     return res.status(403).json({ message: 'Office staff only' });
+  }
+  return next();
+}
+
+function fullAdmin(req, res, next) {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Only an admin can manage office logins.' });
   }
   return next();
 }
@@ -209,18 +215,6 @@ app.get('/api/health', (_req, res) => {
     photos: photosConfigured() ? 'cloudinary:telugu-kalyanamala' : 'url',
     cloudinaryMissing: cloudinaryStatus().missing
   });
-});
-
-app.post('/api/admin/biodata-scan', auth, adminOnly, async (req, res) => {
-  try {
-    const result = await fieldsFromBiodataImage(req.body?.dataUrl);
-    if (!result.found.length) {
-      return res.status(422).json({ message: 'Could not read biodata from this image. Use a clear JPEG or PNG.' });
-    }
-    return res.json(result);
-  } catch (err) {
-    return res.status(err.status || 400).json({ message: err.message || 'Could not read this image.' });
-  }
 });
 
 app.post('/api/uploads', auth, async (req, res) => {
@@ -603,14 +597,14 @@ app.post('/api/admin/profiles', auth, adminOnly, async (req, res) => {
   });
 });
 
-app.get('/api/admin/staff', auth, adminOnly, (_req, res) => {
+app.get('/api/admin/staff', auth, fullAdmin, (_req, res) => {
   const staff = getDb().users
     .filter((user) => user.role === 'admin' || user.role === 'subadmin')
     .map(publicUser);
   res.json({ staff });
 });
 
-app.post('/api/admin/staff', auth, adminOnly, async (req, res) => {
+app.post('/api/admin/staff', auth, fullAdmin, async (req, res) => {
   const email = String(req.body.email || '').trim().toLowerCase();
   const phone = String(req.body.phone || '').replace(/\D/g, '');
   const firstName = String(req.body.firstName || '').trim();

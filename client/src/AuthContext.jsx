@@ -9,6 +9,19 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(Boolean(localStorage.getItem('tk_token')));
 
   useEffect(() => {
+    const syncToken = () => {
+      const next = localStorage.getItem('tk_token') || '';
+      setToken((current) => (current === next ? current : next));
+    };
+    window.addEventListener('storage', syncToken);
+    window.addEventListener('focus', syncToken);
+    return () => {
+      window.removeEventListener('storage', syncToken);
+      window.removeEventListener('focus', syncToken);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!token) {
       setUser(null);
       setLoading(false);

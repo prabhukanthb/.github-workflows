@@ -175,41 +175,6 @@
   color: #fff;
 }
 
-.btn-scan {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-  padding: 11px 18px;
-  background: var(--maroon-deep);
-  color: var(--cream);
-  border: 2px solid var(--gold);
-}
-
-.btn-scan:disabled {
-  opacity: 0.7;
-  cursor: wait;
-}
-
-.scan-box {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 16px;
-  align-items: center;
-  padding: 14px;
-  border: 2px dashed var(--maroon-deep);
-  border-radius: 12px;
-  background: #fff;
-}
-
-.scan-box .pin-note,
-.scan-note {
-  margin: 0;
-  flex: 1 1 220px;
-}
-
 .btn-gold:hover {
   background: #a61d2d;
 }
@@ -1080,9 +1045,39 @@ table.admin {
 table.admin th,
 table.admin td {
   text-align: left;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border-bottom: 1px solid var(--line);
-  vertical-align: top;
+  vertical-align: middle;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+table.admin .admin-person {
+  display: flex;
+  align-items: baseline;
+}
+
+table.admin .admin-person > * + *::before {
+  content: ' · ';
+  font-weight: 400;
+}
+
+table.admin td.actions {
+  display: table-cell;
+  white-space: nowrap;
+}
+
+table.admin td.actions .btn-gold,
+table.admin td.actions .btn-maroon {
+  padding: 5px 8px;
+  font-size: 12px;
+  line-height: 1.2;
+  margin-right: 6px;
+}
+
+table.admin td.actions .btn-gold:last-child,
+table.admin td.actions .btn-maroon:last-child {
+  margin-right: 0;
 }
 
 table.admin th {

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import { HEIGHT_OPTIONS, SUB_CASTES, heightToValue, incomeToLacsInput, lookupIndianPincode, normalizePhotos } from '../profileFields';
@@ -128,29 +128,20 @@ function AddressFields({ title, prefix, form, setForm }) {
   );
 }
 
-async function fileToDataUrl(file, max = 1400, background = '') {
+async function fileToDataUrl(file, max = 1400) {
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement('canvas');
   canvas.width = Math.max(1, Math.round(bitmap.width * scale));
   canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-  const context = canvas.getContext('2d');
-  if (background) {
-    context.fillStyle = background;
-    context.fillRect(0, 0, canvas.width, canvas.height);
-  }
-  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   return canvas.toDataURL('image/jpeg', 0.85);
 }
 
-export default function BiodataForm({ form, setForm, includeAccount = false, includeName = false, allowScan = false }) {
-  const { token, user } = useAuth();
-  const scanInput = useRef(null);
-  const canScan = allowScan && (user?.role === 'admin' || user?.role === 'subadmin');
+export default function BiodataForm({ form, setForm, includeAccount = false, includeName = false }) {
+  const { token } = useAuth();
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoError, setPhotoError] = useState('');
-  const [scanBusy, setScanBusy] = useState(false);
-  const [scanNote, setScanNote] = useState('');
   const [slide, setSlide] = useState(0);
   const set = (name) => (event) => setForm({ ...form, [name]: event.target.value });
   const photos = normalizePhotos(form.photos);
@@ -185,28 +176,6 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
     });
   };
 
-  const scanBiodata = async (event) => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
-    if (!file || !canScan) return;
-    if (!['image/jpeg', 'image/png'].includes(file.type)) {
-      setScanNote('Upload a JPEG or PNG biodata image.');
-      return;
-    }
-    setScanBusy(true);
-    setScanNote('');
-    try {
-      const dataUrl = await fileToDataUrl(file, 1800, '#ffffff');
-      const data = await api.scanBiodata(dataUrl, token);
-      setForm({ ...form, ...data.fields });
-      setScanNote(`Filled ${data.found.join(', ')}. Check the fields before saving.`);
-    } catch (err) {
-      setScanNote(err.message);
-    } finally {
-      setScanBusy(false);
-    }
-  };
-
   const removePhoto = (index) => {
     const next = normalizePhotos(photos.filter((_, photoIndex) => photoIndex !== index));
     setForm({ ...form, photos: next });
@@ -215,16 +184,6 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
 
   return (
     <div className="form-grid">
-      {canScan && (
-        <div className="wide scan-box">
-          <button type="button" className="btn-scan" onClick={() => scanInput.current?.click()} disabled={scanBusy}>
-            {scanBusy ? 'Reading the biodata…' : 'Fill from JPEG or PNG'}
-          </button>
-          <input ref={scanInput} type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png" hidden onChange={scanBiodata} />
-          <p className="pin-note">Office only. The picture’s text is read and the form is filled. It is not added as a profile photo.</p>
-          {scanNote && <p className={scanNote.startsWith('Filled ') ? 'ok scan-note' : 'error scan-note'}>{scanNote}</p>}
-        </div>
-      )}
       {(includeAccount || includeName) && (
         <>
           <div>

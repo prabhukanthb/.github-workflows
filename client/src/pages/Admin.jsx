@@ -19,10 +19,12 @@ export default function Admin() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const isAdmin = user?.role === 'admin' || user?.role === 'subadmin';
+  const isFullAdmin = user?.role === 'admin';
 
   const load = () => {
     if (!token) return;
-    Promise.all([api.adminSummary(token), api.adminProfiles(token), api.adminStaff(token), api.adminInterests(token)])
+    const staffRequest = isFullAdmin ? api.adminStaff(token) : Promise.resolve({ staff: [] });
+    Promise.all([api.adminSummary(token), api.adminProfiles(token), staffRequest, api.adminInterests(token)])
       .then(([summaryData, profileData, staffData, interestData]) => {
         setSummary(summaryData);
         setProfiles(profileData.profiles || []);
@@ -40,9 +42,10 @@ export default function Admin() {
   if (loading) return <div className="page">Loading…</div>;
   if (!isAuthenticated || !isAdmin) return <Navigate to="/" replace />;
 
-  const visible = filter === 'deleted'
+  const matched = filter === 'deleted'
     ? deleted
     : profiles.filter((profile) => filter === 'all' || profile.approvalStatus === filter);
+  const visible = filter === 'all' ? [...matched].reverse() : matched;
 
   const decide = async (profile, approvalStatus) => {
     setError('');
@@ -120,6 +123,7 @@ export default function Admin() {
           </ul>
         )}
       </section>
+      {isFullAdmin && (
       <form className="panel" onSubmit={async (event) => {
         event.preventDefault();
         setError('');
@@ -173,6 +177,7 @@ export default function Admin() {
           </ul>
         )}
       </form>
+      )}
       <div className="panel create-banner">
         <div>
           <h2>Create a profile</h2>
@@ -186,7 +191,7 @@ export default function Admin() {
           ['approved', 'approved'],
           ['rejected', 'rejected'],
           ['draft', 'draft'],
-          ['all', 'all'],
+          ['all', 'All'],
           ['deleted', 'Deleted']
         ].map(([value, label]) => (
           <button key={value} type="button" className={filter === value ? 'btn-maroon' : 'btn-gold'} onClick={() => setFilter(value)}>
@@ -208,13 +213,19 @@ export default function Admin() {
             {visible.map((profile) => (
               <tr key={profile.id}>
                 <td>
-                  <strong>{fullName(profile)}</strong>
-                  <div>{profile.profileId || 'No ID yet'}</div>
-                  <div>{profile.phone}</div>
+                  <span className="admin-person">
+                    <strong>{fullName(profile)}</strong>
+                    <span>{profile.profileId || 'No ID yet'}</span>
+                    <span>{profile.phone}</span>
+                  </span>
                 </td>
                 <td>
-                  {profile.gender === 'female' ? 'Bride' : 'Groom'} · {ageFromDob(profile.dateOfBirth) || '—'}
-                  <div>{profile.occupation} · {profile.currentAddress?.city}</div>
+                  <span className="admin-person">
+                    <span>{profile.gender === 'female' ? 'Bride' : 'Groom'}</span>
+                    <span>{ageFromDob(profile.dateOfBirth) || '—'}</span>
+                    <span>{profile.occupation}</span>
+                    <span>{profile.currentAddress?.city}</span>
+                  </span>
                 </td>
                 <td>{profile.approvalStatus}</td>
                 <td className="actions">
@@ -290,7 +301,7 @@ export function CreateProfile() {
         </p>
       )}
       <form className="panel" onSubmit={create}>
-        <BiodataForm form={form} setForm={setForm} includeAccount allowScan />
+        <BiodataForm form={form} setForm={setForm} includeAccount />
         <p>Leave the password empty and the family can login with the first 4 letters of the full name, @, and the last 4 digits of the mobile. Profiles created here are approved immediately.</p>
         <button className="btn-maroon" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Create profile'}</button>
       </form>
@@ -364,7 +375,7 @@ export function EditProfile() {
       )}
       {!form ? <p>Loading biodata…</p> : (
         <form className="panel" onSubmit={save}>
-          <BiodataForm form={form} setForm={setForm} includeName allowScan />
+          <BiodataForm form={form} setForm={setForm} includeName />
           <button className="btn-maroon" style={{ marginTop: 16 }} type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save profile'}</button>
         </form>
       )}

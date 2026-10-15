@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { REGISTRATION_FEE } from '../siteConfig';
 
@@ -18,7 +18,12 @@ export default function Register() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, isAuthenticated, loading: authLoading, user } = useAuth();
+
+  if (authLoading) return <div className="page">Loading…</div>;
+  if (isAuthenticated) {
+    return <Navigate to={user?.role === 'admin' || user?.role === 'subadmin' ? '/admin' : '/profile'} replace />;
+  }
 
   const set = (name, value) => setForm((current) => ({ ...current, [name]: value }));
   const digits = (name, value) => set(name, value.replace(/\D/g, '').slice(0, 10));
