@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { incomeToLacsInput, mainPhotoUrl } from '../profileFields';
-import { BRAND, ageFromDob, fullName, maritalLabel } from '../siteConfig';
+import { BRAND, ORG, ageFromDob, fullName, maritalLabel } from '../siteConfig';
 
 const CONTACT_LINE = 'Contact B. John Ratnam 9440545049';
 
@@ -64,6 +64,7 @@ function applyDownloadStyles(card) {
     'overflow:hidden',
     `background:${SHEET.cream}`,
     `border:3px solid ${SHEET.blush}`,
+    'box-sizing:border-box',
     `color:${SHEET.ink}`,
     `width:${cardWidth}px`,
     'max-width:none',
@@ -80,7 +81,9 @@ function applyDownloadStyles(card) {
   const kicker = card.querySelector('.sheet-kicker');
   if (kicker) kicker.style.cssText = `letter-spacing:1.6px;text-transform:uppercase;font-size:12px;color:${SHEET.blush};font-weight:700;`;
   const brand = card.querySelector('.sheet-brand');
-  if (brand) brand.style.cssText = 'font-family:Georgia, Times New Roman, serif;font-size:28px;color:#F7F4EC;';
+  if (brand) brand.style.cssText = 'font-family:Georgia, Times New Roman, serif;font-size:28px;color:#F7F4EC;line-height:1.1;';
+  const managed = card.querySelector('.sheet-managed');
+  if (managed) managed.style.cssText = 'margin-top:4px;font-family:Segoe UI, Arial, sans-serif;font-size:14px;font-weight:600;color:#F7F4EC;';
   const id = card.querySelector('.sheet-id');
   if (id) id.style.cssText = `background:#fff;color:${SHEET.scarlet};border-radius:8px;padding:8px 14px;text-align:right;`;
   const idLabel = card.querySelector('.sheet-id span');
@@ -118,12 +121,12 @@ function applyDownloadStyles(card) {
       'background:transparent',
       'box-sizing:border-box',
       `border:4px solid ${SHEET.blush}`,
-      'overflow:visible'
+      'overflow:hidden'
     ].join(';');
   }
   const img = photo?.querySelector('img');
   if (img) {
-    img.style.cssText = 'width:100%;height:auto;max-height:none;object-fit:contain;object-position:center top;display:block;';
+    img.style.cssText = 'width:100%;height:auto;max-height:640px;object-fit:contain;object-position:center top;display:block;';
   }
   const foot = card.querySelector('.sheet-foot');
   if (foot) {
@@ -192,11 +195,17 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
       <div className="sheet-dialog" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-label={name}>
         <div className="actions" style={{ marginBottom: 12 }}>
           {allowDownload && (
-            <button type="button" className="btn-maroon" onClick={download} disabled={busy}>
-              {busy ? 'Preparing…' : 'Download profile'}
+            <button type="button" className="btn-icon btn-download" onClick={download} disabled={busy} aria-label="Download profile" title="Download profile">
+              {busy ? '…' : (
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 4v10" />
+                  <path d="M7 11l5 5 5-5" />
+                  <path d="M5 19h14" />
+                </svg>
+              )}
             </button>
           )}
-          <button type="button" className="btn-ghost btn-close" onClick={onClose}>Close</button>
+          <button type="button" className="btn-close" onClick={onClose}>Close</button>
         </div>
         {error && <div className="error">{error}</div>}
         <div className="sheet-card" ref={cardRef}>
@@ -214,6 +223,7 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
               <div>
                 <div className="sheet-kicker">Mala community</div>
                 <div className="sheet-brand">{BRAND}</div>
+                <div className="sheet-managed">Managed by {ORG}</div>
               </div>
               <div className="sheet-id">
                 <span>Profile ID</span>

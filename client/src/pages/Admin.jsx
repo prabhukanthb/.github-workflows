@@ -6,6 +6,48 @@ import BiodataForm, { profileToForm } from '../components/BiodataForm';
 import ProfileSheet from '../components/ProfileSheet';
 import { ageFromDob, fullName } from '../siteConfig';
 
+function ActionIcon({ name }) {
+  if (name === 'view') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z" />
+        <circle cx="12" cy="12" r="2.6" />
+      </svg>
+    );
+  }
+  if (name === 'edit') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z" />
+        <path d="M13.5 6.5l3 3" />
+      </svg>
+    );
+  }
+  if (name === 'tick') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5 13l4 4L19 7" />
+      </svg>
+    );
+  }
+  if (name === 'draft') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M7 3h8l5 5v13H7z" />
+        <path d="M15 3v5h5" />
+        <path d="M9 13h6" />
+        <path d="M9 17h4" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 6l12 12" />
+      <path d="M18 6L6 18" />
+    </svg>
+  );
+}
+
 export default function Admin() {
   const { token, user, isAuthenticated, loading } = useAuth();
   const [summary, setSummary] = useState(null);
@@ -203,8 +245,12 @@ export default function Admin() {
         <table className="admin">
           <thead>
             <tr>
-              <th>Profile</th>
-              <th>Details</th>
+              <th>Name</th>
+              <th>Profile ID</th>
+              <th>Phone number</th>
+              <th>Age</th>
+              <th>Bride/Groom</th>
+              <th>Job location</th>
               <th>Status</th>
               <th></th>
             </tr>
@@ -212,35 +258,42 @@ export default function Admin() {
           <tbody>
             {visible.map((profile) => (
               <tr key={profile.id}>
+                <td>{fullName(profile)}</td>
+                <td>{profile.profileId || '—'}</td>
+                <td>{profile.phone || '—'}</td>
+                <td>{ageFromDob(profile.dateOfBirth) || '—'}</td>
+                <td>{profile.gender === 'female' ? 'Bride' : profile.gender === 'male' ? 'Groom' : '—'}</td>
+                <td>{profile.jobLocation || '—'}</td>
                 <td>
-                  <span className="admin-person">
-                    <strong>{fullName(profile)}</strong>
-                    <span>{profile.profileId || 'No ID yet'}</span>
-                    <span>{profile.phone}</span>
-                  </span>
+                  {profile.approvalStatus === 'approved' && (
+                    <span className="status-mark approved" title="Approved"><ActionIcon name="tick" /></span>
+                  )}
+                  {profile.approvalStatus === 'draft' && (
+                    <span className="status-mark draft" title="Draft"><ActionIcon name="draft" /></span>
+                  )}
+                  {profile.approvalStatus !== 'approved' && profile.approvalStatus !== 'draft' && profile.approvalStatus}
                 </td>
-                <td>
-                  <span className="admin-person">
-                    <span>{profile.gender === 'female' ? 'Bride' : 'Groom'}</span>
-                    <span>{ageFromDob(profile.dateOfBirth) || '—'}</span>
-                    <span>{profile.occupation}</span>
-                    <span>{profile.currentAddress?.city}</span>
-                  </span>
-                </td>
-                <td>{profile.approvalStatus}</td>
                 <td className="actions">
-                  <button type="button" className="btn-maroon" onClick={() => setViewing(profile)}>View</button>
+                  <button type="button" className="btn-icon btn-view" onClick={() => setViewing(profile)} aria-label="View" title="View">
+                    <ActionIcon name="view" />
+                  </button>
                   {filter !== 'deleted' && (
                     <>
-                      <Link className="btn-gold" to={`/admin/profiles/${profile.id}/edit`}>Edit</Link>
+                      <Link className="btn-icon btn-edit" to={`/admin/profiles/${profile.id}/edit`} aria-label="Edit" title="Edit">
+                        <ActionIcon name="edit" />
+                      </Link>
                       {profile.approvalStatus !== 'approved' && (
-                        <button type="button" className="btn-maroon" onClick={() => decide(profile, 'approved')}>Approve</button>
+                        <button type="button" className="btn-icon btn-tick" onClick={() => decide(profile, 'approved')} aria-label="Approve" title="Approve">
+                          <ActionIcon name="tick" />
+                        </button>
                       )}
                       {profile.approvalStatus !== 'rejected' && (
                         <button type="button" className="btn-gold" onClick={() => decide(profile, 'rejected')}>Hold</button>
                       )}
                       <button type="button" className="btn-gold" onClick={() => resetLogin(profile)}>Reset password</button>
-                      <button type="button" className="btn-maroon" onClick={() => remove(profile)}>Delete</button>
+                      <button type="button" className="btn-icon btn-delete" onClick={() => remove(profile)} aria-label="Delete" title="Delete">
+                        <ActionIcon name="delete" />
+                      </button>
                     </>
                   )}
                 </td>
