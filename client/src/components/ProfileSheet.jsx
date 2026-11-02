@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
+import { addressText } from '../addressText';
 import { incomeToLacsInput, mainPhotoUrl } from '../profileFields';
-import { BRAND, ORG, ageFromDob, fullName, maritalLabel } from '../siteConfig';
+import { BRAND, ORG, ageFromDob, communityLabel, fullName, maritalLabel } from '../siteConfig';
 
 const CONTACT_LINE = 'Contact B. John Ratnam 9440545049';
 
@@ -14,18 +15,6 @@ function joinParts(parts) {
   return values.join(' · ');
 }
 
-function addressText(address) {
-  if (!address) return '';
-  const place = [address.pinCode, address.streetName, address.area, address.city, address.district]
-    .map((part) => String(part || '').trim())
-    .filter(Boolean);
-  if (!place.length) return '';
-  return [...place, address.state, address.country]
-    .map((part) => String(part || '').trim())
-    .filter(Boolean)
-    .join(', ');
-}
-
 function dobText(value) {
   const match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (!match) return '';
@@ -37,9 +26,9 @@ function heightText(profile) {
   return `${profile.heightFeet}.${profile.heightInches || 0}`;
 }
 
-function Row({ label, value }) {
+function Row({ label, value, downloadValue }) {
   return (
-    <div className="sheet-row">
+    <div className="sheet-row" {...(downloadValue == null ? {} : { 'data-download-value': downloadValue })}>
       <span>{label}</span>
       <div>{value || '—'}</div>
     </div>
@@ -175,7 +164,12 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
         windowWidth: 1280,
         onclone: (doc) => {
           const card = doc.querySelector('.sheet-card');
-          if (card) applyDownloadStyles(card);
+          if (!card) return;
+          card.querySelectorAll('[data-download-value]').forEach((row) => {
+            const cell = row.querySelector('div');
+            if (cell) cell.textContent = row.getAttribute('data-download-value') || '—';
+          });
+          applyDownloadStyles(card);
         }
       });
       paintWatermark(canvas);
@@ -235,17 +229,22 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
                 <h2>{name || 'Member'}</h2>
                 <Row label="Gender" value={profile.gender === 'female' ? 'Bride' : profile.gender === 'male' ? 'Groom' : ''} />
                 <Row label="Date of birth" value={dobText(profile.dateOfBirth)} />
+                <Row label="Time of birth" value={profile.timeOfBirth} />
+                <Row label="Place of birth" value={profile.placeOfBirth} />
                 <Row label="Age" value={age ? `${age} years` : ''} />
                 <Row label="Height" value={heightText(profile)} />
                 <Row label="Marital status" value={maritalLabel(profile.maritalStatus)} />
-                <Row label="Sub-community" value={profile.religion} />
+                <Row label="Sub-community" value={communityLabel(profile.religion)} />
                 <Row label="Caste" value="Mala" />
                 <Row label="Mother tongue" value={profile.motherTongue} />
                 <Row label="Education" value={joinParts([profile.highestEducation, profile.fieldOfStudy, profile.college])} />
                 <Row label="Work" value={joinParts([profile.occupation, profile.jobTitle, profile.companyName])} />
                 <Row label="Income" value={income ? `${income} lacs` : ''} />
-                <Row label="Current address" value={addressText(profile.currentAddress)} />
-                <Row label="Present address" value={addressText(profile.presentAddress)} />
+                <Row
+                  label="Current address"
+                  value={addressText(profile.currentAddress)}
+                  downloadValue={addressText(profile.currentAddress, { maskStreetAndArea: true }) || '—'}
+                />
                 <Row label="Father" value={joinParts([profile.fatherName, profile.fatherOccupation, profile.fatherNativePlace])} />
                 <Row label="Mother" value={joinParts([profile.motherName, profile.motherOccupation, profile.motherNativePlace])} />
                 {profile.aboutMe && <p className="sheet-note"><strong>About me. </strong>{profile.aboutMe}</p>}

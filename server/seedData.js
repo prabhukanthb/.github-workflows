@@ -347,6 +347,8 @@ function profile(input) {
     showInSearch: input.showInSearch !== false && (input.approvalStatus || 'approved') === 'approved',
     gender: input.gender,
     dateOfBirth: input.dateOfBirth,
+    timeOfBirth: '',
+    placeOfBirth: '',
     heightFeet: input.heightFeet,
     heightInches: input.heightInches,
     religion: input.religion,

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import { HEIGHT_OPTIONS, SUB_CASTES, heightToValue, incomeToLacsInput, lookupIndianPincode, normalizePhotos } from '../profileFields';
-import { EDUCATION, EMPLOYMENT, MARITAL, MOTHER_TONGUES, RELIGIONS, ageFromDob, maxDobFor18 } from '../siteConfig';
+import { EDUCATION, EMPLOYMENT, MARITAL, MOTHER_TONGUES, RELIGIONS, ageFromDob, communityLabel, maxDobFor18 } from '../siteConfig';
 
 export function profileToForm(profile = {}, user = {}) {
   return {
@@ -14,10 +14,12 @@ export function profileToForm(profile = {}, user = {}) {
     password: '',
     gender: profile.gender || '',
     dateOfBirth: profile.dateOfBirth ? String(profile.dateOfBirth).slice(0, 10) : '',
+    ...splitBirthTime(profile.timeOfBirth),
+    placeOfBirth: profile.placeOfBirth || '',
     heightFeet: profile.heightFeet ?? 5,
     heightInches: profile.heightInches ?? 4,
     height: heightToValue(profile.heightFeet ?? 5, profile.heightInches ?? 4),
-    religion: profile.religion || 'Hindu',
+    religion: communityLabel(profile.religion) || 'Hindu',
     caste: 'Mala',
     subCaste: profile.subCaste || 'SC',
     siblingsCount: profile.siblingsCount === 0 || profile.siblingsCount ? String(profile.siblingsCount) : '0',
@@ -39,13 +41,6 @@ export function profileToForm(profile = {}, user = {}) {
     currentDistrict: profile.currentAddress?.district || '',
     currentState: profile.currentAddress?.state || 'Andhra Pradesh',
     currentCountry: profile.currentAddress?.country || 'India',
-    presentPinCode: profile.presentAddress?.pinCode || '',
-    presentStreetName: profile.presentAddress?.streetName || '',
-    presentArea: profile.presentAddress?.area || '',
-    presentCity: profile.presentAddress?.city || '',
-    presentDistrict: profile.presentAddress?.district || '',
-    presentState: profile.presentAddress?.state || 'Andhra Pradesh',
-    presentCountry: profile.presentAddress?.country || 'India',
     fatherName: profile.fatherName || '',
     fatherOccupation: profile.fatherOccupation || '',
     fatherNativePlace: profile.fatherNativePlace || '',
@@ -128,6 +123,18 @@ function AddressFields({ title, prefix, form, setForm }) {
   );
 }
 
+const BIRTH_HOURS = Array.from({ length: 24 }, (_, hour) => String(hour).padStart(2, '0'));
+const BIRTH_MINUTES = Array.from({ length: 60 }, (_, minute) => String(minute).padStart(2, '0'));
+
+function splitBirthTime(value) {
+  const match = String(value || '').match(/^([01]\d|2[0-3]):([0-5]\d)$/);
+  return {
+    birthHour: match ? match[1] : '',
+    birthMinute: match ? match[2] : '',
+    timeOfBirth: match ? `${match[1]}:${match[2]}` : ''
+  };
+}
+
 async function fileToDataUrl(file, max = 1400) {
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
@@ -144,6 +151,12 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
   const [photoError, setPhotoError] = useState('');
   const [slide, setSlide] = useState(0);
   const set = (name) => (event) => setForm({ ...form, [name]: event.target.value });
+  const setBirthPart = (part) => (event) => {
+    const birthHour = part === 'hour' ? event.target.value : (form.birthHour || '');
+    const birthMinute = part === 'minute' ? event.target.value : (form.birthMinute || '');
+    const timeOfBirth = birthHour !== '' && birthMinute !== '' ? `${birthHour}:${birthMinute}` : '';
+    setForm({ ...form, birthHour, birthMinute, timeOfBirth });
+  };
   const photos = normalizePhotos(form.photos);
   const slideIndex = photos.length ? Math.min(slide, photos.length - 1) : 0;
 
@@ -231,14 +244,42 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
           <option value="male">Groom</option>
         </select>
       </div>
-      <div>
-        <label>Date of birth</label>
-        <input type="date" max={maxDobFor18()} value={form.dateOfBirth} onChange={set('dateOfBirth')} required />
-        {form.dateOfBirth && (
-          <p className="pin-note">
-            {ageFromDob(form.dateOfBirth) >= 18 ? `Age ${ageFromDob(form.dateOfBirth)}` : 'The candidate must be 18 or older.'}
-          </p>
-        )}
+      <div className="wide birth-row">
+        <div>
+          <label>Date of birth</label>
+          <input type="date" max={maxDobFor18()} value={form.dateOfBirth} onChange={set('dateOfBirth')} required />
+          {form.dateOfBirth && (
+            <p className="pin-note">
+              {ageFromDob(form.dateOfBirth) >= 18 ? `Age ${ageFromDob(form.dateOfBirth)}` : 'The candidate must be 18 or older.'}
+            </p>
+          )}
+        </div>
+        <div>
+          <label>Time of birth</label>
+          <div className="birth-time">
+            <div>
+              <label htmlFor="birth-hour">Hours</label>
+              <select id="birth-hour" value={form.birthHour || ''} onChange={setBirthPart('hour')}>
+                <option value="">Hours</option>
+                {BIRTH_HOURS.map((hour) => <option key={hour} value={hour}>{hour}</option>)}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="birth-minute">Minutes</label>
+              <select id="birth-minute" value={form.birthMinute || ''} onChange={setBirthPart('minute')}>
+                <option value="">Minutes</option>
+                {BIRTH_MINUTES.map((minute) => <option key={minute} value={minute}>{minute}</option>)}
+              </select>
+            </div>
+          </div>
+          {(form.birthHour || form.birthMinute) && !(form.birthHour && form.birthMinute) && (
+            <p className="pin-note">Choose both hours and minutes.</p>
+          )}
+        </div>
+        <div>
+          <label>Place of birth</label>
+          <input value={form.placeOfBirth || ''} onChange={set('placeOfBirth')} />
+        </div>
       </div>
       <div>
         <label>Height</label>
@@ -361,7 +402,6 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
         <input value={form.jobLocation} onChange={set('jobLocation')} />
       </div>
       <AddressFields title="Current address" prefix="current" form={form} setForm={setForm} />
-      <AddressFields title="Present address" prefix="present" form={form} setForm={setForm} />
       <h3 className="form-section wide">About & Preferences</h3>
       <div className="wide">
         <label>About the candidate</label>

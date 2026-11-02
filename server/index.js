@@ -9,7 +9,7 @@ import { ageFromDob, cityMatches, formatProfileId, fullName, isOppositeMatch, ne
 import { PASSWORD_HINT, defaultPassword, matchesLogin, toIncomeRupees } from './passwords.js';
 import { cloudinaryStatus, photosConfigured, uploadTeluguPhoto } from './photos.js';
 import { TELUGU_DOMAINS } from './deployGuard.js';
-import { getDb, initDb, presentProfile, publicUser, update } from './store.js';
+import { communityName, getDb, initDb, presentProfile, publicUser, update } from './store.js';
 
 const PORT = Number(process.env.PORT || 4000);
 const SECRET = process.env.JWT_SECRET || 'dev-telugu-kalyanamala-secret-change-me';
@@ -87,6 +87,8 @@ function blankProfile(userId) {
     showInSearch: false,
     gender: '',
     dateOfBirth: '',
+    timeOfBirth: '',
+    placeOfBirth: '',
     heightFeet: 5,
     heightInches: 4,
     religion: 'Hindu',
@@ -147,6 +149,11 @@ function readAddress(body, prefix, fallback = {}) {
   };
 }
 
+function readTimeOfBirth(value) {
+  const match = String(value || '').trim().match(/^([01]\d|2[0-3]):([0-5]\d)$/);
+  return match ? `${match[1]}:${match[2]}` : '';
+}
+
 function readBiodata(body, current = {}) {
   const address = readAddress(body, 'current', current.currentAddress || {});
   const presentAddress = readAddress(body, 'present', current.presentAddress || {});
@@ -158,9 +165,11 @@ function readBiodata(body, current = {}) {
   return {
     gender: body.gender ?? current.gender,
     dateOfBirth: body.dateOfBirth ?? current.dateOfBirth,
+    timeOfBirth: readTimeOfBirth(body.timeOfBirth ?? current.timeOfBirth),
+    placeOfBirth: String(body.placeOfBirth ?? current.placeOfBirth ?? '').trim().slice(0, 120),
     heightFeet: Number(body.heightFeet ?? current.heightFeet ?? 5),
     heightInches: Number(body.heightInches ?? current.heightInches ?? 0),
-    religion: body.religion ?? current.religion,
+    religion: communityName(body.religion ?? current.religion),
     caste: 'Mala',
     subCaste: body.subCaste ?? current.subCaste ?? 'SC',
     motherTongue: body.motherTongue ?? current.motherTongue ?? 'Telugu',
@@ -201,7 +210,6 @@ function validateBiodata(profile) {
   if (!profile.occupation) missing.push('occupation');
   if (!profile.currentAddress?.city) missing.push('city');
   if (profile.currentAddress?.pinCode && !/^[0-9]{6}$/.test(profile.currentAddress.pinCode)) missing.push('6-digit PIN code');
-  if (profile.presentAddress?.pinCode && !/^[0-9]{6}$/.test(profile.presentAddress.pinCode)) missing.push('6-digit present PIN code');
   if (!profile.aboutMe) missing.push('about the candidate');
   return missing;
 }
@@ -390,7 +398,7 @@ app.get('/api/profiles/browse', auth, (req, res) => {
       if (!blob.includes(q)) return false;
     }
     if (!cityMatches(item, city)) return false;
-    if (community && item.religion !== community) return false;
+    if (community && communityName(item.religion) !== community) return false;
     if (tongue && item.motherTongue && item.motherTongue !== tongue) return false;
     if (isAdmin && looking === 'bride' && item.gender !== 'female') return false;
     if (isAdmin && looking === 'groom' && item.gender !== 'male') return false;

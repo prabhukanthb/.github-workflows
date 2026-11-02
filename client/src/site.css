@@ -895,6 +895,18 @@ textarea {
   grid-column: 1 / -1;
 }
 
+.birth-row {
+  display: grid;
+  grid-template-columns: 1.1fr 1.2fr 1.1fr;
+  gap: 8px 14px;
+}
+
+.birth-time {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
 .photo-preview {
   display: block;
   width: 160px;
@@ -1427,6 +1439,7 @@ table.admin a.btn-maroon {
 @media (max-width: 700px) {
   .form-grid,
   .address-fields,
+  .birth-row,
   .detail-list,
   .page-links {
     grid-template-columns: 1fr;

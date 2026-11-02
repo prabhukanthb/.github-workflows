@@ -111,10 +111,16 @@ export function publicUser(user) {
   };
 }
 
+export function communityName(value) {
+  const text = String(value || '').trim();
+  return text === 'Other' ? 'Christian/Hindu' : text;
+}
+
 export function presentProfile(profile, users, { contact = false } = {}) {
   const owner = users.find((user) => user.id === profile.userId);
   return {
     ...profile,
+    religion: communityName(profile.religion),
     firstName: owner?.firstName || '',
     lastName: owner?.lastName || '',
     surname: owner?.surname || '',

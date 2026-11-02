@@ -41,7 +41,12 @@ export const SUB_COMMUNITIES = [
   { label: 'Buddhist', value: 'Buddhist' }
 ];
 
-export const RELIGIONS = ['Hindu', 'Christian', 'Ambedkarist', 'Buddhist', 'Other'];
+export const RELIGIONS = ['Hindu', 'Christian', 'Ambedkarist', 'Buddhist', 'Christian/Hindu'];
+
+export function communityLabel(value) {
+  if (value === 'Other') return 'Christian/Hindu';
+  return value || '';
+}
 export const EDUCATION = ['10th Pass', '12th Pass', 'Diploma', 'ITI', 'B.A', 'B.Sc', 'B.Com', 'B.Tech', 'M.A', 'M.Sc', 'M.Com', 'M.Tech', 'MBA', 'MCA', 'MBBS', 'PhD', 'Other'];
 export const MARITAL = [
   { label: 'Never married', value: 'Nevermarried' },

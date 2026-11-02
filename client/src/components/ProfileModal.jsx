@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { mainPhotoUrl } from '../profileFields';
-import { ageFromDob, fullName, maritalLabel } from '../siteConfig';
+import { ageFromDob, communityLabel, fullName, maritalLabel } from '../siteConfig';
 
 function addressLine(address) {
   if (!address) return '';
@@ -41,15 +41,16 @@ export default function ProfileModal({ profile, onClose, onInterest }) {
           <h2>{name}</h2>
           <div className="detail-list">
             <span>Age</span><div>{ageFromDob(profile.dateOfBirth)}</div>
+            <span>Time of birth</span><div>{profile.timeOfBirth}</div>
+            <span>Place of birth</span><div>{profile.placeOfBirth}</div>
             <span>Height</span><div>{profile.heightFeet} ft {profile.heightInches} in</div>
             <span>Caste</span><div>Mala</div>
-            <span>Community</span><div>{profile.religion}</div>
+            <span>Community</span><div>{communityLabel(profile.religion)}</div>
             <span>Mother tongue</span><div>{profile.motherTongue}</div>
             <span>Marital status</span><div>{maritalLabel(profile.maritalStatus)}</div>
             <span>Education</span><div>{profile.highestEducation} · {profile.fieldOfStudy}</div>
             <span>Work</span><div>{profile.occupation}{profile.jobLocation ? ` · ${profile.jobLocation}` : ''}</div>
             <span>Current address</span><div>{addressLine(profile.currentAddress)}</div>
-            <span>Present address</span><div>{addressLine(profile.presentAddress)}</div>
             <span>Family</span><div>{profile.fatherOccupation} / {profile.motherOccupation}</div>
           </div>
           <p>{profile.aboutMe}</p>
