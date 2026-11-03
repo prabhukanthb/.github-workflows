@@ -1,5 +1,6 @@
-import React from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { pageFor } from './seoPages';
 import SiteHeader from './components/SiteHeader';
 import SiteFooter from './components/SiteFooter';
 import Home from './pages/Home';
@@ -13,10 +14,32 @@ import Admin, { CreateProfile, EditProfile } from './pages/Admin';
 import { Privacy, Refund, Terms } from './pages/Legal';
 import { useAuth } from './AuthContext';
 
+function ensureMeta(name, content) {
+  let tag = document.querySelector(`meta[name="${name}"]`);
+  if (!tag) {
+    tag = document.createElement('meta');
+    tag.setAttribute('name', name);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute('content', content);
+}
+
+function Seo() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    const page = pageFor(pathname);
+    document.title = page.title;
+    ensureMeta('description', page.description);
+    ensureMeta('robots', page.index ? 'index,follow' : 'noindex,nofollow');
+  }, [pathname]);
+  return null;
+}
+
 function Shell() {
   const { loading } = useAuth();
   return (
     <div className="site-shell">
+      <Seo />
       <SiteHeader />
       <main className="site-main">
         {loading ? <div className="page">Loading…</div> : (

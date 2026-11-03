@@ -11,6 +11,7 @@ import { cloudinaryStatus, photosConfigured, uploadTeluguPhoto } from './photos.
 import { TELUGU_DOMAINS } from './deployGuard.js';
 import { communityName, getDb, initDb, presentProfile, publicUser, update } from './store.js';
 import { limitAuth, LOGIN_FAILURE } from './rateLimit.js';
+import { applySeo, robotsTxt, sitemapXml } from './seo.js';
 
 const PORT = Number(process.env.PORT || 4000);
 const SECRET = process.env.JWT_SECRET || 'dev-telugu-kalyanamala-secret-change-me';
@@ -753,12 +754,26 @@ app.delete('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
   });
 });
 
+app.get('/robots.txt', (_req, res) => {
+  res.type('text/plain').send(robotsTxt());
+});
+
+app.get('/sitemap.xml', (_req, res) => {
+  res.type('application/xml').send(sitemapXml());
+});
+
 const dist = path.join(process.cwd(), 'dist');
+let indexHtml = '';
 if (fs.existsSync(dist)) {
-  app.use(express.static(dist));
+  app.use(express.static(dist, { index: false }));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
-    return res.sendFile(path.join(dist, 'index.html'));
+    if (!indexHtml) {
+      const file = path.join(dist, 'index.html');
+      if (!fs.existsSync(file)) return next();
+      indexHtml = fs.readFileSync(file, 'utf8');
+    }
+    res.type('html').send(applySeo(indexHtml, req.path));
   });
 }
 

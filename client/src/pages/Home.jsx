@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { FAQ } from '../seoPages';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { api } from '../api';
@@ -32,25 +33,6 @@ const FEATURE_PHOTOS = [
   'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=600&q=60'
 ];
 
-const FAQ = [
-  {
-    q: 'Is Telugu Kalyanamala only for the Mala community?',
-    a: 'Yes. This service is exclusively for Mala families — Hindu, Christian, Ambedkarist and Buddhist — so parents can search among people who share community, language and family values.'
-  },
-  {
-    q: 'Can parents manage the profile?',
-    a: 'Yes. Many biodata are completed by mothers and fathers. You may register in the candidate’s name, keep phone numbers private, and call the Vijayawada office whenever you need a person to walk you through a match.'
-  },
-  {
-    q: 'Will my phone number be public?',
-    a: 'No. Mobile numbers and email stay hidden on browse cards. Contact is shared only when both families agree, or through the Vijayawada office.'
-  },
-  {
-    q: 'What does registration cost?',
-    a: `Registration is ${REGISTRATION_FEE}. Call the Vijayawada office if you have questions about payment.`
-  }
-];
-
 const PAGE_LINKS = [
   { label: 'Membership', hash: 'membership' },
   { label: 'Success Stories', hash: 'stories' },
@@ -61,7 +43,6 @@ const PAGE_LINKS = [
 export default function Home() {
   const location = useLocation();
   const { isAuthenticated, token } = useAuth();
-  const [openFaq, setOpenFaq] = useState(0);
   const [profiles, setProfiles] = useState([]);
 
   useEffect(() => {
@@ -107,6 +88,7 @@ export default function Home() {
     <div>
       <section className="home-hero" style={{ '--hero-image': `url(${HERO_PHOTO})` }}>
         <div className="home-hero-inner">
+          <p className="hero-kicker">Telugu Mala matrimony in Vijayawada</p>
           <h1>
             Where families meet,<br />
             hopes blossom,<br />
@@ -351,12 +333,10 @@ export default function Home() {
         <div className="section">
           <h2>Questions parents ask</h2>
           {FAQ.map((item, index) => (
-            <div key={item.q} className="faq-item">
-              <button type="button" onClick={() => setOpenFaq(openFaq === index ? -1 : index)} aria-expanded={openFaq === index}>
-                {item.q}
-              </button>
-              {openFaq === index && <div className="faq-body">{item.a}</div>}
-            </div>
+            <details key={item.q} className="faq-item" open={index === 0}>
+              <summary>{item.q}</summary>
+              <div className="faq-body">{item.a}</div>
+            </details>
           ))}
         </div>
       </section>
