@@ -79,7 +79,9 @@ export function applySeo(html, pathname) {
   const page = pageFor(pathname);
   const title = escapeHtml(page.title);
   let next = String(html).replace(/<title>[\s\S]*?<\/title>/i, `<title>${title}</title>`);
-  next = next.replace(/<meta\s+name=["']description["'][^>]*>/i, '');
+  next = next.replace(/<meta\s+name=["']description["'][^>]*>/gi, '');
+  next = next.replace(/<meta\s+name=["']robots["'][^>]*>/gi, '');
+  next = next.replace(/<link\s+rel=["']canonical["'][^>]*>/gi, '');
   next = next.replace(/<html\s+lang=["'][^"']*["']>/i, '<html lang="en-IN">');
   return next.replace('</head>', `    ${headTags(pathname)}\n  </head>`);
 }

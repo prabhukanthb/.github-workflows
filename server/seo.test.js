@@ -7,6 +7,8 @@ const HTML = `<!DOCTYPE html>
   <head>
     <title>Old title</title>
     <meta name="description" content="Old description" />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://www.telugukalyanamala.com/" />
   </head>
   <body><div id="root"></div></body>
 </html>`;
@@ -26,6 +28,7 @@ test('member and office pages stay out of search results', () => {
   for (const path of ['/browse', '/profile', '/admin', '/admin/create', '/login']) {
     const html = applySeo(HTML, path);
     assert.match(html, /noindex,nofollow/, path);
+    assert.equal(html.includes('index,follow'), false, path);
   }
   const sitemap = sitemapXml();
   assert.match(sitemap, /https:\/\/www\.telugukalyanamala\.com\/register/);
