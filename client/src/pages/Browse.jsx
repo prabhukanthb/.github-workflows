@@ -4,7 +4,7 @@ import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import ProfileModal from '../components/ProfileModal';
 import { mainPhotoUrl } from '../profileFields';
-import { ageFromDob, fullName, REGISTER_CTA, REGISTRATION_FEE } from '../siteConfig';
+import { ageFromDob, communityLabel, fullName, REGISTER_CTA, REGISTRATION_FEE } from '../siteConfig';
 
 export default function Browse() {
   const { token, user, isAuthenticated, loading } = useAuth();
@@ -60,6 +60,8 @@ export default function Browse() {
 
   const isAdmin = user?.role === 'admin' || user?.role === 'subadmin';
   const viewerAge = ageFromDob(viewer?.dateOfBirth);
+  const faith = communityLabel(viewer?.religion);
+  const community = faith === 'Christian/Hindu' ? 'Christian and Hindu' : faith;
 
   return (
     <div className="page">
@@ -69,8 +71,8 @@ export default function Browse() {
       {!isAdmin && viewer?.gender && viewerAge && (
         <p>
           {viewer.gender === 'female'
-            ? `Showing grooms older than you (${viewerAge}).`
-            : `Showing brides aged ${viewerAge} or younger.`}
+            ? `Showing ${community ? `${community} ` : ''}grooms older than you (${viewerAge}).`
+            : `Showing ${community ? `${community} ` : ''}brides aged ${viewerAge} or younger.`}
         </p>
       )}
       {!isAdmin && (!viewer?.gender || !viewerAge) && (

@@ -5,7 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { ageFromDob, cityMatches, formatProfileId, fullName, isOppositeMatch, nextProfileSequence, normalizePhotos } from './match.js';
+import { ageFromDob, cityMatches, communityMatches, formatProfileId, fullName, isOppositeMatch, nextProfileSequence, normalizePhotos } from './match.js';
 import { PASSWORD_HINT, defaultPassword, matchesLogin, toIncomeRupees } from './passwords.js';
 import { cloudinaryStatus, photosConfigured, uploadTeluguPhoto } from './photos.js';
 import { TELUGU_DOMAINS } from './deployGuard.js';
@@ -100,7 +100,7 @@ function blankProfile(userId) {
     caste: 'Mala',
     motherTongue: 'Telugu',
     maritalStatus: 'Nevermarried',
-    siblingsCount: 0,
+    siblingsCount: '',
     fatherName: '',
     fatherOccupation: '',
     motherName: '',
@@ -158,6 +158,14 @@ function readTimeOfBirth(value) {
   return match ? `${match[1]}:${match[2]}` : '';
 }
 
+const SIBLING_OPTIONS = ['Brothers', 'Sister', 'Brother/Sister'];
+
+function readSiblings(value, current) {
+  const source = value === undefined || value === null ? current : value;
+  const text = String(source ?? '').trim();
+  return SIBLING_OPTIONS.includes(text) ? text : '';
+}
+
 function readBiodata(body, current = {}) {
   const address = readAddress(body, 'current', current.currentAddress || {});
   const presentAddress = readAddress(body, 'present', current.presentAddress || {});
@@ -178,7 +186,7 @@ function readBiodata(body, current = {}) {
     subCaste: body.subCaste ?? current.subCaste ?? 'SC',
     motherTongue: body.motherTongue ?? current.motherTongue ?? 'Telugu',
     maritalStatus: body.maritalStatus ?? current.maritalStatus,
-    siblingsCount: Number(body.siblingsCount ?? current.siblingsCount ?? 0),
+    siblingsCount: readSiblings(body.siblingsCount, current.siblingsCount),
     fatherName: String(body.fatherName ?? current.fatherName ?? '').trim(),
     fatherOccupation: String(body.fatherOccupation ?? current.fatherOccupation ?? '').trim(),
     motherName: String(body.motherName ?? current.motherName ?? '').trim(),
@@ -389,7 +397,9 @@ app.get('/api/profiles/browse', auth, (req, res) => {
   const isAdmin = req.user.role === 'admin' || req.user.role === 'subadmin';
   const mine = state.profiles.find((item) => item.userId === req.user.id);
   let profiles = state.profiles.filter((item) => item.approvalStatus === 'approved' && item.showInSearch && item.userId !== req.user.id);
-  if (!isAdmin) profiles = profiles.filter((item) => isOppositeMatch(mine, item));
+  if (!isAdmin) {
+    profiles = profiles.filter((item) => isOppositeMatch(mine, item) && communityMatches(mine?.religion, item.religion));
+  }
   const q = String(req.query.q || '').trim().toLowerCase();
   const city = String(req.query.city || '');
   const community = String(req.query.community || '');

@@ -64,6 +64,21 @@ export function formatProfileId(gender, seq) {
   return `${genderCode(gender)}${String(n).padStart(5, '0')}`;
 }
 
+function communityName(value) {
+  const text = String(value || '').trim();
+  return text === 'Other' ? 'Christian/Hindu' : text;
+}
+
+export function communityMatches(viewerReligion, candidateReligion) {
+  const viewer = communityName(viewerReligion);
+  const candidate = communityName(candidateReligion);
+  if (!viewer || !candidate) return false;
+  if (viewer === 'Christian/Hindu') {
+    return candidate === 'Christian' || candidate === 'Hindu' || candidate === 'Christian/Hindu';
+  }
+  return viewer === candidate;
+}
+
 export function isOppositeMatch(viewer, candidate, today = new Date()) {
   if (!viewer || !candidate) return false;
   const viewerAge = ageFromDob(viewer.dateOfBirth, today);

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import { HEIGHT_OPTIONS, SUB_CASTES, heightToValue, incomeToLacsInput, lookupIndianPincode, normalizePhotos } from '../profileFields';
-import { EDUCATION, EMPLOYMENT, MARITAL, MOTHER_TONGUES, RELIGIONS, ageFromDob, communityLabel, maxDobFor18 } from '../siteConfig';
+import { EDUCATION, EMPLOYMENT, MARITAL, MOTHER_TONGUES, RELIGIONS, SIBLINGS, ageFromDob, communityLabel, maxDobFor18 } from '../siteConfig';
 
 export function profileToForm(profile = {}, user = {}) {
   return {
@@ -22,7 +22,7 @@ export function profileToForm(profile = {}, user = {}) {
     religion: communityLabel(profile.religion) || 'Hindu',
     caste: 'Mala',
     subCaste: profile.subCaste || 'SC',
-    siblingsCount: profile.siblingsCount === 0 || profile.siblingsCount ? String(profile.siblingsCount) : '0',
+    siblingsCount: SIBLINGS.includes(profile.siblingsCount) ? profile.siblingsCount : '',
     motherTongue: profile.motherTongue || 'Telugu',
     maritalStatus: profile.maritalStatus || 'Nevermarried',
     highestEducation: profile.highestEducation || '',
@@ -325,8 +325,9 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
       </div>
       <div>
         <label>Siblings</label>
-        <select value={form.siblingsCount ?? '0'} onChange={set('siblingsCount')}>
-          {['0', '1', '2', '3'].map((item) => <option key={item} value={item}>{item}</option>)}
+        <select value={form.siblingsCount || ''} onChange={set('siblingsCount')}>
+          <option value="">Select</option>
+          {SIBLINGS.map((item) => <option key={item} value={item}>{item}</option>)}
         </select>
       </div>
       <div>

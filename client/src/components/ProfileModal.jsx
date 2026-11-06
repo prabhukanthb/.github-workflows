@@ -48,6 +48,7 @@ export default function ProfileModal({ profile, onClose, onInterest }) {
             <span>Community</span><div>{communityLabel(profile.religion)}</div>
             <span>Mother tongue</span><div>{profile.motherTongue}</div>
             <span>Marital status</span><div>{maritalLabel(profile.maritalStatus)}</div>
+            <span>Siblings</span><div>{profile.siblingsCount}</div>
             <span>Education</span><div>{profile.highestEducation} · {profile.fieldOfStudy}</div>
             <span>Work</span><div>{profile.occupation}{profile.jobLocation ? ` · ${profile.jobLocation}` : ''}</div>
             <span>Current address</span><div>{addressLine(profile.currentAddress)}</div>

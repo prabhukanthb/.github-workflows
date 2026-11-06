@@ -42,6 +42,7 @@ export const SUB_COMMUNITIES = [
 ];
 
 export const RELIGIONS = ['Hindu', 'Christian', 'Ambedkarist', 'Buddhist', 'Christian/Hindu'];
+export const SIBLINGS = ['Brothers', 'Sister', 'Brother/Sister'];
 
 export function communityLabel(value) {
   if (value === 'Other') return 'Christian/Hindu';

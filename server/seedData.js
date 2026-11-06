@@ -356,7 +356,7 @@ function profile(input) {
     caste: 'Mala',
     motherTongue: input.motherTongue,
     maritalStatus: input.maritalStatus,
-    siblingsCount: 1,
+    siblingsCount: 'Brothers',
     fatherName: 'Parent',
     fatherOccupation: 'Retired',
     motherName: 'Parent',
