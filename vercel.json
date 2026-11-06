@@ -1,0 +1,46 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": null,
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "www.telugukalyanamala.com" }],
+      "destination": "https://telugukalyanamala.com/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.telugukalyanamala.com" }],
+      "destination": "https://telugukalyanamala.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "telugukalyanamala.org" }],
+      "destination": "https://telugukalyanamala.com/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "telugukalyanamala.org" }],
+      "destination": "https://telugukalyanamala.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "www.telugukalyanamala.org" }],
+      "destination": "https://telugukalyanamala.com/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.telugukalyanamala.org" }],
+      "destination": "https://telugukalyanamala.com/:path*",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
+}
