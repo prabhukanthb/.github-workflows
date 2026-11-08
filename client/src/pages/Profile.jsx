@@ -12,6 +12,7 @@ export default function Profile() {
   const [viewing, setViewing] = useState(false);
   const [status, setStatus] = useState('');
   const [profileId, setProfileId] = useState('');
+  const [earlierProfileId, setEarlierProfileId] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
@@ -26,6 +27,7 @@ export default function Profile() {
         setForm(profileToForm(profileData.profile, user));
         setStatus(profileData.profile.approvalStatus);
         setProfileId(profileData.profile.profileId || '');
+        setEarlierProfileId(profileData.profile.earlierProfileId || '');
       })
       .catch((err) => {
         if (active) setError(err.message);
@@ -48,6 +50,8 @@ export default function Profile() {
       const data = await api.saveProfile(form, token);
       setProfile(data.profile);
       setStatus(data.profile.approvalStatus);
+      setProfileId(data.profile.profileId || '');
+      setEarlierProfileId(data.profile.earlierProfileId || '');
       setMessage(data.message);
     } catch (err) {
       setError(err.message);
@@ -63,6 +67,7 @@ export default function Profile() {
       <p>
         Status: <strong>{status || 'draft'}</strong>
         {profileId ? ` · Profile ID ${profileId}` : ''}
+        {earlierProfileId ? ` (was ${earlierProfileId})` : ''}
         {' · '}<Link to="/change-password">Change password</Link>
       </p>
       {profile && (

@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
 import { MongoClient } from 'mongodb';
+import { alignProfileIds } from './match.js';
 import { buildSeed, withOfficePhone } from './seedData.js';
 import { assertTeluguMongoUri, TELUGU_DB } from './deployGuard.js';
 
@@ -73,6 +74,19 @@ async function applyOfficePhone() {
   return db;
 }
 
+async function applyProfileIds() {
+  const next = alignProfileIds(db);
+  if (next === db) return db;
+  db = next;
+  await persist();
+  return db;
+}
+
+async function settleDb() {
+  await applyOfficePhone();
+  return applyProfileIds();
+}
+
 export async function initDb() {
   if (db && process.env.RESET_DB !== '1') return applyOfficePhone();
   if (usesMongo()) {
@@ -81,19 +95,19 @@ export async function initDb() {
       const existing = await col.findOne({ _id: SITE_ID });
       if (existing?.state?.users && existing.site === SITE_ID) {
         db = existing.state;
-        return applyOfficePhone();
+        return settleDb();
       }
     }
     await seed();
-    return applyOfficePhone();
+    return settleDb();
   }
   const reset = process.env.RESET_DB === '1';
   if (!reset && fs.existsSync(FILE)) {
     db = JSON.parse(fs.readFileSync(FILE, 'utf8'));
-    return applyOfficePhone();
+    return settleDb();
   }
   await seed();
-  return applyOfficePhone();
+  return settleDb();
 }
 
 export function publicUser(user) {
@@ -118,9 +132,13 @@ export function communityName(value) {
 
 export function presentProfile(profile, users, { contact = false } = {}) {
   const owner = users.find((user) => user.id === profile.userId);
+  const retired = Array.isArray(profile.retiredProfileIds) ? profile.retiredProfileIds : [];
+  const earlierProfileId = retired.length ? retired[retired.length - 1] : '';
+  const { retiredProfileIds, ...rest } = profile;
   return {
-    ...profile,
+    ...rest,
     religion: communityName(profile.religion),
+    earlierProfileId: contact && earlierProfileId ? earlierProfileId : undefined,
     firstName: owner?.firstName || '',
     lastName: owner?.lastName || '',
     surname: owner?.surname || '',

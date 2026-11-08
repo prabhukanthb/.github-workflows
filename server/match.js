@@ -42,11 +42,27 @@ export function normalizePhotos(input) {
   }));
 }
 
+function profileNumber(profileId) {
+  const match = String(profileId || '').match(/^([MF])(\d{1,5})$/i);
+  if (!match) return null;
+  return { code: match[1].toUpperCase(), seq: Number(match[2]) };
+}
+
+function rememberProfileId(profileId, used) {
+  const parsed = profileNumber(profileId);
+  if (parsed) {
+    used.add(parsed.seq);
+    return;
+  }
+  const match = String(profileId || '').match(/(\d+)$/);
+  if (match) used.add(Number(match[1]));
+}
+
 export function nextProfileSequence(state) {
   const used = new Set();
   for (const item of [...(state?.profiles || []), ...(state?.deletedProfiles || [])]) {
-    const match = String(item?.profileId || '').match(/(\d+)$/);
-    if (match) used.add(Number(match[1]));
+    rememberProfileId(item?.profileId, used);
+    for (const oldId of item?.retiredProfileIds || []) rememberProfileId(oldId, used);
   }
   let seq = Number(state?.seq) || 0;
   do {
@@ -54,6 +70,71 @@ export function nextProfileSequence(state) {
   } while (used.has(seq) && seq < 100000);
   if (seq > 99999) throw new Error('No profile IDs left.');
   return seq;
+}
+
+function profileIdTaken(state, profileId, exceptId) {
+  const wanted = String(profileId || '');
+  if (!wanted) return false;
+  for (const item of [...(state?.profiles || []), ...(state?.deletedProfiles || [])]) {
+    if (exceptId && item?.id === exceptId) continue;
+    if (item?.profileId === wanted) return true;
+    if ((item?.retiredProfileIds || []).includes(wanted)) return true;
+  }
+  return false;
+}
+
+export function profileIdForGender(state, profile) {
+  const gender = String(profile?.gender || '').toLowerCase();
+  const currentId = profile?.profileId || null;
+  const retired = Array.isArray(profile?.retiredProfileIds) ? profile.retiredProfileIds.filter(Boolean) : [];
+  const seq = Number(state?.seq) || 0;
+  const unchanged = { profileId: currentId, retiredProfileIds: retired, seq };
+  if (gender !== 'male' && gender !== 'female') return unchanged;
+  const parsed = profileNumber(currentId);
+  if (!parsed) return unchanged;
+  if (parsed.code === genderCode(gender)) return unchanged;
+  const swapped = formatProfileId(gender, parsed.seq);
+  const remember = (nextId) => [...retired.filter((id) => id !== nextId), currentId];
+  if (!profileIdTaken(state, swapped, profile?.id)) {
+    return { profileId: swapped, retiredProfileIds: remember(swapped), seq };
+  }
+  const nextSeq = nextProfileSequence(state);
+  return {
+    profileId: formatProfileId(gender, nextSeq),
+    retiredProfileIds: remember(formatProfileId(gender, nextSeq)),
+    seq: nextSeq
+  };
+}
+
+export function alignProfileIds(state) {
+  if (!state?.profiles?.length) return state;
+  let seq = Number(state.seq) || 0;
+  let changed = false;
+  const profiles = [];
+  let working = state;
+  for (const profile of state.profiles) {
+    const result = profileIdForGender(working, profile);
+    const retired = result.retiredProfileIds || [];
+    const previous = profile.retiredProfileIds || [];
+    const sameRetired = retired.length === previous.length && retired.every((id, index) => id === previous[index]);
+    if ((result.profileId || null) === (profile.profileId || null) && sameRetired) {
+      profiles.push(profile);
+      continue;
+    }
+    changed = true;
+    const nextProfile = { ...profile, profileId: result.profileId };
+    if (retired.length) nextProfile.retiredProfileIds = retired;
+    else delete nextProfile.retiredProfileIds;
+    profiles.push(nextProfile);
+    seq = Math.max(seq, Number(result.seq) || 0);
+    working = {
+      ...working,
+      seq,
+      profiles: (working.profiles || []).map((item) => (item.id === profile.id ? nextProfile : item))
+    };
+  }
+  if (!changed) return state;
+  return { ...state, seq, profiles };
 }
 
 export function formatProfileId(gender, seq) {

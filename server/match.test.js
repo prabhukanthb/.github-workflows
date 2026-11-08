@@ -1,10 +1,62 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ageFromDob, cityMatches, communityMatches, formatProfileId, interestIsCurrent, isOppositeMatch, nextProfileSequence, normalizePhotos } from './match.js';
+import { ageFromDob, alignProfileIds, cityMatches, communityMatches, formatProfileId, interestIsCurrent, isOppositeMatch, nextProfileSequence, normalizePhotos, profileIdForGender } from './match.js';
 
 test('formatProfileId pads gender and sequence', () => {
   assert.equal(formatProfileId('female', 1), 'F00001');
   assert.equal(formatProfileId('male', 42), 'M00042');
+});
+
+test('a groom changed to a bride keeps the number and takes the F letter', () => {
+  const state = {
+    seq: 42,
+    profiles: [{ id: 'p1', profileId: 'M00042', gender: 'female' }],
+    deletedProfiles: []
+  };
+  const result = profileIdForGender(state, state.profiles[0]);
+  assert.equal(result.profileId, 'F00042');
+  assert.deepEqual(result.retiredProfileIds, ['M00042']);
+  const aligned = alignProfileIds(state);
+  assert.equal(aligned.profiles[0].profileId, 'F00042');
+  assert.equal(nextProfileSequence(aligned), 43);
+});
+
+test('a taken bride id issues the next number and the old groom id stays retired', () => {
+  const state = {
+    seq: 42,
+    profiles: [
+      { id: 'p1', profileId: 'M00042', gender: 'female' },
+      { id: 'p2', profileId: 'F00042', gender: 'female' }
+    ],
+    deletedProfiles: [{ profileId: 'F00012' }]
+  };
+  const result = profileIdForGender(state, state.profiles[0]);
+  assert.equal(result.profileId, 'F00043');
+  assert.deepEqual(result.retiredProfileIds, ['M00042']);
+  const aligned = alignProfileIds(state);
+  assert.equal(aligned.profiles[0].profileId, 'F00043');
+  assert.equal(nextProfileSequence(aligned), 44);
+});
+
+test('switching back to groom restores this profile’s own earlier id', () => {
+  const state = {
+    seq: 42,
+    profiles: [{ id: 'p1', profileId: 'F00042', gender: 'male', retiredProfileIds: ['M00042'] }],
+    deletedProfiles: []
+  };
+  const result = profileIdForGender(state, state.profiles[0]);
+  assert.equal(result.profileId, 'M00042');
+  assert.deepEqual(result.retiredProfileIds, ['F00042']);
+});
+
+test('a matching profile id is left as it is', () => {
+  const state = {
+    seq: 2,
+    profiles: [{ id: 'p', profileId: 'F00001', gender: 'female' }],
+    deletedProfiles: []
+  };
+  assert.equal(alignProfileIds(state), state);
+  assert.equal(profileIdForGender(state, { id: 'p2', gender: 'female' }).profileId, null);
 });
 
 test('a deleted profile id is not issued again', () => {

@@ -236,7 +236,10 @@ export default function Admin() {
             {visible.map((profile) => (
               <tr key={profile.id}>
                 <td>{fullName(profile)}</td>
-                <td>{profile.profileId || '—'}</td>
+                <td>
+                  {profile.profileId || '—'}
+                  {profile.earlierProfileId ? <div className="pin-note">was {profile.earlierProfileId}</div> : null}
+                </td>
                 <td>{profile.phone || '—'}</td>
                 <td>{ageFromDob(profile.dateOfBirth) || '—'}</td>
                 <td>{profile.gender === 'female' ? 'Bride' : profile.gender === 'male' ? 'Groom' : '—'}</td>
@@ -381,8 +384,11 @@ export function EditProfile() {
     setMessage('');
     try {
       const data = await api.adminUpdate(id, form, token);
+      const previousId = profile?.profileId;
       setProfile(data.profile);
-      setMessage(`${fullName(data.profile)} was saved.`);
+      const nextId = data.profile.profileId;
+      const idNote = previousId && nextId && previousId !== nextId ? ` Profile ID is now ${nextId}.` : '';
+      setMessage(`${fullName(data.profile)} was saved.${idNote}`);
       setForm(profileToForm(data.profile));
     } catch (err) {
       setError(err.message);
@@ -396,6 +402,9 @@ export function EditProfile() {
       <div className="kicker">Vijayawada office</div>
       <h2>Edit profile</h2>
       <p><Link to="/admin">Back to the office list</Link></p>
+      {profile?.profileId && (
+        <p>Profile ID <strong>{profile.profileId}</strong>{profile.earlierProfileId ? ` (was ${profile.earlierProfileId})` : ''}</p>
+      )}
       {error && <div className="error">{error}</div>}
       {message && <div className="ok">{message}</div>}
       {profile && (

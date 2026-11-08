@@ -5,7 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { ageFromDob, cityMatches, communityMatches, formatProfileId, fullName, interestIsCurrent, isOppositeMatch, nextProfileSequence, normalizePhotos } from './match.js';
+import { ageFromDob, cityMatches, communityMatches, formatProfileId, fullName, interestIsCurrent, isOppositeMatch, nextProfileSequence, normalizePhotos, profileIdForGender } from './match.js';
 import { PASSWORD_HINT, defaultPassword, matchesLogin, toIncomeRupees } from './passwords.js';
 import { cloudinaryStatus, photosConfigured, uploadTeluguPhoto } from './photos.js';
 import { TELUGU_DOMAINS } from './deployGuard.js';
@@ -80,6 +80,17 @@ function findLogin(value) {
 function optionalPhone(value) {
   if (value == null || value === '') return null;
   return String(value).replace(/\D/g, '').slice(0, 10);
+}
+
+function assignProfileId(state, profile) {
+  const aligned = profileIdForGender(state, profile);
+  const saved = { ...profile, profileId: aligned.profileId };
+  if (aligned.retiredProfileIds?.length) saved.retiredProfileIds = aligned.retiredProfileIds;
+  else delete saved.retiredProfileIds;
+  return {
+    profile: saved,
+    seq: Math.max(Number(state.seq) || 0, Number(aligned.seq) || 0)
+  };
 }
 
 function blankProfile(userId) {
@@ -381,16 +392,25 @@ app.put('/api/profiles/me', auth, async (req, res) => {
   if (phonePatch && phonePatch.length !== 10) {
     return res.status(400).json({ message: 'Alternate mobile must be 10 digits.' });
   }
-  await update((state) => ({
-    ...state,
-    users: phonePatch === undefined ? state.users : state.users.map((item) => (
-      item.id === req.user.id ? { ...item, alternativePhone: phonePatch } : item
-    )),
-    profiles: state.profiles.map((item) => (item.id === current.id ? next : item))
-  }));
+  let saved = next;
+  await update((state) => {
+    const assigned = assignProfileId(state, next);
+    saved = assigned.profile;
+    return {
+      ...state,
+      seq: assigned.seq,
+      users: phonePatch === undefined ? state.users : state.users.map((item) => (
+        item.id === req.user.id ? { ...item, alternativePhone: phonePatch } : item
+      )),
+      profiles: state.profiles.map((item) => (item.id === current.id ? saved : item))
+    };
+  });
+  const idNote = current.profileId && saved.profileId && current.profileId !== saved.profileId
+    ? ` Profile ID is now ${saved.profileId}.`
+    : '';
   res.json({
-    profile: presentProfile(next, getDb().users, { contact: true }),
-    message: 'Biodata sent to the Vijayawada office for review.'
+    profile: presentProfile(saved, getDb().users, { contact: true }),
+    message: `Biodata sent to the Vijayawada office for review.${idNote}`
   });
 });
 
@@ -434,7 +454,7 @@ app.get('/api/profiles/browse', auth, (req, res) => {
 app.get('/api/profiles/:id', auth, (req, res) => {
   const state = getDb();
   const isAdmin = req.user.role === 'admin' || req.user.role === 'subadmin';
-  const profile = state.profiles.find((item) => item.id === req.params.id || item.profileId === req.params.id);
+  const profile = state.profiles.find((item) => item.id === req.params.id || item.profileId === req.params.id || (item.retiredProfileIds || []).includes(req.params.id));
   if (!profile) return res.status(404).json({ message: 'Profile not found' });
   const mine = profile.userId === req.user.id;
   if (!mine && !isAdmin && !(profile.approvalStatus === 'approved' && profile.showInSearch)) {
@@ -716,24 +736,25 @@ app.patch('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
     next.approvalStatus = status;
     next.showInSearch = status === 'approved';
     next.rejectedReason = status === 'rejected' ? String(req.body.rejectedReason || 'Please contact the office.') : null;
-    if (status === 'approved' && !next.profileId) {
-      const seq = nextProfileSequence(getDb());
-      next.profileId = formatProfileId(next.gender, seq);
-      await update((state) => ({
-        ...state,
-        seq,
-        users: usersWithAccount(state.users),
-        profiles: state.profiles.map((item) => (item.id === current.id ? next : item))
-      }));
-      return res.json({ profile: presentProfile(next, getDb().users, { contact: true }) });
-    }
   }
-  await update((state) => ({
-    ...state,
-    users: usersWithAccount(state.users),
-    profiles: state.profiles.map((item) => (item.id === current.id ? next : item))
-  }));
-  return res.json({ profile: presentProfile(next, getDb().users, { contact: true }) });
+  let saved = next;
+  await update((state) => {
+    let working = saved;
+    let seq = Number(state.seq) || 0;
+    if (status === 'approved' && !working.profileId) {
+      seq = nextProfileSequence(state);
+      working = { ...working, profileId: formatProfileId(working.gender, seq) };
+    }
+    const assigned = assignProfileId({ ...state, seq }, working);
+    saved = assigned.profile;
+    return {
+      ...state,
+      seq: assigned.seq,
+      users: usersWithAccount(state.users),
+      profiles: state.profiles.map((item) => (item.id === current.id ? saved : item))
+    };
+  });
+  return res.json({ profile: presentProfile(saved, getDb().users, { contact: true }) });
 });
 
 app.post('/api/admin/profiles/:id/reset-password', auth, adminOnly, async (req, res) => {
