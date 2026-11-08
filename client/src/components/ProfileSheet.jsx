@@ -235,6 +235,7 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
                 <Row label="Height" value={heightText(profile)} />
                 <Row label="Marital status" value={maritalLabel(profile.maritalStatus)} />
                 <Row label="Siblings" value={profile.siblingsCount} />
+                <Row label="About Siblings" value={profile.aboutSiblings} />
                 <Row label="Sub-community" value={communityLabel(profile.religion)} />
                 <Row label="Caste" value="Mala" />
                 <Row label="Mother tongue" value={profile.motherTongue} />

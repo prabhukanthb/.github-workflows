@@ -4,7 +4,6 @@ import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import BiodataForm, { profileToForm } from '../components/BiodataForm';
 import ProfileSheet from '../components/ProfileSheet';
-import { fullName } from '../siteConfig';
 
 export default function Profile() {
   const { token, isAuthenticated, loading, user } = useAuth();
@@ -13,7 +12,6 @@ export default function Profile() {
   const [viewing, setViewing] = useState(false);
   const [status, setStatus] = useState('');
   const [profileId, setProfileId] = useState('');
-  const [interests, setInterests] = useState([]);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
@@ -21,14 +19,13 @@ export default function Profile() {
   useEffect(() => {
     if (!token) return undefined;
     let active = true;
-    Promise.all([api.myProfile(token), api.interests(token)])
-      .then(([profileData, interestData]) => {
+    api.myProfile(token)
+      .then((profileData) => {
         if (!active) return;
         setProfile(profileData.profile);
         setForm(profileToForm(profileData.profile, user));
         setStatus(profileData.profile.approvalStatus);
         setProfileId(profileData.profile.profileId || '');
-        setInterests(interestData.interests || []);
       })
       .catch((err) => {
         if (active) setError(err.message);
@@ -57,13 +54,6 @@ export default function Profile() {
     } finally {
       setBusy(false);
     }
-  };
-
-  const respond = async (id, next) => {
-    const data = await api.respondInterest(id, next, token);
-    setMessage(data.message);
-    const refreshed = await api.interests(token);
-    setInterests(refreshed.interests || []);
   };
 
   return (
@@ -95,23 +85,7 @@ export default function Profile() {
       {viewing && profile && (
         <ProfileSheet profile={profile} onClose={() => setViewing(false)} />
       )}
-
-      <h2 style={{ marginTop: 36 }}>Interests</h2>
-      {interests.length === 0 && <p>No interests yet.</p>}
-      <div className="profile-grid">
-        {interests.map((item) => (
-          <article key={item.id} className="why-card">
-            <h3>{fullName(item.profile) || item.fromName}</h3>
-            <p>{item.incoming ? 'Received' : 'Sent'} · {item.status}</p>
-            {item.incoming && item.status === 'pending' && (
-              <div className="actions">
-                <button type="button" className="btn-maroon" onClick={() => respond(item.id, 'accepted')}>Accept</button>
-                <button type="button" className="btn-gold" onClick={() => respond(item.id, 'declined')}>Decline</button>
-              </div>
-            )}
-          </article>
-        ))}
-      </div>
+      <p style={{ marginTop: 24 }}><Link to="/interests">Interest notifications</Link> are on their own page and stay for 7 days.</p>
     </div>
   );
 }

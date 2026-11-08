@@ -5,7 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { ageFromDob, cityMatches, communityMatches, formatProfileId, fullName, isOppositeMatch, nextProfileSequence, normalizePhotos } from './match.js';
+import { ageFromDob, cityMatches, communityMatches, formatProfileId, fullName, interestIsCurrent, isOppositeMatch, nextProfileSequence, normalizePhotos } from './match.js';
 import { PASSWORD_HINT, defaultPassword, matchesLogin, toIncomeRupees } from './passwords.js';
 import { cloudinaryStatus, photosConfigured, uploadTeluguPhoto } from './photos.js';
 import { TELUGU_DOMAINS } from './deployGuard.js';
@@ -101,6 +101,7 @@ function blankProfile(userId) {
     motherTongue: 'Telugu',
     maritalStatus: 'Nevermarried',
     siblingsCount: '',
+    aboutSiblings: '',
     fatherName: '',
     fatherOccupation: '',
     motherName: '',
@@ -187,6 +188,7 @@ function readBiodata(body, current = {}) {
     motherTongue: body.motherTongue ?? current.motherTongue ?? 'Telugu',
     maritalStatus: body.maritalStatus ?? current.maritalStatus,
     siblingsCount: readSiblings(body.siblingsCount, current.siblingsCount),
+    aboutSiblings: String(body.aboutSiblings ?? current.aboutSiblings ?? '').trim().slice(0, 1000),
     fatherName: String(body.fatherName ?? current.fatherName ?? '').trim(),
     fatherOccupation: String(body.fatherOccupation ?? current.fatherOccupation ?? '').trim(),
     motherName: String(body.motherName ?? current.motherName ?? '').trim(),
@@ -442,10 +444,21 @@ app.get('/api/profiles/:id', auth, (req, res) => {
   res.json({ profile: presentProfile(profile, state.users, { contact: isAdmin || mine }) });
 });
 
-app.get('/api/interests', auth, (req, res) => {
+async function currentInterests(now = new Date()) {
+  const interests = getDb().interests || [];
+  if (interests.every((item) => interestIsCurrent(item.createdAt, now))) return interests;
+  await update((state) => ({
+    ...state,
+    interests: (state.interests || []).filter((item) => interestIsCurrent(item.createdAt, now))
+  }));
+  return getDb().interests || [];
+}
+
+app.get('/api/interests', auth, async (req, res) => {
+  const interests = await currentInterests();
   const state = getDb();
   const mine = state.profiles.find((item) => item.userId === req.user.id);
-  const rows = state.interests.filter((item) => item.fromUserId === req.user.id || item.toProfileId === mine?.id);
+  const rows = interests.filter((item) => item.fromUserId === req.user.id || item.toProfileId === mine?.id);
   res.json({
     interests: rows.map((item) => {
       const incoming = item.fromUserId !== req.user.id;
@@ -464,10 +477,11 @@ app.get('/api/interests', auth, (req, res) => {
 
 app.post('/api/interests', auth, async (req, res) => {
   const targetId = String(req.body.profileId || '');
+  const interests = await currentInterests();
   const state = getDb();
   const target = state.profiles.find((item) => item.id === targetId);
   if (!target || target.userId === req.user.id) return res.status(400).json({ message: 'Choose another profile.' });
-  if (state.interests.some((item) => item.fromUserId === req.user.id && item.toProfileId === target.id)) {
+  if (interests.some((item) => item.fromUserId === req.user.id && item.toProfileId === target.id)) {
     return res.status(409).json({ message: 'Interest already sent. The office will follow up.' });
   }
   const interest = {
@@ -486,14 +500,15 @@ app.post('/api/interests', auth, async (req, res) => {
   }));
   res.status(201).json({
     interest,
-    message: 'Interest noted. The Vijayawada office can see it on the admin dashboard. Phone numbers stay private until both families agree.'
+    message: 'Interest noted. The Vijayawada office can see it for 7 days. Phone numbers stay private until both families agree.'
   });
 });
 
 app.post('/api/interests/:id/respond', auth, async (req, res) => {
   const status = req.body.status === 'accepted' ? 'accepted' : 'declined';
+  const interests = await currentInterests();
   const mine = getDb().profiles.find((item) => item.userId === req.user.id);
-  const interest = getDb().interests.find((item) => item.id === req.params.id && item.toProfileId === mine?.id);
+  const interest = interests.find((item) => item.id === req.params.id && item.toProfileId === mine?.id);
   if (!interest) return res.status(404).json({ message: 'Interest not found' });
   await update((state) => ({
     ...state,
@@ -506,21 +521,23 @@ app.post('/api/interests/:id/respond', auth, async (req, res) => {
   });
 });
 
-app.get('/api/admin/summary', auth, adminOnly, (_req, res) => {
+app.get('/api/admin/summary', auth, adminOnly, async (_req, res) => {
+  const interests = await currentInterests();
   const state = getDb();
   res.json({
     users: state.users.length,
     profiles: state.profiles.length,
     pending: state.profiles.filter((item) => item.approvalStatus === 'pending').length,
     approved: state.profiles.filter((item) => item.approvalStatus === 'approved').length,
-    interests: state.interests.length,
-    pendingInterests: state.interests.filter((item) => item.status === 'pending').length
+    interests: interests.length,
+    pendingInterests: interests.filter((item) => item.status === 'pending').length
   });
 });
 
-app.get('/api/admin/interests', auth, adminOnly, (_req, res) => {
+app.get('/api/admin/interests', auth, adminOnly, async (_req, res) => {
+  const interests = await currentInterests();
   const state = getDb();
-  const rows = [...state.interests].sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+  const rows = [...interests].sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
   const party = (profile, user) => {
     const view = profile ? presentProfile(profile, state.users, { contact: true }) : null;
     return {

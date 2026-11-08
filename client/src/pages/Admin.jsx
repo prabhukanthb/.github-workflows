@@ -51,7 +51,6 @@ function ActionIcon({ name }) {
 export default function Admin() {
   const { token, user, isAuthenticated, loading } = useAuth();
   const [summary, setSummary] = useState(null);
-  const [interests, setInterests] = useState([]);
   const [profiles, setProfiles] = useState([]);
   const [deleted, setDeleted] = useState([]);
   const [filter, setFilter] = useState('pending');
@@ -66,13 +65,12 @@ export default function Admin() {
   const load = () => {
     if (!token) return;
     const staffRequest = isFullAdmin ? api.adminStaff(token) : Promise.resolve({ staff: [] });
-    Promise.all([api.adminSummary(token), api.adminProfiles(token), staffRequest, api.adminInterests(token)])
-      .then(([summaryData, profileData, staffData, interestData]) => {
+    Promise.all([api.adminSummary(token), api.adminProfiles(token), staffRequest])
+      .then(([summaryData, profileData, staffData]) => {
         setSummary(summaryData);
         setProfiles(profileData.profiles || []);
         setDeleted(profileData.deleted || []);
         setStaff(staffData.staff || []);
-        setInterests(interestData.interests || []);
       })
       .catch((err) => setError(err.message));
   };
@@ -143,28 +141,7 @@ export default function Admin() {
           ))}
         </div>
       )}
-      <section className="panel">
-        <h2>Interest notifications</h2>
-        <p>When a member taps Express interest, it appears here for the office. There is no separate email or text message. Call the numbers below and keep them private until both families agree.</p>
-        {interests.length === 0 && <p>No interests yet.</p>}
-        {interests.length > 0 && (
-          <ul className="interest-list">
-            {interests.map((item) => (
-              <li key={item.id}>
-                <strong>{item.from.name}</strong>
-                {item.from.profileId ? ` (${item.from.profileId})` : ''}
-                {item.from.phone ? ` · ${item.from.phone}` : ''}
-                {' interested in '}
-                <strong>{item.to.name}</strong>
-                {item.to.profileId ? ` (${item.to.profileId})` : ''}
-                {item.to.phone ? ` · ${item.to.phone}` : ''}
-                {` · ${item.status}`}
-                {item.createdAt ? ` · ${new Date(item.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}` : ''}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <p><Link to="/admin/interests">Interest notifications</Link> are on their own page. Each one is removed after 7 days.</p>
       {isFullAdmin && (
       <form className="panel" onSubmit={async (event) => {
         event.preventDefault();

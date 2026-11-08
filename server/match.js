@@ -72,11 +72,19 @@ function communityName(value) {
 export function communityMatches(viewerReligion, candidateReligion) {
   const viewer = communityName(viewerReligion);
   const candidate = communityName(candidateReligion);
-  if (!viewer || !candidate) return false;
-  if (viewer === 'Christian/Hindu') {
-    return candidate === 'Christian' || candidate === 'Hindu' || candidate === 'Christian/Hindu';
-  }
-  return viewer === candidate;
+  if (viewer === 'Christian') return candidate === 'Christian';
+  if (viewer === 'Hindu') return candidate === 'Hindu';
+  return true;
+}
+
+export const INTEREST_DAYS = 7;
+const INTEREST_WINDOW_MS = INTEREST_DAYS * 24 * 60 * 60 * 1000;
+
+export function interestIsCurrent(createdAt, now = new Date()) {
+  const created = Date.parse(createdAt || '');
+  if (!Number.isFinite(created)) return false;
+  const age = now.getTime() - created;
+  return age >= 0 && age < INTEREST_WINDOW_MS;
 }
 
 export function isOppositeMatch(viewer, candidate, today = new Date()) {

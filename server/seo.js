@@ -92,6 +92,7 @@ export function robotsTxt() {
     'Allow: /',
     'Disallow: /admin',
     'Disallow: /profile',
+    'Disallow: /interests',
     'Disallow: /browse',
     'Disallow: /login',
     'Disallow: /forgot-password',

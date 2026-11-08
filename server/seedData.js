@@ -317,7 +317,7 @@ export function buildSeed({ officeHash, memberHash }) {
         fromUserId: 'u-suresh',
         toProfileId: 'p1',
         status: 'pending',
-        createdAt: '2026-09-01T10:00:00.000Z'
+        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
       }
     ],
     resets: []
@@ -357,6 +357,7 @@ function profile(input) {
     motherTongue: input.motherTongue,
     maritalStatus: input.maritalStatus,
     siblingsCount: 'Brothers',
+    aboutSiblings: '',
     fatherName: 'Parent',
     fatherOccupation: 'Retired',
     motherName: 'Parent',

@@ -61,7 +61,7 @@ export default function Browse() {
   const isAdmin = user?.role === 'admin' || user?.role === 'subadmin';
   const viewerAge = ageFromDob(viewer?.dateOfBirth);
   const faith = communityLabel(viewer?.religion);
-  const community = faith === 'Christian/Hindu' ? 'Christian and Hindu' : faith;
+  const community = faith === 'Christian' || faith === 'Hindu' ? faith : '';
 
   return (
     <div className="page">

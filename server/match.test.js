@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ageFromDob, cityMatches, communityMatches, formatProfileId, isOppositeMatch, nextProfileSequence, normalizePhotos } from './match.js';
+import { ageFromDob, cityMatches, communityMatches, formatProfileId, interestIsCurrent, isOppositeMatch, nextProfileSequence, normalizePhotos } from './match.js';
 
 test('formatProfileId pads gender and sequence', () => {
   assert.equal(formatProfileId('female', 1), 'F00001');
@@ -50,17 +50,28 @@ test('a groom sees brides of the same age or younger', () => {
   assert.equal(isOppositeMatch(groom, { gender: 'female', dateOfBirth: '1990-04-01' }, today), false);
 });
 
-test('Christian and Hindu search stay within the same community', () => {
+test('Christian and Hindu search stay within that community and every other community sees all', () => {
   assert.equal(communityMatches('Christian', 'Christian'), true);
   assert.equal(communityMatches('Christian', 'Hindu'), false);
+  assert.equal(communityMatches('Christian', 'Christian/Hindu'), false);
   assert.equal(communityMatches('Hindu', 'Hindu'), true);
   assert.equal(communityMatches('Hindu', 'Christian'), false);
   assert.equal(communityMatches('Christian/Hindu', 'Christian'), true);
   assert.equal(communityMatches('Christian/Hindu', 'Hindu'), true);
-  assert.equal(communityMatches('Christian/Hindu', 'Christian/Hindu'), true);
-  assert.equal(communityMatches('Christian/Hindu', 'Buddhist'), false);
+  assert.equal(communityMatches('Christian/Hindu', 'Buddhist'), true);
+  assert.equal(communityMatches('Ambedkarist', 'Hindu'), true);
+  assert.equal(communityMatches('Buddhist', 'Christian'), true);
   assert.equal(communityMatches('Other', 'Christian'), true);
-  assert.equal(communityMatches('Ambedkarist', 'Buddhist'), false);
+  assert.equal(communityMatches('Christian', ''), false);
+});
+
+test('an interest notification lasts 7 days', () => {
+  const now = new Date('2026-11-08T12:00:00.000Z');
+  assert.equal(interestIsCurrent('2026-11-08T11:00:00.000Z', now), true);
+  assert.equal(interestIsCurrent('2026-11-01T12:00:01.000Z', now), true);
+  assert.equal(interestIsCurrent('2026-11-01T12:00:00.000Z', now), false);
+  assert.equal(interestIsCurrent('2026-10-01T12:00:00.000Z', now), false);
+  assert.equal(interestIsCurrent('', now), false);
 });
 
 test('city search accepts common spellings', () => {

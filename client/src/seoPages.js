@@ -52,7 +52,7 @@ export const PAGES = {
   }
 };
 
-const PRIVATE_PREFIXES = ['/admin', '/browse', '/profile', '/login', '/forgot-password', '/change-password'];
+const PRIVATE_PREFIXES = ['/admin', '/browse', '/profile', '/interests', '/login', '/forgot-password', '/change-password'];
 
 export function normalizePath(pathname) {
   const path = String(pathname || '/').split('?')[0].replace(/\/+$/, '') || '/';

@@ -23,6 +23,7 @@ export function profileToForm(profile = {}, user = {}) {
     caste: 'Mala',
     subCaste: profile.subCaste || 'SC',
     siblingsCount: SIBLINGS.includes(profile.siblingsCount) ? profile.siblingsCount : '',
+    aboutSiblings: profile.aboutSiblings || '',
     motherTongue: profile.motherTongue || 'Telugu',
     maritalStatus: profile.maritalStatus || 'Nevermarried',
     highestEducation: profile.highestEducation || '',
@@ -329,6 +330,10 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
           <option value="">Select</option>
           {SIBLINGS.map((item) => <option key={item} value={item}>{item}</option>)}
         </select>
+      </div>
+      <div className="wide">
+        <label>About Siblings</label>
+        <textarea value={form.aboutSiblings || ''} onChange={set('aboutSiblings')} maxLength={1000} />
       </div>
       <div>
         <label>Marital status</label>

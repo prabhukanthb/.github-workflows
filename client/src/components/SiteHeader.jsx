@@ -19,14 +19,21 @@ export default function SiteHeader() {
   const isAdmin = user?.role === 'admin' || user?.role === 'subadmin';
 
   useEffect(() => {
-    if (!token || !isAdmin) {
+    if (!token) {
       setPendingInterests(0);
       return undefined;
     }
     let active = true;
-    api.adminSummary(token)
+    const request = isAdmin ? api.adminSummary(token) : api.interests(token);
+    request
       .then((data) => {
-        if (active) setPendingInterests(data.pendingInterests || 0);
+        if (!active) return;
+        if (isAdmin) {
+          setPendingInterests(data.pendingInterests || 0);
+          return;
+        }
+        const waiting = (data.interests || []).filter((item) => item.incoming && item.status === 'pending').length;
+        setPendingInterests(waiting);
       })
       .catch(() => {
         if (active) setPendingInterests(0);
@@ -69,12 +76,20 @@ export default function SiteHeader() {
             )
           ))}
           {isAuthenticated && !isAdmin && (
-            <Link to="/profile" onClick={() => setOpen(false)}>My Profile</Link>
+            <>
+              <Link to="/profile" onClick={() => setOpen(false)}>My Profile</Link>
+              <Link to="/interests" onClick={() => setOpen(false)}>
+                Interests{pendingInterests > 0 ? ` (${pendingInterests})` : ''}
+              </Link>
+            </>
           )}
           {isAdmin && (
-            <Link to="/admin" onClick={() => setOpen(false)}>
-              Office{pendingInterests > 0 ? ` (${pendingInterests})` : ''}
-            </Link>
+            <>
+              <Link to="/admin" onClick={() => setOpen(false)}>Office</Link>
+              <Link to="/admin/interests" onClick={() => setOpen(false)}>
+                Interests{pendingInterests > 0 ? ` (${pendingInterests})` : ''}
+              </Link>
+            </>
           )}
           {isAuthenticated && (
             <>

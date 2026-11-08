@@ -25,7 +25,7 @@ test('the homepage is indexable and names Vijayawada and the Mala community', ()
 });
 
 test('member and office pages stay out of search results', () => {
-  for (const path of ['/browse', '/profile', '/admin', '/admin/create', '/login']) {
+  for (const path of ['/browse', '/profile', '/interests', '/admin', '/admin/create', '/admin/interests', '/login']) {
     const html = applySeo(HTML, path);
     assert.match(html, /noindex,nofollow/, path);
     assert.equal(html.includes('index,follow'), false, path);
@@ -37,6 +37,7 @@ test('member and office pages stay out of search results', () => {
   assert.equal(sitemap.includes('/profile'), false);
   const robots = robotsTxt();
   assert.match(robots, /Disallow: \/browse/);
+  assert.match(robots, /Disallow: \/interests/);
   assert.match(robots, /Disallow: \/admin/);
   assert.match(robots, /Sitemap: https:\/\/www\.telugukalyanamala\.com\/sitemap\.xml/);
 });
