@@ -145,7 +145,7 @@ function paintWatermark(canvas, photoBox) {
   ctx.lineWidth = 3;
   const label = BRAND;
   const stepX = 340;
-  const stepY = 108;
+  const stepY = 50;
   for (let y = -canvas.height; y < canvas.height; y += stepY) {
     for (let x = -canvas.width; x < canvas.width; x += stepX) {
       ctx.globalAlpha = 0.55;
