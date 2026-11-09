@@ -125,9 +125,19 @@ function applyDownloadStyles(card) {
   }
 }
 
-function paintWatermark(canvas) {
+function paintWatermark(canvas, photoBox) {
   const ctx = canvas.getContext('2d');
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const snapshot = photoSnapshot(ctx, canvas, photoBox);
   ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, canvas.width, canvas.height);
+  if (snapshot) {
+    ctx.rect(snapshot.x, snapshot.y, snapshot.w, snapshot.h);
+    ctx.clip('evenodd');
+  } else {
+    ctx.clip();
+  }
   ctx.translate(canvas.width / 2, canvas.height / 2);
   ctx.rotate(-18 * Math.PI / 180);
   ctx.font = '700 22px Georgia, Times New Roman, serif';
@@ -147,6 +157,48 @@ function paintWatermark(canvas) {
     }
   }
   ctx.restore();
+  if (!snapshot) return;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.putImageData(snapshot.data, snapshot.x, snapshot.y);
+  paintPhotoEdges(ctx, snapshot);
+}
+
+function photoSnapshot(ctx, canvas, photoBox) {
+  if (!photoBox) return null;
+  const x = Math.max(0, Math.min(canvas.width - 1, photoBox.x));
+  const y = Math.max(0, Math.min(canvas.height - 1, photoBox.y));
+  const w = Math.min(photoBox.w, canvas.width - x);
+  const h = Math.min(photoBox.h, canvas.height - y);
+  if (w < 8 || h < 8) return null;
+  return { x, y, w, h, data: ctx.getImageData(x, y, w, h) };
+}
+
+function paintPhotoEdges(ctx, box) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(box.x, box.y, box.w, box.h);
+  ctx.clip();
+  let fontSize = Math.max(16, Math.round(Math.min(box.w, box.h) * 0.055));
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const fit = () => {
+    ctx.font = `700 ${fontSize}px Georgia, Times New Roman, serif`;
+  };
+  fit();
+  while (fontSize > 12 && ctx.measureText(BRAND).width > box.w - 16) {
+    fontSize -= 1;
+    fit();
+  }
+  ctx.lineWidth = Math.max(2, Math.round(fontSize / 8));
+  ctx.strokeStyle = 'rgba(44, 51, 40, 0.72)';
+  ctx.fillStyle = '#ffffff';
+  const x = box.x + box.w / 2;
+  const pad = Math.max(fontSize * 0.7, 14);
+  ctx.strokeText(BRAND, x, box.y + pad);
+  ctx.fillText(BRAND, x, box.y + pad);
+  ctx.strokeText(BRAND, x, box.y + box.h - pad);
+  ctx.fillText(BRAND, x, box.y + box.h - pad);
+  ctx.restore();
 }
 
 export default function ProfileSheet({ profile, onClose, allowDownload = false }) {
@@ -164,22 +216,34 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
     setError('');
     try {
       const { default: html2canvas } = await import('html2canvas');
+      const scale = 2;
+      let photoBox = null;
       const canvas = await html2canvas(cardRef.current, {
-        scale: 2,
+        scale,
         useCORS: true,
         backgroundColor: SHEET.cream,
         windowWidth: 1280,
-        onclone: (doc) => {
-          const card = doc.querySelector('.sheet-card');
+        onclone: (doc, card) => {
           if (!card) return;
           card.querySelectorAll('[data-download-value]').forEach((row) => {
             const cell = row.querySelector('div');
             if (cell) cell.textContent = row.getAttribute('data-download-value') || '—';
           });
           applyDownloadStyles(card);
+          const photo = card.querySelector('.sheet-photo');
+          if (!photo) return;
+          const cardRect = card.getBoundingClientRect();
+          const photoRect = photo.getBoundingClientRect();
+          if (photoRect.width < 8 || photoRect.height < 8) return;
+          photoBox = {
+            x: Math.round((photoRect.left - cardRect.left) * scale),
+            y: Math.round((photoRect.top - cardRect.top) * scale),
+            w: Math.round(photoRect.width * scale),
+            h: Math.round(photoRect.height * scale)
+          };
         }
       });
-      paintWatermark(canvas);
+      paintWatermark(canvas, photoBox);
       const link = document.createElement('a');
       link.download = `${BRAND.replace(/\s+/g, '-')}-${profile.profileId || 'profile'}.png`;
       link.href = canvas.toDataURL('image/png');
