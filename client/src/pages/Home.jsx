@@ -3,6 +3,7 @@ import { FAQ } from '../seoPages';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { api } from '../api';
+import Watermark from '../components/Watermark';
 import { mainPhotoUrl } from '../profileFields';
 import { fullName } from '../siteConfig';
 import {
@@ -59,7 +60,7 @@ export default function Home() {
     let active = true;
     api.browse(token, '')
       .then((data) => {
-        if (active) setProfiles((data.profiles || []).slice(0, 8));
+        if (active) setProfiles((data.profiles || []).filter((profile) => !profile.restricted).slice(0, 8));
       })
       .catch(() => {
         if (active) setProfiles([]);
@@ -184,7 +185,10 @@ export default function Home() {
           <div className="carousel">
             {featured.map((profile) => (
               <article key={profile.id} className="profile-card">
-                <img src={profile.photo || FEATURE_PHOTOS[0]} alt="" />
+                <div className="card-photo">
+                  <img src={profile.photo || FEATURE_PHOTOS[0]} alt="" />
+                  {isAuthenticated && profiles.length > 0 && <Watermark variant="photo" />}
+                </div>
                 <div className="meta">
                   <strong>{profile.name}</strong>
                   <div>{[profile.work, profile.city].filter(Boolean).join(' · ')}</div>

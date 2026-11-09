@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ageFromDob, alignProfileIds, cityMatches, communityMatches, formatProfileId, interestIsCurrent, isOppositeMatch, nextProfileSequence, normalizePhotos, profileIdForGender } from './match.js';
+import { ageFromDob, alignProfileIds, canViewMatches, cityMatches, communityMatches, formatProfileId, interestIsCurrent, isOppositeMatch, nextProfileSequence, normalizePhotos, profileIdForGender } from './match.js';
 
 test('formatProfileId pads gender and sequence', () => {
   assert.equal(formatProfileId('female', 1), 'F00001');
@@ -100,6 +100,17 @@ test('a groom sees brides of the same age or younger', () => {
   assert.equal(ageFromDob(groom.dateOfBirth, today), 30);
   assert.equal(isOppositeMatch(groom, { gender: 'female', dateOfBirth: '1998-04-01' }, today), true);
   assert.equal(isOppositeMatch(groom, { gender: 'female', dateOfBirth: '1990-04-01' }, today), false);
+});
+
+test('only an approved biodata can open other profiles', () => {
+  const member = { role: 'user' };
+  assert.equal(canViewMatches(member, { approvalStatus: 'approved', showInSearch: true }), true);
+  assert.equal(canViewMatches(member, { approvalStatus: 'pending', showInSearch: false }), false);
+  assert.equal(canViewMatches(member, { approvalStatus: 'draft', showInSearch: false }), false);
+  assert.equal(canViewMatches(member, { approvalStatus: 'approved', showInSearch: false }), false);
+  assert.equal(canViewMatches({ role: 'admin' }, null), true);
+  assert.equal(canViewMatches({ role: 'subadmin' }, { approvalStatus: 'pending' }), true);
+  assert.equal(canViewMatches(null, { approvalStatus: 'approved', showInSearch: true }), false);
 });
 
 test('Christian and Hindu search stay within that community and every other community sees all', () => {

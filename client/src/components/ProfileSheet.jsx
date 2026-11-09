@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { addressText } from '../addressText';
 import { incomeToLacsInput, mainPhotoUrl } from '../profileFields';
+import Watermark from './Watermark';
 import { BRAND, ORG, ageFromDob, communityLabel, fullName, maritalLabel } from '../siteConfig';
 
 const CONTACT_LINE = 'Contact B. John Ratnam 9440545049';
@@ -59,8 +60,7 @@ function applyDownloadStyles(card) {
     'max-width:none',
     'font-family:Georgia, Times New Roman, serif'
   ].join(';');
-  const watermark = card.querySelector('.sheet-watermark');
-  if (watermark) watermark.remove();
+  card.querySelectorAll('.wm, .sheet-watermark').forEach((node) => node.remove());
   const inner = card.querySelector('.sheet-inner');
   if (inner) inner.style.cssText = 'position:relative;z-index:1;background:transparent;';
   const head = card.querySelector('.sheet-head');
@@ -126,16 +126,21 @@ function applyDownloadStyles(card) {
 function paintWatermark(canvas) {
   const ctx = canvas.getContext('2d');
   ctx.save();
-  ctx.globalAlpha = 0.14;
-  ctx.fillStyle = SHEET.deep;
-  ctx.font = '700 42px Georgia, Times New Roman, serif';
   ctx.translate(canvas.width / 2, canvas.height / 2);
   ctx.rotate(-18 * Math.PI / 180);
+  ctx.font = '700 22px Georgia, Times New Roman, serif';
+  ctx.textAlign = 'center';
+  ctx.lineWidth = 3;
   const label = BRAND;
-  const stepX = 460;
-  const stepY = 150;
+  const stepX = 340;
+  const stepY = 108;
   for (let y = -canvas.height; y < canvas.height; y += stepY) {
     for (let x = -canvas.width; x < canvas.width; x += stepX) {
+      ctx.globalAlpha = 0.55;
+      ctx.strokeStyle = '#F7F4EC';
+      ctx.strokeText(label, x, y);
+      ctx.globalAlpha = 0.22;
+      ctx.fillStyle = SHEET.deep;
       ctx.fillText(label, x, y);
     }
   }
@@ -203,15 +208,6 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
         </div>
         {error && <div className="error">{error}</div>}
         <div className="sheet-card" ref={cardRef}>
-          <div className="sheet-watermark" aria-hidden="true">
-            {Array.from({ length: 14 }).map((_, row) => (
-              <div key={row}>
-                {Array.from({ length: 4 }).map((__, col) => (
-                  <span key={col}>{BRAND}</span>
-                ))}
-              </div>
-            ))}
-          </div>
           <div className="sheet-inner">
             <header className="sheet-head">
               <div>
@@ -254,10 +250,12 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
               </div>
               <div className={photo ? 'sheet-photo' : 'sheet-photo sheet-photo-empty'}>
                 {photo ? <img src={photo} alt="" crossOrigin="anonymous" /> : <div>{(name || 'T').slice(0, 1)}</div>}
+                <Watermark variant="photo" />
               </div>
             </div>
             <footer className="sheet-foot">{CONTACT_LINE}</footer>
           </div>
+          <Watermark variant="sheet" />
         </div>
       </div>
     </div>

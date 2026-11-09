@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import ProfileModal from '../components/ProfileModal';
+import Watermark from '../components/Watermark';
 import { mainPhotoUrl } from '../profileFields';
 import { ageFromDob, communityLabel, fullName, REGISTER_CTA, REGISTRATION_FEE } from '../siteConfig';
 
@@ -15,6 +16,8 @@ export default function Browse() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(true);
   const [selected, setSelected] = useState(null);
+  const [notice, setNotice] = useState(false);
+  const announced = useRef(false);
 
   useEffect(() => {
     if (loading) return undefined;
@@ -28,8 +31,15 @@ export default function Browse() {
     api.browse(token, search.toString())
       .then((data) => {
         if (!active) return;
-        setProfiles(data.profiles || []);
+        const rows = data.profiles || [];
+        setProfiles(rows);
         setViewer(data.viewer);
+        const open = data.viewer?.approvalStatus === 'approved' && data.viewer?.showInSearch !== false;
+        const office = user?.role === 'admin' || user?.role === 'subadmin';
+        if (!office && !open && rows.length && !announced.current) {
+          announced.current = true;
+          setNotice(true);
+        }
       })
       .catch((err) => {
         if (active) setError(err.message);
@@ -40,7 +50,7 @@ export default function Browse() {
     return () => {
       active = false;
     };
-  }, [token, loading, params, query]);
+  }, [token, loading, params, query, user]);
 
   if (loading || busy) return <div className="page">Loading profiles…</div>;
 
@@ -48,8 +58,8 @@ export default function Browse() {
     return (
       <div className="page" style={{ maxWidth: 680 }}>
         <div className="kicker">Telugu Kalyanamala</div>
-        <h2>Search profiles</h2>
-        <p>Register to view Mala matches. Registration is {REGISTRATION_FEE}. Parents may create the login. Phone numbers stay private.</p>
+        <h2>Please register to view the profile</h2>
+        <p>Registration is {REGISTRATION_FEE}. Parents may create the login. Phone numbers stay private until the office approves the biodata.</p>
         <div className="actions">
           <Link to="/register" className="btn-maroon">{REGISTER_CTA}</Link>
           <Link to="/login" className="btn-gold">Login</Link>
@@ -59,6 +69,7 @@ export default function Browse() {
   }
 
   const isAdmin = user?.role === 'admin' || user?.role === 'subadmin';
+  const approved = isAdmin || (viewer?.approvalStatus === 'approved' && viewer?.showInSearch !== false);
   const viewerAge = ageFromDob(viewer?.dateOfBirth);
   const faith = communityLabel(viewer?.religion);
   const community = faith === 'Christian' || faith === 'Hindu' ? faith : '';
@@ -75,6 +86,9 @@ export default function Browse() {
             : `Showing ${community ? `${community} ` : ''}brides aged ${viewerAge} or younger.`}
         </p>
       )}
+      {!approved && (
+        <div className="notice">Please check with the admin. Profiles stay blurred until the Vijayawada office approves your biodata.</div>
+      )}
       {!isAdmin && (!viewer?.gender || !viewerAge) && (
         <div className="notice">Complete your biodata before matches can be shown. <Link to="/profile">Open my profile</Link></div>
       )}
@@ -90,13 +104,21 @@ export default function Browse() {
           const name = fullName(profile);
           const photo = mainPhotoUrl(profile.photos);
           return (
-            <article key={profile.id} className="profile-card">
-              {photo ? <img src={photo} alt="" /> : <div className="avatar">{name.slice(0, 1)}</div>}
+            <article key={profile.id} className={approved ? 'profile-card' : 'profile-card is-restricted'}>
+              <div className="card-photo">
+                {photo ? <img src={photo} alt="" draggable={approved} /> : <div className="avatar">{approved ? name.slice(0, 1) : ''}</div>}
+                {approved && <Watermark variant="photo" />}
+              </div>
               <div className="meta">
-                <strong>{name}</strong>
-                <div>{profile.profileId} · {ageFromDob(profile.dateOfBirth)} yrs</div>
-                <div>{[profile.occupation, profile.currentAddress?.city].filter(Boolean).join(' · ')}</div>
-                <button type="button" className="btn-maroon" style={{ marginTop: 10 }} onClick={() => setSelected(profile)}>
+                <strong className="blur-target">{name}</strong>
+                <div className="blur-target">{profile.profileId} · {ageFromDob(profile.dateOfBirth)} yrs</div>
+                <div className="blur-target">{[profile.occupation, profile.currentAddress?.city].filter(Boolean).join(' · ')}</div>
+                <button
+                  type="button"
+                  className="btn-maroon"
+                  style={{ marginTop: 10 }}
+                  onClick={() => (approved ? setSelected(profile) : setNotice(true))}
+                >
                   View biodata
                 </button>
               </div>
@@ -104,7 +126,21 @@ export default function Browse() {
           );
         })}
       </div>
-      {selected && (
+      {notice && (
+        <div className="modal-back" onClick={() => setNotice(false)} role="presentation">
+          <div className="modal access-notice" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-label="Please check with the admin">
+            <div className="body">
+              <h2>Please check with the admin</h2>
+              <p>Your login is registered. Profiles and interest open after the Vijayawada office approves the biodata.</p>
+              <div className="actions">
+                <Link to="/profile" className="btn-maroon">Open my biodata</Link>
+                <button type="button" className="btn-close" onClick={() => setNotice(false)}>Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {selected && approved && (
         <ProfileModal
           profile={selected}
           onClose={() => setSelected(null)}

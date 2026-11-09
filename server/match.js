@@ -150,6 +150,13 @@ function communityName(value) {
   return text === 'Other' ? 'Christian/Hindu' : text;
 }
 
+export function canViewMatches(user, profile) {
+  if (!user) return false;
+  const role = user.role;
+  if (role === 'admin' || role === 'subadmin') return true;
+  return profile?.approvalStatus === 'approved' && profile?.showInSearch !== false;
+}
+
 export function communityMatches(viewerReligion, candidateReligion) {
   const viewer = communityName(viewerReligion);
   const candidate = communityName(candidateReligion);

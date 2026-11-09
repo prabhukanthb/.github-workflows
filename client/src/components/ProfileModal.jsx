@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Watermark from './Watermark';
 import { mainPhotoUrl } from '../profileFields';
 import { ageFromDob, communityLabel, fullName, maritalLabel } from '../siteConfig';
 
@@ -34,8 +35,10 @@ export default function ProfileModal({ profile, onClose, onInterest }) {
     <div className="modal-back" onClick={onClose} role="presentation">
       <div className="modal" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-label={name}>
         <div className="modal-photo">
-          {photo ? <img src={photo} alt="" /> : <div className="avatar">{name.slice(0, 1)}</div>}
+          {photo ? <img src={photo} alt="" draggable="false" /> : <div className="avatar">{name.slice(0, 1)}</div>}
+          <Watermark variant="photo" />
         </div>
+        <Watermark variant="sheet" />
         <div className="body">
           <div className="kicker">{profile.profileId}</div>
           <h2>{name}</h2>

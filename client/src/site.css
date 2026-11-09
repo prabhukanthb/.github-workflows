@@ -481,6 +481,12 @@
   box-shadow: var(--shadow);
 }
 
+.card-photo {
+  position: relative;
+  overflow: hidden;
+  background: var(--cream);
+}
+
 .profile-card img,
 .story-card img,
 .branch-photo {
@@ -501,6 +507,17 @@
 .profile-card .meta,
 .story-card .meta {
   padding: 14px 16px 18px;
+}
+
+.profile-card.is-restricted .card-photo img,
+.profile-card.is-restricted .card-photo .avatar {
+  filter: blur(18px);
+  transform: scale(1.12);
+}
+
+.profile-card.is-restricted .blur-target {
+  filter: blur(12px);
+  user-select: none;
 }
 
 .tag-grid {
@@ -1015,6 +1032,7 @@ textarea {
 }
 
 .modal {
+  position: relative;
   width: min(720px, 100%);
   background: #fff;
   border-radius: 16px;
@@ -1022,12 +1040,19 @@ textarea {
   box-shadow: var(--shadow);
 }
 
+.access-notice {
+  width: min(460px, 100%);
+  margin-top: 12vh;
+}
+
 .modal-photo {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   background: #2C3328;
+  overflow: hidden;
 }
 
 .modal-photo img,
@@ -1214,30 +1239,41 @@ table.admin th {
   color: var(--ink);
 }
 
-.sheet-watermark {
+.wm {
   position: absolute;
-  inset: -18% -10%;
-  z-index: 0;
+  inset: -16% -8%;
+  z-index: 4;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
   transform: rotate(-18deg);
   pointer-events: none;
-  opacity: 0.14;
+  overflow: hidden;
 }
 
-.sheet-watermark div {
+.wm div {
   display: flex;
   justify-content: space-around;
-  gap: 28px;
+  gap: 18px;
 }
 
-.sheet-watermark span {
+.wm span {
   font-family: var(--serif);
-  font-size: 22px;
   font-weight: 700;
-  color: var(--maroon-deep);
   white-space: nowrap;
+  color: var(--maroon-deep);
+}
+
+.wm-sheet span {
+  font-size: 13px;
+  opacity: 0.2;
+}
+
+.wm-photo span {
+  font-size: 12px;
+  color: #fff;
+  opacity: 0.78;
+  text-shadow: 0 1px 2px rgba(44, 51, 40, 0.55);
 }
 
 .sheet-inner {
@@ -1337,6 +1373,8 @@ table.admin th {
 }
 
 .sheet-photo {
+  position: relative;
+  overflow: hidden;
   width: 100%;
   max-width: none;
   height: auto;

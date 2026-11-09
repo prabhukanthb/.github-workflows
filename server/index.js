@@ -5,7 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { ageFromDob, cityMatches, communityMatches, formatProfileId, fullName, interestIsCurrent, isOppositeMatch, nextProfileSequence, normalizePhotos, profileIdForGender } from './match.js';
+import { ageFromDob, canViewMatches, cityMatches, communityMatches, formatProfileId, fullName, interestIsCurrent, isOppositeMatch, nextProfileSequence, normalizePhotos, profileIdForGender } from './match.js';
 import { PASSWORD_HINT, defaultPassword, matchesLogin, toIncomeRupees } from './passwords.js';
 import { cloudinaryStatus, photosConfigured, uploadTeluguPhoto } from './photos.js';
 import { TELUGU_DOMAINS } from './deployGuard.js';
@@ -80,6 +80,24 @@ function findLogin(value) {
 function optionalPhone(value) {
   if (value == null || value === '') return null;
   return String(value).replace(/\D/g, '').slice(0, 10);
+}
+
+function limitedProfile(profile, users) {
+  const owner = users.find((user) => user.id === profile.userId);
+  const photos = normalizePhotos(profile.photos || []).slice(0, 1);
+  return {
+    id: profile.id,
+    profileId: profile.profileId || '',
+    gender: profile.gender || '',
+    dateOfBirth: profile.dateOfBirth || '',
+    occupation: profile.occupation || '',
+    currentAddress: { city: profile.currentAddress?.city || '' },
+    photos,
+    firstName: owner?.firstName || '',
+    lastName: owner?.surname || owner?.lastName || '',
+    surname: owner?.surname || '',
+    restricted: true
+  };
 }
 
 function assignProfileId(state, profile) {
@@ -445,9 +463,13 @@ app.get('/api/profiles/browse', auth, (req, res) => {
     if (ageMax && age && age > ageMax) return false;
     return true;
   });
+  const allowed = canViewMatches(req.user, mine);
   res.json({
-    profiles: profiles.map((item) => presentProfile(item, state.users, { contact: isAdmin })),
-    viewer: mine ? presentProfile(mine, state.users, { contact: true }) : null
+    profiles: profiles.map((item) => (
+      allowed ? presentProfile(item, state.users, { contact: isAdmin }) : limitedProfile(item, state.users)
+    )),
+    viewer: mine ? presentProfile(mine, state.users, { contact: true }) : null,
+    access: allowed ? 'full' : 'pending'
   });
 });
 
@@ -457,8 +479,12 @@ app.get('/api/profiles/:id', auth, (req, res) => {
   const profile = state.profiles.find((item) => item.id === req.params.id || item.profileId === req.params.id || (item.retiredProfileIds || []).includes(req.params.id));
   if (!profile) return res.status(404).json({ message: 'Profile not found' });
   const mine = profile.userId === req.user.id;
+  const viewerProfile = state.profiles.find((item) => item.userId === req.user.id);
   if (!mine && !isAdmin && !(profile.approvalStatus === 'approved' && profile.showInSearch)) {
     return res.status(404).json({ message: 'Profile not found' });
+  }
+  if (!mine && !isAdmin && !canViewMatches(req.user, viewerProfile)) {
+    return res.status(403).json({ message: 'Please check with the admin.' });
   }
   profile.profileViews += 1;
   res.json({ profile: presentProfile(profile, state.users, { contact: isAdmin || mine }) });
@@ -499,8 +525,14 @@ app.post('/api/interests', auth, async (req, res) => {
   const targetId = String(req.body.profileId || '');
   const interests = await currentInterests();
   const state = getDb();
+  const sender = state.profiles.find((item) => item.userId === req.user.id);
+  if (!canViewMatches(req.user, sender)) {
+    return res.status(403).json({ message: 'Please check with the admin.' });
+  }
   const target = state.profiles.find((item) => item.id === targetId);
-  if (!target || target.userId === req.user.id) return res.status(400).json({ message: 'Choose another profile.' });
+  if (!target || target.userId === req.user.id || target.approvalStatus !== 'approved' || !target.showInSearch) {
+    return res.status(400).json({ message: 'Choose another profile.' });
+  }
   if (interests.some((item) => item.fromUserId === req.user.id && item.toProfileId === target.id)) {
     return res.status(409).json({ message: 'Interest already sent. The office will follow up.' });
   }
