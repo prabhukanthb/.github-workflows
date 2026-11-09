@@ -146,7 +146,7 @@ async function fileToDataUrl(file, max = 1400) {
   return canvas.toDataURL('image/jpeg', 0.85);
 }
 
-export default function BiodataForm({ form, setForm, includeAccount = false, includeName = false }) {
+export default function BiodataForm({ form, setForm, includeAccount = false, includeName = false, includePhone = false }) {
   const { token } = useAuth();
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoError, setPhotoError] = useState('');
@@ -230,6 +230,12 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
           </div>
         </>
       )}
+      {includePhone && !includeAccount && (
+        <div>
+          <label>Mobile number</label>
+          <input value={form.phone || ''} inputMode="numeric" onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} required />
+        </div>
+      )}
       {!includeAccount && (
         <div>
           <label>Alternate mobile</label>
@@ -241,8 +247,8 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
         <label>Looking to introduce</label>
         <select value={form.gender} onChange={set('gender')} required>
           <option value="">Select</option>
-          <option value="female">Bride</option>
-          <option value="male">Groom</option>
+          <option value="female">Girl</option>
+          <option value="male">Boy</option>
         </select>
       </div>
       <div className="wide birth-row">

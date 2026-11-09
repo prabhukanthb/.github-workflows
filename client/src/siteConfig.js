@@ -48,6 +48,18 @@ export function communityLabel(value) {
   if (value === 'Other') return 'Christian/Hindu';
   return value || '';
 }
+
+export function genderLabel(gender) {
+  if (gender === 'female') return 'Girl';
+  if (gender === 'male') return 'Boy';
+  return '';
+}
+
+export function genderCardLabel(gender) {
+  if (gender === 'female') return 'Female';
+  if (gender === 'male') return 'Male';
+  return '';
+}
 export const EDUCATION = ['10th Pass', '12th Pass', 'Diploma', 'ITI', 'B.A', 'B.Sc', 'B.Com', 'B.Tech', 'M.A', 'M.Sc', 'M.Com', 'M.Tech', 'MBA', 'MCA', 'MBBS', 'PhD', 'Other'];
 export const MARITAL = [
   { label: 'Never married', value: 'Nevermarried' },

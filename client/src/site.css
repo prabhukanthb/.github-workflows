@@ -1331,6 +1331,15 @@ table.admin th {
   text-transform: uppercase;
 }
 
+.sheet-id .sheet-community {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  margin-bottom: 4px;
+}
+
 .sheet-id strong {
   font-family: var(--serif);
   font-size: 22px;

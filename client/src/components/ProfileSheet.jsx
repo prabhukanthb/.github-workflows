@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { addressText } from '../addressText';
 import { incomeToLacsInput, mainPhotoUrl } from '../profileFields';
 import Watermark from './Watermark';
-import { BRAND, ORG, ageFromDob, communityLabel, fullName, maritalLabel } from '../siteConfig';
+import { BRAND, ORG, ageFromDob, communityLabel, fullName, genderCardLabel, genderLabel, maritalLabel } from '../siteConfig';
 
 const CONTACT_LINE = 'Contact B. John Ratnam 9440545049';
 
@@ -79,6 +79,8 @@ function applyDownloadStyles(card) {
   if (idLabel) idLabel.style.cssText = 'display:block;font-size:12px;letter-spacing:1px;text-transform:uppercase;';
   const idValue = card.querySelector('.sheet-id strong');
   if (idValue) idValue.style.cssText = `font-family:Georgia, Times New Roman, serif;font-size:22px;color:${SHEET.scarlet};`;
+  const community = card.querySelector('.sheet-community');
+  if (community) community.style.cssText = `display:block;font-family:Georgia, Times New Roman, serif;font-size:16px;font-weight:700;letter-spacing:0;text-transform:none;color:${SHEET.scarlet};margin-bottom:4px;`;
   const body = card.querySelector('.sheet-body');
   if (body) {
     body.style.cssText = 'display:flex;flex-direction:row;align-items:flex-start;gap:0;padding:0;width:100%;background:transparent;';
@@ -216,6 +218,7 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
                 <div className="sheet-managed">Managed by {ORG}</div>
               </div>
               <div className="sheet-id">
+                <span className="sheet-community">{[communityLabel(profile.religion), genderCardLabel(profile.gender)].filter(Boolean).join(' ')}</span>
                 <span>Profile ID</span>
                 <strong>{profile.profileId || '—'}</strong>
               </div>
@@ -223,7 +226,7 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
             <div className="sheet-body">
               <div className="sheet-copy">
                 <h2>{name || 'Member'}</h2>
-                <Row label="Gender" value={profile.gender === 'female' ? 'Bride' : profile.gender === 'male' ? 'Groom' : ''} />
+                <Row label="Gender" value={genderLabel(profile.gender)} />
                 <Row label="Date of birth" value={dobText(profile.dateOfBirth)} />
                 <Row label="Time of birth" value={profile.timeOfBirth} />
                 <Row label="Place of birth" value={profile.placeOfBirth} />

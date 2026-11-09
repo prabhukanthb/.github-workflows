@@ -79,10 +79,10 @@ export default function Home() {
       photo: mainPhotoUrl(profile.photos)
     }))
     : [
-      { id: 'vja', name: 'Bride', city: 'Vijayawada', work: 'Teacher', photo: FEATURE_PHOTOS[0] },
-      { id: 'gnt', name: 'Groom', city: 'Vijayawada', work: 'Engineer', photo: FEATURE_PHOTOS[1] },
-      { id: 'hyd', name: 'Bride', city: 'Hyderabad', work: 'Nurse', photo: FEATURE_PHOTOS[2] },
-      { id: 'nri', name: 'Groom', city: 'Guntur', work: 'IT professional', photo: FEATURE_PHOTOS[3] }
+      { id: 'vja', name: 'Girl', city: 'Vijayawada', work: 'Teacher', photo: FEATURE_PHOTOS[0] },
+      { id: 'gnt', name: 'Boy', city: 'Vijayawada', work: 'Engineer', photo: FEATURE_PHOTOS[1] },
+      { id: 'hyd', name: 'Girl', city: 'Hyderabad', work: 'Nurse', photo: FEATURE_PHOTOS[2] },
+      { id: 'nri', name: 'Boy', city: 'Guntur', work: 'IT professional', photo: FEATURE_PHOTOS[3] }
     ];
 
   return (

@@ -106,6 +106,19 @@ export function profileIdForGender(state, profile) {
   };
 }
 
+export function restoreRegisteredProfiles(state) {
+  const profiles = state?.profiles || [];
+  if (!profiles.some((item) => item?.profileId && item.approvalStatus === 'pending')) return state;
+  return {
+    ...state,
+    profiles: profiles.map((item) => (
+      item?.profileId && item.approvalStatus === 'pending'
+        ? { ...item, approvalStatus: 'approved', showInSearch: true }
+        : item
+    ))
+  };
+}
+
 export function alignProfileIds(state) {
   if (!state?.profiles?.length) return state;
   let seq = Number(state.seq) || 0;

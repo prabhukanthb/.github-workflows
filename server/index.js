@@ -402,8 +402,11 @@ app.put('/api/profiles/me', auth, async (req, res) => {
   const next = { ...current, ...readBiodata(req.body, current) };
   const missing = validateBiodata(next);
   if (missing.length) return res.status(400).json({ message: `Please add: ${missing.join(', ')}.` });
-  next.approvalStatus = 'pending';
-  next.showInSearch = false;
+  const reviewing = !current.profileId;
+  if (reviewing) {
+    next.approvalStatus = 'pending';
+    next.showInSearch = false;
+  }
   const phonePatch = Object.prototype.hasOwnProperty.call(req.body, 'alternativePhone')
     ? optionalPhone(req.body.alternativePhone)
     : undefined;
@@ -428,7 +431,9 @@ app.put('/api/profiles/me', auth, async (req, res) => {
     : '';
   res.json({
     profile: presentProfile(saved, getDb().users, { contact: true }),
-    message: `Biodata sent to the Vijayawada office for review.${idNote}`
+    message: reviewing
+      ? `Biodata sent to the Vijayawada office for review.${idNote}`
+      : `Biodata saved.${idNote}`
   });
 });
 
@@ -746,9 +751,19 @@ app.patch('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
   if (phonePatch && phonePatch.length !== 10) {
     return res.status(400).json({ message: 'Alternate mobile must be 10 digits.' });
   }
+  let mobilePatch;
+  if (Object.prototype.hasOwnProperty.call(req.body, 'phone')) {
+    mobilePatch = String(req.body.phone || '').replace(/\D/g, '');
+    if (mobilePatch.length !== 10) {
+      return res.status(400).json({ message: 'Mobile number must be 10 digits.' });
+    }
+    const taken = getDb().users.some((user) => user.id !== current.userId && (user.phone === mobilePatch || user.alternativePhone === mobilePatch));
+    if (taken) return res.status(409).json({ message: 'This mobile number is already registered.' });
+  }
   const usersWithAccount = (users) => users.map((item) => {
     if (item.id !== current.userId) return item;
     const nextUser = { ...item };
+    if (mobilePatch) nextUser.phone = mobilePatch;
     if (phonePatch !== undefined) nextUser.alternativePhone = phonePatch;
     if (Object.prototype.hasOwnProperty.call(req.body, 'firstName')) nextUser.firstName = String(req.body.firstName || '').trim();
     if (Object.prototype.hasOwnProperty.call(req.body, 'surname')) {

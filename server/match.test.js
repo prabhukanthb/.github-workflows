@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ageFromDob, alignProfileIds, canViewMatches, cityMatches, communityMatches, formatProfileId, interestIsCurrent, isOppositeMatch, nextProfileSequence, normalizePhotos, profileIdForGender } from './match.js';
+import { ageFromDob, alignProfileIds, canViewMatches, cityMatches, communityMatches, formatProfileId, interestIsCurrent, isOppositeMatch, nextProfileSequence, normalizePhotos, profileIdForGender, restoreRegisteredProfiles } from './match.js';
 
 test('formatProfileId pads gender and sequence', () => {
   assert.equal(formatProfileId('female', 1), 'F00001');
@@ -100,6 +100,22 @@ test('a groom sees brides of the same age or younger', () => {
   assert.equal(ageFromDob(groom.dateOfBirth, today), 30);
   assert.equal(isOppositeMatch(groom, { gender: 'female', dateOfBirth: '1998-04-01' }, today), true);
   assert.equal(isOppositeMatch(groom, { gender: 'female', dateOfBirth: '1990-04-01' }, today), false);
+});
+
+test('a profile id already issued is not left pending', () => {
+  const state = {
+    profiles: [
+      { id: 'p1', profileId: 'M00120', approvalStatus: 'pending', showInSearch: false },
+      { id: 'p2', profileId: null, approvalStatus: 'pending', showInSearch: false },
+      { id: 'p3', profileId: 'F00064', approvalStatus: 'rejected', showInSearch: false }
+    ]
+  };
+  const next = restoreRegisteredProfiles(state);
+  assert.equal(next.profiles[0].approvalStatus, 'approved');
+  assert.equal(next.profiles[0].showInSearch, true);
+  assert.equal(next.profiles[1].approvalStatus, 'pending');
+  assert.equal(next.profiles[2].approvalStatus, 'rejected');
+  assert.equal(restoreRegisteredProfiles(next), next);
 });
 
 test('only an approved biodata can open other profiles', () => {

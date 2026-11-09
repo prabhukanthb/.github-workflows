@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
 import { MongoClient } from 'mongodb';
-import { alignProfileIds } from './match.js';
+import { alignProfileIds, restoreRegisteredProfiles } from './match.js';
 import { buildSeed, withOfficePhone } from './seedData.js';
 import { assertTeluguMongoUri, TELUGU_DB } from './deployGuard.js';
 
@@ -75,7 +75,8 @@ async function applyOfficePhone() {
 }
 
 async function applyProfileIds() {
-  const next = alignProfileIds(db);
+  const aligned = alignProfileIds(db);
+  const next = restoreRegisteredProfiles(aligned);
   if (next === db) return db;
   db = next;
   await persist();

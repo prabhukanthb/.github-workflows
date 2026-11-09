@@ -200,7 +200,7 @@ export default function Admin() {
       <div className="panel create-banner">
         <div>
           <h2>Create a profile</h2>
-          <p>Add a bride or groom biodata for a family. Office staff do not have a member profile.</p>
+          <p>Add a girl or boy biodata for a family. Office staff do not have a member profile.</p>
         </div>
         <Link to="/admin/create" className="btn-gold">Create profile</Link>
       </div>
@@ -226,7 +226,7 @@ export default function Admin() {
               <th>Profile ID</th>
               <th>Phone number</th>
               <th>Age</th>
-              <th>Bride/Groom</th>
+              <th>Girl/Boy</th>
               <th>Job location</th>
               <th>Status</th>
               <th></th>
@@ -242,7 +242,7 @@ export default function Admin() {
                 </td>
                 <td>{profile.phone || '—'}</td>
                 <td>{ageFromDob(profile.dateOfBirth) || '—'}</td>
-                <td>{profile.gender === 'female' ? 'Bride' : profile.gender === 'male' ? 'Groom' : '—'}</td>
+                <td>{profile.gender === 'female' ? 'Girl' : profile.gender === 'male' ? 'Boy' : '—'}</td>
                 <td>{profile.jobLocation || '—'}</td>
                 <td>
                   {profile.approvalStatus === 'approved' && (
@@ -414,7 +414,7 @@ export function EditProfile() {
       )}
       {!form ? <p>Loading biodata…</p> : (
         <form className="panel" onSubmit={save}>
-          <BiodataForm form={form} setForm={setForm} includeName />
+          <BiodataForm form={form} setForm={setForm} includeName includePhone />
           <button className="btn-maroon" style={{ marginTop: 16 }} type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save profile'}</button>
         </form>
       )}
