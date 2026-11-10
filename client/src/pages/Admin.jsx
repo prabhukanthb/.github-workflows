@@ -4,7 +4,7 @@ import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import BiodataForm, { profileToForm } from '../components/BiodataForm';
 import ProfileSheet from '../components/ProfileSheet';
-import { ageFromDob, fullName } from '../siteConfig';
+import { ageFromDob, fullName, genderLabel } from '../siteConfig';
 
 function ActionIcon({ name }) {
   if (name === 'view') {
@@ -200,7 +200,7 @@ export default function Admin() {
       <div className="panel create-banner">
         <div>
           <h2>Create a profile</h2>
-          <p>Add a girl or boy biodata for a family. Office staff do not have a member profile.</p>
+          <p>Add a female or male biodata for a family. Office staff do not have a member profile.</p>
         </div>
         <Link to="/admin/create" className="btn-gold">Create profile</Link>
       </div>
@@ -226,7 +226,7 @@ export default function Admin() {
               <th>Profile ID</th>
               <th>Phone number</th>
               <th>Age</th>
-              <th>Girl/Boy</th>
+              <th>Male/Female</th>
               <th>Job location</th>
               <th>Status</th>
               <th></th>
@@ -242,7 +242,7 @@ export default function Admin() {
                 </td>
                 <td>{profile.phone || '—'}</td>
                 <td>{ageFromDob(profile.dateOfBirth) || '—'}</td>
-                <td>{profile.gender === 'female' ? 'Girl' : profile.gender === 'male' ? 'Boy' : '—'}</td>
+                <td>{genderLabel(profile.gender) || '—'}</td>
                 <td>{profile.jobLocation || '—'}</td>
                 <td>
                   {profile.approvalStatus === 'approved' && (

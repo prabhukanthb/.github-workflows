@@ -48,7 +48,7 @@ export default function Login() {
           <div className="notice">
             Demo office: admin@example.com / Office@12345
             <br />
-            Demo girl: anitha.demo@example.com / Member@12345
+            Demo female: anitha.demo@example.com / Member@12345
           </div>
         )}
       </form>

@@ -50,15 +50,13 @@ export function communityLabel(value) {
 }
 
 export function genderLabel(gender) {
-  if (gender === 'female') return 'Girl';
-  if (gender === 'male') return 'Boy';
+  if (gender === 'female') return 'Female';
+  if (gender === 'male') return 'Male';
   return '';
 }
 
 export function genderCardLabel(gender) {
-  if (gender === 'female') return 'Female';
-  if (gender === 'male') return 'Male';
-  return '';
+  return genderLabel(gender);
 }
 export const EDUCATION = ['10th Pass', '12th Pass', 'Diploma', 'ITI', 'B.A', 'B.Sc', 'B.Com', 'B.Tech', 'M.A', 'M.Sc', 'M.Com', 'M.Tech', 'MBA', 'MCA', 'MBBS', 'PhD', 'Other'];
 export const MARITAL = [

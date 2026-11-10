@@ -247,8 +247,8 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
         <label>Looking to introduce</label>
         <select value={form.gender} onChange={set('gender')} required>
           <option value="">Select</option>
-          <option value="female">Girl</option>
-          <option value="male">Boy</option>
+          <option value="female">Female</option>
+          <option value="male">Male</option>
         </select>
       </div>
       <div className="wide birth-row">

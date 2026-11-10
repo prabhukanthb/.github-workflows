@@ -82,8 +82,8 @@ export default function Browse() {
       {!isAdmin && viewer?.gender && viewerAge && (
         <p>
           {viewer.gender === 'female'
-            ? `Showing ${community ? `${community} ` : ''}boys older than you (${viewerAge}).`
-            : `Showing ${community ? `${community} ` : ''}girls aged ${viewerAge} or younger.`}
+            ? `Showing ${community ? `${community} ` : ''}males older than you (${viewerAge}).`
+            : `Showing ${community ? `${community} ` : ''}females aged ${viewerAge} or younger.`}
         </p>
       )}
       {!approved && (
