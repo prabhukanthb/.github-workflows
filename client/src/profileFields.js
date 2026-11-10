@@ -1,6 +1,7 @@
 export const SUB_CASTES = [
   { label: 'SC', value: 'SC' },
   { label: 'BC', value: 'BC' },
+  { label: 'BC-C', value: 'BC-C' },
   { label: 'OC', value: 'OC' },
   { label: 'Not applicable', value: 'NA' }
 ];

@@ -58,7 +58,7 @@ export function genderLabel(gender) {
 export function genderCardLabel(gender) {
   return genderLabel(gender);
 }
-export const EDUCATION = ['10th Pass', '12th Pass', 'Diploma', 'ITI', 'B.A', 'B.Sc', 'B.Com', 'B.Tech', 'M.A', 'M.Sc', 'M.Com', 'M.Tech', 'MBA', 'MCA', 'MBBS', 'PhD', 'Other'];
+export const EDUCATION = ['10th Pass', '12th Pass', 'Diploma', 'ITI', 'B.A', 'B.Sc', 'B.Com', 'B.Tech', 'M.A', 'M.Sc', 'M.Com', 'M.Tech', 'MS - USA', 'MS - Canada', 'MS - Germany', 'MS - UK', 'MS - Australia', 'MBA', 'MCA', 'MBBS', 'PhD', 'Other'];
 export const MARITAL = [
   { label: 'Never married', value: 'Nevermarried' },
   { label: 'Divorced', value: 'Divorced' },
