@@ -22,7 +22,7 @@ Without `MONGODB_URI`, profiles stay in `data/db.json` on this computer. Product
 
 ## Launch on Vercel
 
-`telugukalyanamala.com` and `telugukalyanamala.org` are one site. `www` and `.org` redirect to `https://telugukalyanamala.com`. Do not add `newkalyanamala.com` or `newkalyanamala.org` to this Vercel project, and do not reuse that site’s MongoDB URI or Cloudinary cloud.
+`telugukalyanamala.com` and `telugukalyanamala.org` are one site. `www.telugukalyanamala.org` and the `.org` name redirect to `https://www.telugukalyanamala.com`. `newkalyanamala.com` and `newkalyanamala.org`, including `www`, also redirect there. Do not reuse the New Kalyanamala MongoDB URI or Cloudinary cloud.
 
 1. In MongoDB Atlas, create a database user and a database named `telugu-kalyanamala`. The connection string must end with `/telugu-kalyanamala`.
 2. In Cloudinary, create a separate cloud for this site. Photos are stored only in the folder `telugu-kalyanamala`.

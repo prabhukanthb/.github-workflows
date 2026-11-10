@@ -38,6 +38,54 @@
       "has": [{ "type": "host", "value": "www.telugukalyanamala.org" }],
       "destination": "https://telugukalyanamala.com/:path*",
       "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "newkalyanamala.com" }],
+      "destination": "https://www.telugukalyanamala.com/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "newkalyanamala.com" }],
+      "destination": "https://www.telugukalyanamala.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "www.newkalyanamala.com" }],
+      "destination": "https://www.telugukalyanamala.com/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.newkalyanamala.com" }],
+      "destination": "https://www.telugukalyanamala.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "newkalyanamala.org" }],
+      "destination": "https://www.telugukalyanamala.com/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "newkalyanamala.org" }],
+      "destination": "https://www.telugukalyanamala.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "www.newkalyanamala.org" }],
+      "destination": "https://www.telugukalyanamala.com/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.newkalyanamala.org" }],
+      "destination": "https://www.telugukalyanamala.com/:path*",
+      "permanent": true
     }
   ],
   "rewrites": [

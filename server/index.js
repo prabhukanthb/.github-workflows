@@ -19,13 +19,23 @@ const DUMMY_PASSWORD_HASH = bcrypt.hashSync('login-timing-padding', 8);
 const app = express();
 app.set('trust proxy', 1);
 
+const CANONICAL_ORIGIN = 'https://www.telugukalyanamala.com';
+const REDIRECT_HOSTS = new Set([
+  'telugukalyanamala.com',
+  'telugukalyanamala.org',
+  'www.telugukalyanamala.org',
+  'newkalyanamala.com',
+  'www.newkalyanamala.com',
+  'newkalyanamala.org',
+  'www.newkalyanamala.org'
+]);
+
 app.use(cors());
 app.use(express.json({ limit: '4mb' }));
 app.use((req, res, next) => {
   const host = String(req.headers.host || '').split(':')[0].toLowerCase();
-  const aliases = new Set(['telugukalyanamala.com', 'telugukalyanamala.org', 'www.telugukalyanamala.org']);
-  if (!aliases.has(host)) return next();
-  return res.redirect(301, `https://www.telugukalyanamala.com${req.originalUrl}`);
+  if (!REDIRECT_HOSTS.has(host)) return next();
+  return res.redirect(301, `${CANONICAL_ORIGIN}${req.originalUrl}`);
 });
 app.use(async (_req, res, next) => {
   try {
