@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import { HEIGHT_OPTIONS, SUB_CASTES, heightToValue, incomeToLacsInput, lookupIndianPincode, normalizePhotos } from '../profileFields';
-import { EDUCATION, EMPLOYMENT, MARITAL, MOTHER_TONGUES, RELIGIONS, SIBLINGS, ageFromDob, communityLabel, maxDobFor18 } from '../siteConfig';
+import { EDUCATION, EMPLOYMENT, MARITAL, MOTHER_TONGUES, RELIGIONS, SIBLINGS, COMPLEXIONS, ageFromDob, communityLabel, maxDobFor18 } from '../siteConfig';
 
 export function profileToForm(profile = {}, user = {}) {
   return {
@@ -19,6 +19,7 @@ export function profileToForm(profile = {}, user = {}) {
     heightFeet: profile.heightFeet ?? 5,
     heightInches: profile.heightInches ?? 4,
     height: heightToValue(profile.heightFeet ?? 5, profile.heightInches ?? 4),
+    complexion: COMPLEXIONS.includes(profile.complexion) ? profile.complexion : '',
     religion: communityLabel(profile.religion) || 'Hindu',
     caste: 'Mala',
     subCaste: profile.subCaste || 'SC',
@@ -305,6 +306,13 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
         >
           <option value="">Select</option>
           {HEIGHT_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+        </select>
+      </div>
+      <div>
+        <label>Skin complexion</label>
+        <select value={form.complexion || ''} onChange={set('complexion')}>
+          <option value="">Select</option>
+          {COMPLEXIONS.map((item) => <option key={item}>{item}</option>)}
         </select>
       </div>
       <h3 className="form-section wide">Religion & Family</h3>

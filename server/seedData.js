@@ -351,6 +351,7 @@ function profile(input) {
     placeOfBirth: '',
     heightFeet: input.heightFeet,
     heightInches: input.heightInches,
+    complexion: input.complexion || '',
     religion: input.religion,
     subCaste: 'SC',
     caste: 'Mala',

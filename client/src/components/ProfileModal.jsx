@@ -47,6 +47,7 @@ export default function ProfileModal({ profile, onClose, onInterest }) {
             <span>Time of birth</span><div>{profile.timeOfBirth}</div>
             <span>Place of birth</span><div>{profile.placeOfBirth}</div>
             <span>Height</span><div>{profile.heightFeet} ft {profile.heightInches} in</div>
+            {profile.complexion && <><span>Skin complexion</span><div>{profile.complexion}</div></>}
             <span>Caste</span><div>Mala</div>
             <span>Community</span><div>{communityLabel(profile.religion)}</div>
             <span>Mother tongue</span><div>{profile.motherTongue}</div>

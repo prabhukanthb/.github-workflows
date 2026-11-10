@@ -124,6 +124,7 @@ function blankProfile(userId) {
     placeOfBirth: '',
     heightFeet: 5,
     heightInches: 4,
+    complexion: '',
     religion: 'Hindu',
     subCaste: 'SC',
     caste: 'Mala',
@@ -189,11 +190,18 @@ function readTimeOfBirth(value) {
 }
 
 const SIBLING_OPTIONS = ['Brothers', 'Sister', 'Brother/Sister'];
+const COMPLEXIONS = ['Fair / Very Fair', 'Wheatish', 'Dusky', 'Dark'];
 
 function readSiblings(value, current) {
   const source = value === undefined || value === null ? current : value;
   const text = String(source ?? '').trim();
   return SIBLING_OPTIONS.includes(text) ? text : '';
+}
+
+function readComplexion(value, current) {
+  const source = value === undefined || value === null ? current : value;
+  const text = String(source ?? '').trim();
+  return COMPLEXIONS.includes(text) ? text : '';
 }
 
 function readBiodata(body, current = {}) {
@@ -211,6 +219,7 @@ function readBiodata(body, current = {}) {
     placeOfBirth: String(body.placeOfBirth ?? current.placeOfBirth ?? '').trim().slice(0, 120),
     heightFeet: Number(body.heightFeet ?? current.heightFeet ?? 5),
     heightInches: Number(body.heightInches ?? current.heightInches ?? 0),
+    complexion: readComplexion(body.complexion, current.complexion),
     religion: communityName(body.religion ?? current.religion),
     caste: 'Mala',
     subCaste: body.subCaste ?? current.subCaste ?? 'SC',

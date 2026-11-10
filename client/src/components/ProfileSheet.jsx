@@ -296,6 +296,7 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
                 <Row label="Place of birth" value={profile.placeOfBirth} />
                 <Row label="Age" value={age ? `${age} years` : ''} />
                 <Row label="Height" value={heightText(profile)} />
+                <Row label="Skin complexion" value={profile.complexion} />
                 <Row label="Marital status" value={maritalLabel(profile.maritalStatus)} />
                 <Row label="Siblings" value={profile.siblingsCount} />
                 <Row label="About Siblings" value={profile.aboutSiblings} />
