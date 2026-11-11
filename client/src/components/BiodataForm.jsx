@@ -384,6 +384,9 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
         <label>Education</label>
         <select value={form.highestEducation} onChange={set('highestEducation')} required>
           <option value="">Select</option>
+          {form.highestEducation && !EDUCATION.includes(form.highestEducation) && (
+            <option value={form.highestEducation}>{form.highestEducation}</option>
+          )}
           {EDUCATION.map((item) => <option key={item}>{item}</option>)}
         </select>
       </div>
