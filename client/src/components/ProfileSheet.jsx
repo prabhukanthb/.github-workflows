@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { addressText } from '../addressText';
 import { incomeToLacsInput, mainPhotoUrl } from '../profileFields';
+import { sheetMarkPoints } from '../sheetWatermark';
 import Watermark from './Watermark';
 import { BRAND, ORG, ageFromDob, communityLabel, fullName, genderCardLabel, genderLabel, maritalLabel } from '../siteConfig';
 
@@ -125,6 +126,25 @@ function applyDownloadStyles(card) {
   }
 }
 
+const SHEET_MARK_FONT = '700 22px Georgia, Times New Roman, serif';
+
+function drawSheetMark(ctx, x, y) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(-18 * Math.PI / 180);
+  ctx.font = SHEET_MARK_FONT;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.lineWidth = 3;
+  ctx.globalAlpha = 0.55;
+  ctx.strokeStyle = '#F7F4EC';
+  ctx.strokeText(BRAND, 0, 0);
+  ctx.globalAlpha = 0.22;
+  ctx.fillStyle = SHEET.deep;
+  ctx.fillText(BRAND, 0, 0);
+  ctx.restore();
+}
+
 function paintWatermark(canvas, photoBox) {
   const ctx = canvas.getContext('2d');
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -138,23 +158,12 @@ function paintWatermark(canvas, photoBox) {
   } else {
     ctx.clip();
   }
-  ctx.translate(canvas.width / 2, canvas.height / 2);
-  ctx.rotate(-18 * Math.PI / 180);
-  ctx.font = '700 22px Georgia, Times New Roman, serif';
-  ctx.textAlign = 'center';
-  ctx.lineWidth = 3;
-  const label = BRAND;
-  const stepX = 340;
-  const stepY = 50;
-  for (let y = -canvas.height; y < canvas.height; y += stepY) {
-    for (let x = -canvas.width; x < canvas.width; x += stepX) {
-      ctx.globalAlpha = 0.55;
-      ctx.strokeStyle = '#F7F4EC';
-      ctx.strokeText(label, x, y);
-      ctx.globalAlpha = 0.22;
-      ctx.fillStyle = SHEET.deep;
-      ctx.fillText(label, x, y);
-    }
+  ctx.font = SHEET_MARK_FONT;
+  const measured = ctx.measureText(BRAND).width;
+  const textWidth = measured > 40 ? measured : 220;
+  const photo = snapshot ? { x: snapshot.x, y: snapshot.y, w: snapshot.w, h: snapshot.h } : null;
+  for (const point of sheetMarkPoints(canvas.width, canvas.height, photo, textWidth)) {
+    drawSheetMark(ctx, point.x, point.y);
   }
   ctx.restore();
   if (!snapshot) return;
