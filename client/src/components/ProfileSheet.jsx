@@ -37,6 +37,34 @@ function Row({ label, value, downloadValue }) {
   );
 }
 
+const DOWNLOAD_CARD_WIDTH = 920;
+const DOWNLOAD_PHOTO_WIDTH = Math.round(DOWNLOAD_CARD_WIDTH * 0.5);
+const DOWNLOAD_PHOTO_BORDER = 8;
+
+function downloadPhotoContentSize(pixelWidth, pixelHeight) {
+  const width = Math.max(1, DOWNLOAD_PHOTO_WIDTH - DOWNLOAD_PHOTO_BORDER);
+  if (!pixelWidth || !pixelHeight) return { width, height: width };
+  return {
+    width,
+    height: Math.max(1, Math.round(width * pixelHeight / pixelWidth))
+  };
+}
+
+function photoSnapshotCanvas(doc, bitmap) {
+  const maxEdge = 2400;
+  const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+  const shot = doc.createElement('canvas');
+  shot.width = width;
+  shot.height = height;
+  const ctx = shot.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  return shot;
+}
+
 const SHEET = {
   cream: '#F7F4EC',
   deep: '#5E6B52',
@@ -48,8 +76,8 @@ const SHEET = {
 };
 
 function applyDownloadStyles(card) {
-  const cardWidth = 920;
-  const photoWidth = Math.round(cardWidth * 0.5);
+  const cardWidth = DOWNLOAD_CARD_WIDTH;
+  const photoWidth = DOWNLOAD_PHOTO_WIDTH;
   card.style.cssText = [
     'position:relative',
     'overflow:hidden',
@@ -118,7 +146,8 @@ function applyDownloadStyles(card) {
   }
   const img = photo?.querySelector('img');
   if (img) {
-    img.style.cssText = 'width:100%;height:auto;max-height:640px;object-fit:contain;object-position:center top;display:block;';
+    const size = downloadPhotoContentSize(img.naturalWidth, img.naturalHeight);
+    img.style.cssText = `width:${size.width}px;height:${size.height}px;max-width:none;max-height:none;object-fit:fill;display:block;`;
   }
   const foot = card.querySelector('.sheet-foot');
   if (foot) {
@@ -223,10 +252,19 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
   const download = async () => {
     setBusy(true);
     setError('');
+    let bitmap = null;
     try {
       const { default: html2canvas } = await import('html2canvas');
       const scale = 2;
       let photoBox = null;
+      const sourcePhoto = cardRef.current.querySelector('.sheet-photo img');
+      if (sourcePhoto?.naturalWidth) {
+        try {
+          bitmap = await createImageBitmap(sourcePhoto);
+        } catch {
+          bitmap = null;
+        }
+      }
       const canvas = await html2canvas(cardRef.current, {
         scale,
         useCORS: true,
@@ -240,6 +278,13 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
           });
           applyDownloadStyles(card);
           const photo = card.querySelector('.sheet-photo');
+          const img = photo?.querySelector('img');
+          if (bitmap && img) {
+            const shot = photoSnapshotCanvas(doc, bitmap);
+            const size = downloadPhotoContentSize(shot.width, shot.height);
+            shot.style.cssText = `width:${size.width}px;height:${size.height}px;max-width:none;max-height:none;display:block;`;
+            img.replaceWith(shot);
+          }
           if (!photo) return;
           const cardRect = card.getBoundingClientRect();
           const photoRect = photo.getBoundingClientRect();
@@ -260,6 +305,7 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
     } catch {
       setError('Could not download the profile. Please try again.');
     } finally {
+      bitmap?.close();
       setBusy(false);
     }
   };
