@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ageFromDob, alignProfileIds, canViewMatches, cityMatches, communityMatches, communityName, formatProfileId, interestIsCurrent, isOppositeMatch, nextProfileSequence, normalizePhotos, normalizeStoredReligions, profileIdForGender, restoreRegisteredProfiles } from './match.js';
+import { ageFromDob, alignProfileIds, canViewMatches, cityMatches, communityMatches, communityName, formatProfileId, interestIsCurrent, isOppositeMatch, nextProfileSequence, normalizePhotos, normalizeStoredReligions, profileIdForGender, religionToStore, restoreRegisteredProfiles } from './match.js';
 
 test('formatProfileId pads gender and sequence', () => {
   assert.equal(formatProfileId('female', 1), 'F00001');
@@ -145,6 +145,13 @@ test('Christian and Hindu search stay within that community and every other comm
   assert.equal(communityName('క్రైస్తవ'), 'Christian');
   assert.equal(communityMatches('Christian', 'క్రైస్తవ'), true);
   assert.equal(communityMatches('క్రైస్తవ', 'Hindu'), false);
+});
+
+test('a translated religion is not stored unless it is already Christian', () => {
+  assert.equal(religionToStore('క్రైస్తవ', 'Hindu'), 'Christian');
+  assert.equal(religionToStore('Chrétien', 'Hindu'), 'Hindu');
+  assert.equal(religionToStore('ईसाई', ''), '');
+  assert.equal(religionToStore('Christian', 'Hindu'), 'Christian');
 });
 
 test('a Telugu Christian religion is stored as Christian', () => {

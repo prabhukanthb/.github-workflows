@@ -246,7 +246,7 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
       <h3 className="form-section wide">Basic Details</h3>
       <div>
         <label>Looking to introduce</label>
-        <select value={form.gender} onChange={set('gender')} required>
+        <select value={form.gender} onChange={set('gender')} translate="no" required>
           <option value="">Select</option>
           <option value="female">Female</option>
           <option value="male">Male</option>
@@ -310,22 +310,22 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
       </div>
       <div>
         <label>Skin complexion</label>
-        <select value={form.complexion || ''} onChange={set('complexion')}>
+        <select value={form.complexion || ''} onChange={set('complexion')} translate="no">
           <option value="">Select</option>
-          {COMPLEXIONS.map((item) => <option key={item}>{item}</option>)}
+          {COMPLEXIONS.map((item) => <option key={item} value={item}>{item}</option>)}
         </select>
       </div>
       <h3 className="form-section wide">Religion & Family</h3>
       <div>
         <label>Sub-community</label>
-        <select value={form.religion} onChange={set('religion')}>
-          {RELIGIONS.map((item) => <option key={item}>{item}</option>)}
+        <select value={form.religion} onChange={set('religion')} translate="no">
+          {RELIGIONS.map((item) => <option key={item} value={item}>{item}</option>)}
         </select>
       </div>
       <div>
         <label>Mother tongue</label>
-        <select value={form.motherTongue} onChange={set('motherTongue')}>
-          {MOTHER_TONGUES.map((item) => <option key={item}>{item}</option>)}
+        <select value={form.motherTongue} onChange={set('motherTongue')} translate="no">
+          {MOTHER_TONGUES.map((item) => <option key={item} value={item}>{item}</option>)}
         </select>
       </div>
       <div>
@@ -382,12 +382,12 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
       <h3 className="form-section wide">Education & Professional</h3>
       <div>
         <label>Education</label>
-        <select value={form.highestEducation} onChange={set('highestEducation')} required>
+        <select value={form.highestEducation} onChange={set('highestEducation')} translate="no" required>
           <option value="">Select</option>
           {form.highestEducation && !EDUCATION.includes(form.highestEducation) && (
             <option value={form.highestEducation}>{form.highestEducation}</option>
           )}
-          {EDUCATION.map((item) => <option key={item}>{item}</option>)}
+          {EDUCATION.map((item) => <option key={item} value={item}>{item}</option>)}
         </select>
       </div>
       <div>

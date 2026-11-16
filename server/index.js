@@ -9,7 +9,7 @@ import { ageFromDob, canViewMatches, cityMatches, communityMatches, formatProfil
 import { PASSWORD_HINT, defaultPassword, matchesLogin, toIncomeRupees } from './passwords.js';
 import { cloudinaryStatus, photosConfigured, uploadTeluguPhoto } from './photos.js';
 import { TELUGU_DOMAINS } from './deployGuard.js';
-import { communityName, getDb, initDb, presentProfile, publicUser, update } from './store.js';
+import { communityName, getDb, initDb, presentProfile, publicUser, religionToStore, update } from './store.js';
 import { reactivateDeleted } from './reactivate.js';
 import { limitAuth, LOGIN_FAILURE } from './rateLimit.js';
 import { applySeo, robotsTxt, sitemapXml } from './seo.js';
@@ -231,7 +231,7 @@ function readBiodata(body, current = {}) {
     heightFeet: Number(body.heightFeet ?? current.heightFeet ?? 5),
     heightInches: Number(body.heightInches ?? current.heightInches ?? 0),
     complexion: readComplexion(body.complexion, current.complexion),
-    religion: communityName(body.religion ?? current.religion),
+    religion: religionToStore(body.religion, current.religion),
     caste: 'Mala',
     subCaste: body.subCaste ?? current.subCaste ?? 'SC',
     motherTongue: body.motherTongue ?? current.motherTongue ?? 'Telugu',

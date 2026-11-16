@@ -166,9 +166,18 @@ const COMMUNITY_NAMES = {
   'క్రిస్టియన్': 'Christian'
 };
 
+const RELIGIONS = ['Hindu', 'Christian', 'Ambedkarist', 'Buddhist', 'Christian/Hindu'];
+
 export function communityName(value) {
   const text = String(value || '').trim();
   return COMMUNITY_NAMES[text] || text;
+}
+
+export function religionToStore(incoming, current = '') {
+  const named = communityName(incoming);
+  if (RELIGIONS.includes(named)) return named;
+  const previous = communityName(current);
+  return RELIGIONS.includes(previous) ? previous : (current || '');
 }
 
 export function normalizeStoredReligions(state) {

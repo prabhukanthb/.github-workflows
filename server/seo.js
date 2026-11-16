@@ -59,6 +59,7 @@ export function headTags(pathname) {
   const description = escapeHtml(page.description);
   const robots = index ? 'index,follow' : 'noindex,nofollow';
   return [
+    `<meta name="google" content="notranslate" />`,
     `<meta name="description" content="${description}" />`,
     `<meta name="robots" content="${robots}" />`,
     `<link rel="canonical" href="${url}" />`,
@@ -82,7 +83,8 @@ export function applySeo(html, pathname) {
   next = next.replace(/<meta\s+name=["']description["'][^>]*>/gi, '');
   next = next.replace(/<meta\s+name=["']robots["'][^>]*>/gi, '');
   next = next.replace(/<link\s+rel=["']canonical["'][^>]*>/gi, '');
-  next = next.replace(/<html\s+lang=["'][^"']*["']>/i, '<html lang="en-IN">');
+  next = next.replace(/<html\b[^>]*>/i, '<html lang="en-IN" translate="no" class="notranslate">');
+  next = next.replace(/<meta\s+name=["']google["'][^>]*>/gi, '');
   return next.replace('</head>', `    ${headTags(pathname)}\n  </head>`);
 }
 

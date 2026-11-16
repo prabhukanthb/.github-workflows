@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
 import { MongoClient } from 'mongodb';
-import { alignProfileIds, communityName, normalizeStoredReligions, restoreRegisteredProfiles } from './match.js';
+import { alignProfileIds, communityName, normalizeStoredReligions, religionToStore, restoreRegisteredProfiles } from './match.js';
 import { buildSeed, withOfficePhone } from './seedData.js';
 import { assertTeluguMongoUri, TELUGU_DB } from './deployGuard.js';
 
@@ -135,7 +135,7 @@ export function publicUser(user) {
   };
 }
 
-export { communityName };
+export { communityName, religionToStore };
 
 export function presentProfile(profile, users, { contact = false } = {}) {
   const owner = users.find((user) => user.id === profile.userId);

@@ -31,6 +31,9 @@ function Seo() {
   useEffect(() => {
     const page = pageFor(pathname);
     document.title = page.title;
+    document.documentElement.setAttribute('translate', 'no');
+    document.documentElement.classList.add('notranslate');
+    ensureMeta('google', 'notranslate');
     ensureMeta('description', page.description);
     ensureMeta('robots', page.index ? 'index,follow' : 'noindex,nofollow');
   }, [pathname]);
@@ -40,7 +43,7 @@ function Seo() {
 function Shell() {
   const { loading } = useAuth();
   return (
-    <div className="site-shell">
+    <div className="site-shell notranslate" translate="no">
       <Seo />
       <SiteHeader />
       <main className="site-main">

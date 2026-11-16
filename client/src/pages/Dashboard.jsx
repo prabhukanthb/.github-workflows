@@ -28,28 +28,42 @@ function Count({ count, label, selected, onClick }) {
   );
 }
 
+function BarRow({ count, gender, max, selected, onClick }) {
+  const width = max > 0 ? Math.round((count / max) * 100) : 0;
+  return (
+    <button type="button" className={`dash-bar${selected ? ' is-selected' : ''}`} aria-pressed={selected} onClick={onClick}>
+      <span className="dash-bar-track">
+        <span className={`dash-bar-fill ${gender}`} style={{ width: `${width}%` }} />
+      </span>
+      <span className="dash-bar-count">{count} {gender === 'male' ? 'Male' : 'Female'}</span>
+    </button>
+  );
+}
+
 function Matrix({ title, rows, kind, pick, onPick }) {
+  const max = Math.max(1, ...rows.flatMap((row) => [row.male, row.female]));
   return (
     <section className="panel dash-panel">
       <h2>{title}</h2>
-      <div className="dash-row dash-head">
-        <span />
-        <span>Male</span>
-        <span>Female</span>
+      <div className="dash-legend">
+        <span><i className="dash-swatch male" /> Male</span>
+        <span><i className="dash-swatch female" /> Female</span>
       </div>
       {rows.length === 0 && <p>No profiles in this view yet.</p>}
       {rows.map((row) => (
-        <div className="dash-row" key={row.label}>
-          <span className="dash-label">{row.label}</span>
-          <Count
+        <div className="dash-chart-row" key={row.label}>
+          <div className="dash-label">{row.label}</div>
+          <BarRow
             count={row.male}
-            label="Male"
+            gender="male"
+            max={max}
             selected={samePick(pick, { kind, label: row.label, gender: 'male' })}
             onClick={() => onPick({ kind, label: row.label, gender: 'male' })}
           />
-          <Count
+          <BarRow
             count={row.female}
-            label="Female"
+            gender="female"
+            max={max}
             selected={samePick(pick, { kind, label: row.label, gender: 'female' })}
             onClick={() => onPick({ kind, label: row.label, gender: 'female' })}
           />
@@ -86,7 +100,7 @@ export default function Dashboard() {
     <div className="page dash-board">
       <div className="kicker">Vijayawada office</div>
       <h2>Dashboard</h2>
-      <p>Male and female counts by community and qualification. Click a number to see those profiles. Deleted profiles are not counted. <Link to="/admin">Back to the office list</Link>.</p>
+      <p>Male and female counts by community and qualification. Click a bar to see those profiles. Deleted profiles are not counted. <Link to="/admin">Back to the office list</Link>.</p>
       {error && <div className="error">{error}</div>}
       <div className="dash-scope">
         <button type="button" className={scope === 'search' ? 'btn-maroon' : 'btn-gold'} onClick={() => { setScope('search'); setPick(null); }}>In search</button>

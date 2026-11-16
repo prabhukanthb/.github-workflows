@@ -19,6 +19,8 @@ test('the homepage is indexable and names Vijayawada and the Mala community', ()
   assert.match(html, /meta name="description" content="[^"]*Mala matrimony/);
   assert.match(html, /meta name="robots" content="index,follow"/);
   assert.match(html, /rel="canonical" href="https:\/\/www\.telugukalyanamala\.com\/"/);
+  assert.match(html, /<html lang="en-IN" translate="no" class="notranslate">/);
+  assert.match(html, /meta name="google" content="notranslate"/);
   assert.match(html, /application\/ld\+json/);
   assert.match(html, /Vijayawada/);
   assert.equal(html.includes('Old description'), false);

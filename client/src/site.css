@@ -1644,6 +1644,88 @@ table.admin a.btn-maroon {
   color: var(--gold);
 }
 
+.dash-legend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.dash-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  border-radius: 4px;
+  vertical-align: -2px;
+}
+
+.dash-swatch.male {
+  background: var(--maroon-mid);
+}
+
+.dash-swatch.female {
+  background: var(--maroon-deep);
+}
+
+.dash-chart-row {
+  margin-bottom: 14px;
+}
+
+.dash-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+.dash-bar-track {
+  flex: 1;
+  height: 18px;
+  background: #f3f0e6;
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.dash-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 9px;
+  min-width: 0;
+}
+
+.dash-bar-fill.male {
+  background: var(--maroon-mid);
+}
+
+.dash-bar-fill.female {
+  background: var(--maroon-deep);
+}
+
+.dash-bar-count {
+  min-width: 84px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.dash-bar.is-selected .dash-bar-track {
+  outline: 2px solid var(--maroon-deep);
+  outline-offset: 2px;
+}
+
+.dash-bar.is-selected .dash-bar-count {
+  color: var(--maroon-mid);
+}
+
 @media (max-width: 700px) {
   .dash-genders,
   .dash-row {
