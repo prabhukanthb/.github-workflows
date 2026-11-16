@@ -6,6 +6,7 @@ import { MongoClient } from 'mongodb';
 import { alignProfileIds, communityName, normalizeStoredReligions, religionToStore, restoreRegisteredProfiles } from './match.js';
 import { buildSeed, withOfficePhone } from './seedData.js';
 import { assertTeluguMongoUri, TELUGU_DB } from './deployGuard.js';
+import { normalizeStoredEducation } from './education.js';
 
 const FILE = path.join(process.cwd(), 'data', 'db.json');
 const SITE_ID = 'telugu-kalyanamala';
@@ -91,10 +92,22 @@ async function applyCommunityNames() {
   return db;
 }
 
+async function applyEducation() {
+  const { state: next, changes } = normalizeStoredEducation(db);
+  if (next === db) return db;
+  for (const change of changes) {
+    console.log(`Qualification ${change.profileId || change.id}: ${change.from} → ${change.to}`);
+  }
+  db = next;
+  await persist();
+  return db;
+}
+
 async function settleDb() {
   await applyOfficePhone();
   await applyProfileIds();
-  return applyCommunityNames();
+  await applyCommunityNames();
+  return applyEducation();
 }
 
 export async function initDb() {
