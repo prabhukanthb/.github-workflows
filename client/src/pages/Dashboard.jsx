@@ -9,6 +9,7 @@ import {
   matchesPick,
   pickTitle,
   profilesInScope,
+  jobRows,
   qualificationRows,
   religionRows,
   samePick
@@ -100,7 +101,7 @@ export default function Dashboard() {
     <div className="page dash-board">
       <div className="kicker">Vijayawada office</div>
       <h2>Dashboard</h2>
-      <p>Male and female counts by community and qualification. Click a bar to see those profiles. Deleted profiles are not counted. <Link to="/admin">Back to the office list</Link>.</p>
+      <p>Male and female counts by community, qualification, and job. Click a bar to see those profiles. Deleted profiles are not counted. <Link to="/admin">Back to the office list</Link>.</p>
       {error && <div className="error">{error}</div>}
       <div className="dash-scope">
         <button type="button" className={scope === 'search' ? 'btn-maroon' : 'btn-gold'} onClick={() => { setScope('search'); setPick(null); }}>In search</button>
@@ -112,13 +113,14 @@ export default function Dashboard() {
       </div>
       <Matrix title="By community" rows={religionRows(scoped)} kind="religion" pick={pick} onPick={choose} />
       <Matrix title="By qualification" rows={qualificationRows(scoped)} kind="qualification" pick={pick} onPick={choose} />
+      <Matrix title="By job" rows={jobRows(scoped)} kind="job" pick={pick} onPick={choose} />
       {pick && (
         <section className="panel">
           <h2>{pickTitle(pick)} · {chosen.length}</h2>
           {chosen.length === 0 ? <p>No profiles in this group.</p> : (
             <table className="admin">
               <thead>
-                <tr><th>Name</th><th>Profile ID</th><th>Community</th><th>Gender</th><th>Qualification</th><th>Status</th><th /></tr>
+                <tr><th>Name</th><th>Profile ID</th><th>Community</th><th>Gender</th><th>Qualification</th><th>Work</th><th>Status</th><th /></tr>
               </thead>
               <tbody>
                 {chosen.map((profile) => (
@@ -128,6 +130,7 @@ export default function Dashboard() {
                     <td>{profile.religion || '—'}</td>
                     <td>{genderLabel(profile.gender) || '—'}</td>
                     <td>{profile.highestEducation || '—'}</td>
+                    <td>{profile.occupation || '—'}</td>
                     <td>{profile.approvalStatus}</td>
                     <td className="actions">
                       <button type="button" className="btn-gold" onClick={() => setViewing(profile)}>View</button>

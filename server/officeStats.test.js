@@ -4,6 +4,8 @@ import {
   genderTotals,
   matchesPick,
   profilesInScope,
+  jobKey,
+  jobRows,
   qualificationRows,
   religionRows
 } from '../client/src/officeStats.js';
@@ -55,6 +57,28 @@ test('a Telugu Christian value counts as Christian, not its own community', () =
   ], 'search'));
   assert.deepEqual(rows.find((row) => row.label === 'Christian'), { label: 'Christian', male: 1, female: 1 });
   assert.equal(rows.some((row) => row.label === 'క్రైస్తవ'), false);
+});
+
+test('job rows group government, bank, and the other kinds of work', () => {
+  const people = [
+    { id: 'g', gender: 'male', employmentType: 'govt', occupation: 'Clerk', approvalStatus: 'approved', showInSearch: true },
+    { id: 'b', gender: 'female', employmentType: 'public', occupation: 'Bank officer', approvalStatus: 'approved', showInSearch: true },
+    { id: 's', gender: 'male', employmentType: 'private', occupation: 'Software engineer', approvalStatus: 'approved', showInSearch: true },
+    { id: 't', gender: 'female', employmentType: 'private', occupation: 'Teacher', approvalStatus: 'approved', showInSearch: true },
+    { id: 'm', gender: 'female', employmentType: 'private', occupation: 'Nurse', approvalStatus: 'approved', showInSearch: true },
+    { id: 'p', gender: 'male', employmentType: 'private', occupation: 'Engineer', approvalStatus: 'approved', showInSearch: true }
+  ];
+  const rows = jobRows(people);
+  assert.deepEqual(rows.find((row) => row.label === 'Government'), { label: 'Government', male: 1, female: 0 });
+  assert.deepEqual(rows.find((row) => row.label === 'Bank'), { label: 'Bank', male: 0, female: 1 });
+  assert.deepEqual(rows.find((row) => row.label === 'Software'), { label: 'Software', male: 1, female: 0 });
+  assert.deepEqual(rows.find((row) => row.label === 'Teaching'), { label: 'Teaching', male: 0, female: 1 });
+  assert.deepEqual(rows.find((row) => row.label === 'Medical'), { label: 'Medical', male: 0, female: 1 });
+  assert.deepEqual(rows.find((row) => row.label === 'Private'), { label: 'Private', male: 1, female: 0 });
+  assert.deepEqual(rows.find((row) => row.label === 'Business'), { label: 'Business', male: 0, female: 0 });
+  assert.equal(jobKey({ employmentType: 'govt', occupation: 'Teacher' }), 'Government');
+  assert.equal(jobKey({ occupation: 'SBI clerk' }), 'Bank');
+  assert.deepEqual(people.filter((profile) => matchesPick(profile, { kind: 'job', label: 'Bank', gender: 'female' })).map((profile) => profile.id), ['b']);
 });
 
 test('a clicked cell matches only that community or qualification and gender', () => {

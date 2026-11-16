@@ -8,6 +8,24 @@ export function qualificationKey(profile) {
   return String(profile?.highestEducation || '').trim() || 'Not given';
 }
 
+export const JOBS = ['Government', 'Bank', 'Software', 'Teaching', 'Medical', 'Business', 'Private', 'Self employed'];
+
+export function jobKey(profile) {
+  const text = [profile?.occupation, profile?.jobTitle, profile?.companyName, profile?.industry].filter(Boolean).join(' ');
+  const type = String(profile?.employmentType || '').toLowerCase();
+  if (/\bbank|banker|\bsbi\b|\bhdfc\b|\bicici\b|\baxis bank\b|\bcanara\b/i.test(text)) return 'Bank';
+  if (type === 'govt' || /\bgovernment\b|\bgovt\b|\brailway\b|\bpolice\b|\barmy\b|\bnavy\b|\bdefence\b|\bdefense\b|\bconstable\b/i.test(text)) return 'Government';
+  if (/\bsoftware\b|\bdeveloper\b|\bprogrammer\b|\bit professional\b|\binformation technology\b/i.test(text)) return 'Software';
+  if (/\bteach|\blecturer\b|\bprofessor\b|\btutor\b|\bprincipal\b/i.test(text)) return 'Teaching';
+  if (/\bdoctor\b|\bnurse\b|\bdentist\b|\bpharmacist\b|\bhospital\b|\bmbbs\b|\bphysiotherap/i.test(text)) return 'Medical';
+  if (type === 'business' || /\bbusiness\b|\bproprietor\b|\bentrepreneur\b/i.test(text)) return 'Business';
+  if (type === 'self-employed' || type === 'self employed') return 'Self employed';
+  if (type === 'private') return 'Private';
+  if (type === 'public') return 'Public';
+  if (text.trim()) return 'Other work';
+  return 'Not given';
+}
+
 export function profilesInScope(profiles, scope) {
   const list = profiles || [];
   if (scope === 'all') return list.filter((profile) => profile.approvalStatus !== 'deleted');
@@ -41,6 +59,14 @@ export function qualificationRows(profiles) {
     .sort((a, b) => (b.male + b.female) - (a.male + a.female) || a.label.localeCompare(b.label));
 }
 
+export function jobRows(profiles) {
+  const rows = rowsFor(profiles, jobKey, JOBS);
+  const known = JOBS.map((label) => rows.find((row) => row.label === label));
+  const extras = rows.filter((row) => !JOBS.includes(row.label) && row.label !== 'Not given' && row.male + row.female > 0);
+  const missing = rows.find((row) => row.label === 'Not given');
+  return missing && missing.male + missing.female > 0 ? [...known, ...extras, missing] : [...known, ...extras];
+}
+
 export function genderTotals(profiles) {
   return {
     male: (profiles || []).filter((profile) => profile.gender === 'male').length,
@@ -58,6 +84,7 @@ export function matchesPick(profile, pick) {
   if (pick.gender && profile.gender !== pick.gender) return false;
   if (pick.kind === 'religion' && religionKey(profile) !== pick.label) return false;
   if (pick.kind === 'qualification' && qualificationKey(profile) !== pick.label) return false;
+  if (pick.kind === 'job' && jobKey(profile) !== pick.label) return false;
   return true;
 }
 
