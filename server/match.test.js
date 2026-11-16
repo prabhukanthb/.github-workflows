@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { ageFromDob, alignProfileIds, canViewMatches, cityMatches, communityMatches, formatProfileId, interestIsCurrent, isOppositeMatch, nextProfileSequence, normalizePhotos, profileIdForGender, restoreRegisteredProfiles } from './match.js';
+import { ageFromDob, alignProfileIds, canViewMatches, cityMatches, communityMatches, communityName, formatProfileId, interestIsCurrent, isOppositeMatch, nextProfileSequence, normalizePhotos, normalizeStoredReligions, profileIdForGender, restoreRegisteredProfiles } from './match.js';
 
 test('formatProfileId pads gender and sequence', () => {
   assert.equal(formatProfileId('female', 1), 'F00001');
@@ -142,6 +142,24 @@ test('Christian and Hindu search stay within that community and every other comm
   assert.equal(communityMatches('Buddhist', 'Christian'), true);
   assert.equal(communityMatches('Other', 'Christian'), true);
   assert.equal(communityMatches('Christian', ''), false);
+  assert.equal(communityName('క్రైస్తవ'), 'Christian');
+  assert.equal(communityMatches('Christian', 'క్రైస్తవ'), true);
+  assert.equal(communityMatches('క్రైస్తవ', 'Hindu'), false);
+});
+
+test('a Telugu Christian religion is stored as Christian', () => {
+  const state = {
+    profiles: [
+      { id: 'p-te', religion: 'క్రైస్తవ' },
+      { id: 'p-en', religion: 'Hindu' }
+    ],
+    deletedProfiles: [{ id: 'p-old', religion: 'క్రైస్తవుడు' }]
+  };
+  const next = normalizeStoredReligions(state);
+  assert.equal(next.profiles[0].religion, 'Christian');
+  assert.equal(next.profiles[1].religion, 'Hindu');
+  assert.equal(next.deletedProfiles[0].religion, 'Christian');
+  assert.equal(normalizeStoredReligions(next), next);
 });
 
 test('an interest notification lasts 7 days', () => {

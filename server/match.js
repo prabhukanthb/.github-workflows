@@ -158,9 +158,38 @@ export function formatProfileId(gender, seq) {
   return `${genderCode(gender)}${String(n).padStart(5, '0')}`;
 }
 
-function communityName(value) {
+const COMMUNITY_NAMES = {
+  Other: 'Christian/Hindu',
+  'క్రైస్తవ': 'Christian',
+  'క్రైస్తవుడు': 'Christian',
+  'క్రైస్తవురాలు': 'Christian',
+  'క్రిస్టియన్': 'Christian'
+};
+
+export function communityName(value) {
   const text = String(value || '').trim();
-  return text === 'Other' ? 'Christian/Hindu' : text;
+  return COMMUNITY_NAMES[text] || text;
+}
+
+export function normalizeStoredReligions(state) {
+  const rewrite = (list) => {
+    if (!Array.isArray(list)) return { list, changed: false };
+    let changed = false;
+    const next = list.map((profile) => {
+      if (!profile) return profile;
+      const religion = communityName(profile.religion);
+      if (religion === String(profile.religion || '').trim()) return profile;
+      changed = true;
+      return { ...profile, religion };
+    });
+    return { list: changed ? next : list, changed };
+  };
+  const profiles = rewrite(state?.profiles);
+  const deleted = rewrite(state?.deletedProfiles);
+  if (!profiles.changed && !deleted.changed) return state;
+  const next = { ...state, profiles: profiles.list };
+  if (Array.isArray(state.deletedProfiles)) next.deletedProfiles = deleted.list;
+  return next;
 }
 
 export function canViewMatches(user, profile) {

@@ -48,6 +48,15 @@ test('search scope leaves out profiles that are not in search', () => {
   assert.equal(profilesInScope(profiles, 'all').length, 9);
 });
 
+test('a Telugu Christian value counts as Christian, not its own community', () => {
+  const rows = religionRows(profilesInScope([
+    { id: 'te', gender: 'male', religion: 'క్రైస్తవ', approvalStatus: 'approved', showInSearch: true },
+    { id: 'en', gender: 'female', religion: 'Christian', approvalStatus: 'approved', showInSearch: true }
+  ], 'search'));
+  assert.deepEqual(rows.find((row) => row.label === 'Christian'), { label: 'Christian', male: 1, female: 1 });
+  assert.equal(rows.some((row) => row.label === 'క్రైస్తవ'), false);
+});
+
 test('a clicked cell matches only that community or qualification and gender', () => {
   const christianFemale = profiles.filter((profile) => matchesPick(profile, { kind: 'religion', label: 'Christian', gender: 'female' }));
   const nursing = profiles.filter((profile) => matchesPick(profile, { kind: 'qualification', label: 'M.Sc. Nursing', gender: 'female' }));

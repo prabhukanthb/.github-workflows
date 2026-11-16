@@ -44,9 +44,17 @@ export const SUB_COMMUNITIES = [
 export const RELIGIONS = ['Hindu', 'Christian', 'Ambedkarist', 'Buddhist', 'Christian/Hindu'];
 export const SIBLINGS = ['Brothers', 'Sister', 'Brother/Sister'];
 
+const COMMUNITY_NAMES = {
+  Other: 'Christian/Hindu',
+  'క్రైస్తవ': 'Christian',
+  'క్రైస్తవుడు': 'Christian',
+  'క్రైస్తవురాలు': 'Christian',
+  'క్రిస్టియన్': 'Christian'
+};
+
 export function communityLabel(value) {
-  if (value === 'Other') return 'Christian/Hindu';
-  return value || '';
+  const text = String(value || '').trim();
+  return COMMUNITY_NAMES[text] || text;
 }
 
 export function genderLabel(gender) {

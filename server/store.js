@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import bcrypt from 'bcryptjs';
 import { MongoClient } from 'mongodb';
-import { alignProfileIds, restoreRegisteredProfiles } from './match.js';
+import { alignProfileIds, communityName, normalizeStoredReligions, restoreRegisteredProfiles } from './match.js';
 import { buildSeed, withOfficePhone } from './seedData.js';
 import { assertTeluguMongoUri, TELUGU_DB } from './deployGuard.js';
 
@@ -83,9 +83,18 @@ async function applyProfileIds() {
   return db;
 }
 
+async function applyCommunityNames() {
+  const next = normalizeStoredReligions(db);
+  if (next === db) return db;
+  db = next;
+  await persist();
+  return db;
+}
+
 async function settleDb() {
   await applyOfficePhone();
-  return applyProfileIds();
+  await applyProfileIds();
+  return applyCommunityNames();
 }
 
 export async function initDb() {
@@ -126,10 +135,7 @@ export function publicUser(user) {
   };
 }
 
-export function communityName(value) {
-  const text = String(value || '').trim();
-  return text === 'Other' ? 'Christian/Hindu' : text;
-}
+export { communityName };
 
 export function presentProfile(profile, users, { contact = false } = {}) {
   const owner = users.find((user) => user.id === profile.userId);
