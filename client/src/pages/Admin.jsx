@@ -108,6 +108,20 @@ export default function Admin() {
     }
   };
 
+  const reactivate = async (profile) => {
+    const label = `${fullName(profile)}${profile.profileId ? ` (${profile.profileId})` : ''}`;
+    if (!window.confirm(`Put ${label} back with the same profile ID?`)) return;
+    setError('');
+    try {
+      const data = await api.adminReactivate(profile.id, token);
+      setMessage(data.message);
+      setFilter(data.profile?.approvalStatus === 'approved' ? 'approved' : 'pending');
+      load();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const remove = async (profile) => {
     const label = `${fullName(profile)}${profile.profileId ? ` (${profile.profileId})` : ''}`;
     if (!window.confirm(`Move ${label} to Deleted? This profile ID will not be used again.`)) return;
@@ -141,7 +155,7 @@ export default function Admin() {
           ))}
         </div>
       )}
-      <p><Link to="/admin/interests">Interest notifications</Link> are on their own page. Each one is removed after 7 days.</p>
+      <p><Link to="/admin/dashboard">Dashboard</Link> shows male and female counts by community and qualification. <Link to="/admin/interests">Interest notifications</Link> are on their own page. Each one is removed after 7 days.</p>
       {isFullAdmin && (
       <form className="panel" onSubmit={async (event) => {
         event.preventDefault();
@@ -257,6 +271,9 @@ export default function Admin() {
                   <button type="button" className="btn-icon btn-view" onClick={() => setViewing(profile)} aria-label="View" title="View">
                     <ActionIcon name="view" />
                   </button>
+                  {filter === 'deleted' && (
+                    <button type="button" className="btn-gold" onClick={() => reactivate(profile)}>Reactivate</button>
+                  )}
                   {filter !== 'deleted' && (
                     <>
                       <Link className="btn-icon btn-edit" to={`/admin/profiles/${profile.id}/edit`} aria-label="Edit" title="Edit">

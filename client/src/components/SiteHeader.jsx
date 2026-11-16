@@ -86,6 +86,7 @@ export default function SiteHeader() {
           {isAdmin && (
             <>
               <Link to="/admin" onClick={() => setOpen(false)}>Office</Link>
+              <Link to="/admin/dashboard" onClick={() => setOpen(false)}>Dashboard</Link>
               <Link to="/admin/interests" onClick={() => setOpen(false)}>
                 Interests{pendingInterests > 0 ? ` (${pendingInterests})` : ''}
               </Link>

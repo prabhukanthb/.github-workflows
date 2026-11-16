@@ -10,6 +10,7 @@ import { PASSWORD_HINT, defaultPassword, matchesLogin, toIncomeRupees } from './
 import { cloudinaryStatus, photosConfigured, uploadTeluguPhoto } from './photos.js';
 import { TELUGU_DOMAINS } from './deployGuard.js';
 import { communityName, getDb, initDb, presentProfile, publicUser, update } from './store.js';
+import { reactivateDeleted } from './reactivate.js';
 import { limitAuth, LOGIN_FAILURE } from './rateLimit.js';
 import { applySeo, robotsTxt, sitemapXml } from './seo.js';
 
@@ -866,6 +867,26 @@ app.delete('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
     profile: presentProfile(removed, getDb().users, { contact: true }),
     message: `${removed.profileId || 'This profile'} was moved to Deleted. This profile ID will not be used again.`
   });
+});
+
+app.post('/api/admin/profiles/:id/reactivate', auth, adminOnly, async (req, res) => {
+  let restored = null;
+  let error = null;
+  await update((state) => {
+    const result = reactivateDeleted(state, req.params.id);
+    if (result.error) {
+      error = result.error;
+      return state;
+    }
+    restored = result.profile;
+    return result.state;
+  });
+  if (error === 'not-found') return res.status(404).json({ message: 'Deleted profile not found' });
+  if (error === 'already-active') return res.status(409).json({ message: 'This profile is already active.' });
+  const message = restored.profileId
+    ? `${restored.profileId} is back in search with the same profile ID.`
+    : 'This profile is back on the waiting list. Approve it to give a profile ID.';
+  res.json({ profile: presentProfile(restored, getDb().users, { contact: true }), message });
 });
 
 app.get('/robots.txt', (_req, res) => {

@@ -12,6 +12,7 @@ import Browse from './pages/Browse';
 import Profile from './pages/Profile';
 import Interests, { OfficeInterests } from './pages/Interests';
 import Admin, { CreateProfile, EditProfile } from './pages/Admin';
+import Dashboard from './pages/Dashboard';
 import { Privacy, Refund, Terms } from './pages/Legal';
 import { useAuth } from './AuthContext';
 
@@ -54,6 +55,7 @@ function Shell() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/interests" element={<Interests />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/dashboard" element={<Dashboard />} />
             <Route path="/admin/interests" element={<OfficeInterests />} />
             <Route path="/admin/create" element={<CreateProfile />} />
             <Route path="/admin/profiles/:id/edit" element={<EditProfile />} />
