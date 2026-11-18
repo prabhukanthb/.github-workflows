@@ -1,4 +1,4 @@
-import { FAQ, SITE_ORIGIN, isPrivatePath, pageFor, publicPages } from '../client/src/seoPages.js';
+import { FAQ, SITE_ORIGIN, isPrivatePath, landingFor, pageFor, publicPages } from '../client/src/seoPages.js';
 
 export function escapeHtml(value) {
   return String(value)
@@ -12,8 +12,16 @@ function absoluteUrl(path) {
   return path === '/' ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${path}`;
 }
 
+function landingHtml(page) {
+  const places = page.places?.length
+    ? `<ul>${page.places.map((place) => `<li>${escapeHtml(place)}</li>`).join('')}</ul>`
+    : '';
+  const paragraphs = (page.paragraphs || []).map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join('');
+  return `<article><h1>${escapeHtml(page.h1)}</h1>${paragraphs}${places}</article>`;
+}
+
 function jsonLd(page) {
-  if (page.path !== '/' || !page.index) return '';
+  if (!page.index || (page.path !== '/' && !landingFor(page.path))) return '';
   const data = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -36,18 +44,34 @@ function jsonLd(page) {
           postalCode: '520004',
           addressCountry: 'IN'
         },
-        areaServed: 'Telugu Mala families'
-      },
-      {
-        '@type': 'FAQPage',
-        mainEntity: FAQ.map((item) => ({
-          '@type': 'Question',
-          name: item.q,
-          acceptedAnswer: { '@type': 'Answer', text: item.a }
-        }))
+        areaServed: [
+          { '@type': 'State', name: 'Andhra Pradesh' },
+          { '@type': 'State', name: 'Telangana' },
+          { '@type': 'City', name: 'Vijayawada' },
+          { '@type': 'City', name: 'Hyderabad' },
+          { '@type': 'City', name: 'Guntur' },
+          { '@type': 'City', name: 'Visakhapatnam' },
+          { '@type': 'City', name: 'Warangal' },
+          { '@type': 'City', name: 'Tirupati' }
+        ],
+        knowsLanguage: ['Telugu', 'English'],
+        audience: {
+          '@type': 'Audience',
+          audienceType: 'Telugu Mala families in Andhra Pradesh and Telangana'
+        }
       }
     ]
   };
+  if (page.path === '/') {
+    data['@graph'].push({
+      '@type': 'FAQPage',
+      mainEntity: FAQ.map((item) => ({
+        '@type': 'Question',
+        name: item.q,
+        acceptedAnswer: { '@type': 'Answer', text: item.a }
+      }))
+    });
+  }
   return `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`;
 }
 
@@ -85,7 +109,12 @@ export function applySeo(html, pathname) {
   next = next.replace(/<link\s+rel=["']canonical["'][^>]*>/gi, '');
   next = next.replace(/<html\b[^>]*>/i, '<html lang="en-IN" translate="no" class="notranslate">');
   next = next.replace(/<meta\s+name=["']google["'][^>]*>/gi, '');
-  return next.replace('</head>', `    ${headTags(pathname)}\n  </head>`);
+  next = next.replace('</head>', `    ${headTags(pathname)}\n  </head>`);
+  const landing = landingFor(pathname);
+  if (landing) {
+    next = next.replace(/<div id="root"><\/div>/, `<div id="root">${landingHtml(landing)}</div>`);
+  }
+  return next;
 }
 
 export function robotsTxt() {

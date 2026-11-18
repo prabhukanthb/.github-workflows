@@ -353,11 +353,26 @@
   padding: 64px 18px;
 }
 
+.section h1,
 .section h2 {
   font-family: var(--serif);
   color: var(--maroon-mid);
   font-size: clamp(26px, 4vw, 36px);
   margin: 0 0 10px;
+}
+
+.place-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 0 0 24px;
+  padding: 0;
+  list-style: none;
+  color: var(--ink);
+}
+
+.place-page .hero-actions {
+  margin-top: 8px;
 }
 
 .section .sub {

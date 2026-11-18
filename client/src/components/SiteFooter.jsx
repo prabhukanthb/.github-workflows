@@ -18,6 +18,10 @@ export default function SiteFooter() {
           <p><Link to="/#stories">Success Stories</Link></p>
           <p><Link to="/#services">Services</Link></p>
           <p><Link to="/#contact">Contact Us</Link></p>
+          <p><Link to="/andhra-pradesh">Andhra Pradesh</Link></p>
+          <p><Link to="/telangana">Telangana</Link></p>
+          <p><Link to="/hindu-mala-matrimony">Hindu Mala</Link></p>
+          <p><Link to="/christian-mala-matrimony">Christian Mala</Link></p>
           <p><Link to="/register">{REGISTER_CTA}</Link></p>
           <p><Link to="/login">Login</Link></p>
         </div>

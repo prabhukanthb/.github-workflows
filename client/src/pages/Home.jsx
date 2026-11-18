@@ -89,7 +89,7 @@ export default function Home() {
     <div>
       <section className="home-hero" style={{ '--hero-image': `url(${HERO_PHOTO})` }}>
         <div className="home-hero-inner">
-          <p className="hero-kicker">Telugu Mala matrimony in Vijayawada</p>
+          <p className="hero-kicker">Telugu Mala matrimony for Andhra Pradesh and Telangana</p>
           <h1>
             Where families meet,<br />
             hopes blossom,<br />
@@ -97,8 +97,8 @@ export default function Home() {
           </h1>
           <p className="home-motto">{MOTTO}</p>
           <p className="lede verse">
-            For fifteen years in <strong>Vijayawada</strong>, <strong>{BRAND}</strong> has lovingly brought together
-            hearts, hopes, and families within the <strong>Mala community</strong>.
+            For fifteen years from <strong>Vijayawada</strong>, <strong>{BRAND}</strong> has brought together
+            Telugu <strong>Mala</strong> families in <strong>Andhra Pradesh</strong> and <strong>Telangana</strong>.
           </p>
           <p className="lede verse">
             Guided by <strong>{ORG}</strong>, we help every candidate and every caring parent discover a meaningful bond —
@@ -133,6 +133,33 @@ export default function Home() {
           ))}
         </div>
       </div>
+
+      <section className="band" id="places">
+        <div className="section">
+          <h2>Telugu Mala matrimony for Andhra Pradesh and Telangana</h2>
+          <p className="sub">
+            The office is in Vijayawada. Telugu Mala families from both states register here —
+            Hindu, Christian, Ambedkarist and Buddhist.
+          </p>
+          <div className="why-grid">
+            <article className="why-card">
+              <h3>Andhra Pradesh</h3>
+              <p>Vijayawada, Guntur, Visakhapatnam, Tirupati, Rajahmundry, Kakinada, Nellore and other districts.</p>
+              <Link to="/andhra-pradesh">Mala matrimony in Andhra Pradesh</Link>
+            </article>
+            <article className="why-card">
+              <h3>Telangana</h3>
+              <p>Hyderabad, Warangal, Karimnagar, Khammam, Nizamabad and other districts.</p>
+              <Link to="/telangana">Mala matrimony in Telangana</Link>
+            </article>
+            <article className="why-card">
+              <h3>Hindu and Christian</h3>
+              <p>A Hindu search stays among Hindu Mala families. A Christian search stays among Christian Mala families.</p>
+              <p><Link to="/hindu-mala-matrimony">Hindu Mala matrimony</Link> · <Link to="/christian-mala-matrimony">Christian Mala matrimony</Link></p>
+            </article>
+          </div>
+        </div>
+      </section>
 
       <section className="band" id="why">
         <div className="section">

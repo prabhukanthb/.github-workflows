@@ -14,6 +14,7 @@ import Interests, { OfficeInterests } from './pages/Interests';
 import Admin, { CreateProfile, EditProfile } from './pages/Admin';
 import Dashboard from './pages/Dashboard';
 import { Privacy, Refund, Terms } from './pages/Legal';
+import Place from './pages/Place';
 import { useAuth } from './AuthContext';
 
 function ensureMeta(name, content) {
@@ -65,6 +66,10 @@ function Shell() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/refund" element={<Refund />} />
+            <Route path="/andhra-pradesh" element={<Place />} />
+            <Route path="/telangana" element={<Place />} />
+            <Route path="/hindu-mala-matrimony" element={<Place />} />
+            <Route path="/christian-mala-matrimony" element={<Place />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         )}

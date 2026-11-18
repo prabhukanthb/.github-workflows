@@ -13,17 +13,35 @@ const HTML = `<!DOCTYPE html>
   <body><div id="root"></div></body>
 </html>`;
 
-test('the homepage is indexable and names Vijayawada and the Mala community', () => {
+test('the homepage is indexable and names both Telugu states and the Mala community', () => {
   const html = applySeo(HTML, '/');
-  assert.match(html, /<title>Telugu Mala Matrimony in Vijayawada \| Telugu Kalyanamala<\/title>/);
-  assert.match(html, /meta name="description" content="[^"]*Mala matrimony/);
+  assert.match(html, /<title>Telugu Mala Matrimony in Andhra Pradesh and Telangana \| Telugu Kalyanamala<\/title>/);
+  assert.match(html, /meta name="description" content="[^"]*Andhra Pradesh and Telangana/);
   assert.match(html, /meta name="robots" content="index,follow"/);
   assert.match(html, /rel="canonical" href="https:\/\/www\.telugukalyanamala\.com\/"/);
   assert.match(html, /<html lang="en-IN" translate="no" class="notranslate">/);
   assert.match(html, /meta name="google" content="notranslate"/);
   assert.match(html, /application\/ld\+json/);
-  assert.match(html, /Vijayawada/);
+  assert.match(html, /Andhra Pradesh/);
+  assert.match(html, /Telangana/);
   assert.equal(html.includes('Old description'), false);
+});
+
+test('state pages are indexable and name the cities families search for', () => {
+  const andhra = applySeo(HTML, '/andhra-pradesh');
+  assert.match(andhra, /Mala Matrimony in Andhra Pradesh/);
+  assert.match(andhra, /<h1>Mala matrimony in Andhra Pradesh<\/h1>/);
+  assert.match(andhra, /Visakhapatnam/);
+  assert.match(andhra, /rel="canonical" href="https:\/\/www\.telugukalyanamala\.com\/andhra-pradesh"/);
+  const telangana = applySeo(HTML, '/telangana');
+  assert.match(telangana, /<h1>Mala matrimony in Telangana<\/h1>/);
+  assert.match(telangana, /Hyderabad/);
+  assert.match(telangana, /Warangal/);
+  const sitemap = sitemapXml();
+  assert.match(sitemap, /\/andhra-pradesh/);
+  assert.match(sitemap, /\/telangana/);
+  assert.match(sitemap, /\/hindu-mala-matrimony/);
+  assert.match(sitemap, /\/christian-mala-matrimony/);
 });
 
 test('member and office pages stay out of search results', () => {
