@@ -1603,6 +1603,10 @@ table.admin a.btn-maroon {
   grid-template-columns: 1fr 1fr;
 }
 
+.dash-panel {
+  min-width: 0;
+}
+
 .dash-panel h2 {
   margin-bottom: 12px;
 }
@@ -1747,6 +1751,8 @@ table.admin a.btn-maroon {
   gap: 14px;
   overflow-x: auto;
   padding: 4px 2px 8px;
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
 }
 
@@ -1800,6 +1806,9 @@ table.admin a.btn-maroon {
   display: block;
   width: 100%;
   border-radius: 8px 8px 0 0;
+}
+
+.dash-vbar-fill.has-count {
   min-height: 4px;
 }
 

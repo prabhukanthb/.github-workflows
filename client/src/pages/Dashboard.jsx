@@ -30,18 +30,6 @@ function Count({ count, label, selected, onClick }) {
   );
 }
 
-function BarRow({ count, gender, max, selected, onClick }) {
-  const width = max > 0 ? Math.round((count / max) * 100) : 0;
-  return (
-    <button type="button" className={`dash-bar${selected ? ' is-selected' : ''}`} aria-pressed={selected} onClick={onClick}>
-      <span className="dash-bar-track">
-        <span className={`dash-bar-fill ${gender}`} style={{ width: `${width}%` }} />
-      </span>
-      <span className="dash-bar-count">{count} {gender === 'male' ? 'Male' : 'Female'}</span>
-    </button>
-  );
-}
-
 function VerticalBar({ count, gender, max, selected, label, onClick }) {
   const height = max > 0 ? Math.round((count / max) * 100) : 0;
   const name = gender === 'male' ? 'Male' : 'Female';
@@ -55,15 +43,17 @@ function VerticalBar({ count, gender, max, selected, label, onClick }) {
     >
       <span className="dash-vbar-count">{count}</span>
       <span className="dash-vbar-track">
-        <span className={`dash-vbar-fill ${gender}`} style={{ height: `${height}%` }} />
+        <span className={`dash-vbar-fill ${gender}${count > 0 ? ' has-count' : ''}`} style={{ height: `${height}%` }} />
       </span>
       <span className="dash-vbar-name">{name}</span>
     </button>
   );
 }
 
-function VerticalChart({ title, rows, kind, pick, onPick }) {
-  const visible = barsWithAtLeast(rows);
+function VerticalChart({ title, rows, kind, pick, onPick, minimum = 2 }) {
+  const visible = minimum > 0
+    ? barsWithAtLeast(rows, minimum)
+    : rows.map((row) => ({ ...row, showMale: true, showFemale: true }));
   const max = Math.max(1, ...visible.flatMap((row) => [
     row.showMale ? row.male : 0,
     row.showFemale ? row.female : 0
@@ -109,39 +99,6 @@ function VerticalChart({ title, rows, kind, pick, onPick }) {
   );
 }
 
-function Matrix({ title, rows, kind, pick, onPick }) {
-  const max = Math.max(1, ...rows.flatMap((row) => [row.male, row.female]));
-  return (
-    <section className="panel dash-panel">
-      <h2>{title}</h2>
-      <div className="dash-legend">
-        <span><i className="dash-swatch male" /> Male</span>
-        <span><i className="dash-swatch female" /> Female</span>
-      </div>
-      {rows.length === 0 && <p>No profiles in this view yet.</p>}
-      {rows.map((row) => (
-        <div className="dash-chart-row" key={row.label}>
-          <div className="dash-label">{row.label}</div>
-          <BarRow
-            count={row.male}
-            gender="male"
-            max={max}
-            selected={samePick(pick, { kind, label: row.label, gender: 'male' })}
-            onClick={() => onPick({ kind, label: row.label, gender: 'male' })}
-          />
-          <BarRow
-            count={row.female}
-            gender="female"
-            max={max}
-            selected={samePick(pick, { kind, label: row.label, gender: 'female' })}
-            onClick={() => onPick({ kind, label: row.label, gender: 'female' })}
-          />
-        </div>
-      ))}
-    </section>
-  );
-}
-
 export default function Dashboard() {
   const { token, user, isAuthenticated, loading } = useAuth();
   const isAdmin = user?.role === 'admin' || user?.role === 'subadmin';
@@ -169,7 +126,7 @@ export default function Dashboard() {
     <div className="page dash-board">
       <div className="kicker">Vijayawada office</div>
       <h2>Dashboard</h2>
-      <p>Male and female counts by community, qualification, and job. Community and qualification use upright bars, and a bar is shown only when that side has at least 2 profiles. Click a bar to see those profiles. Deleted profiles are not counted. <Link to="/admin">Back to the office list</Link>.</p>
+      <p>Male and female counts by community, qualification, and job. The charts use upright bars. Community and qualification show a bar when that side has at least 2 profiles. Every job is shown. Click a bar to see those profiles. Deleted profiles are not counted. <Link to="/admin">Back to the office list</Link>.</p>
       {error && <div className="error">{error}</div>}
       <div className="dash-scope">
         <button type="button" className={scope === 'search' ? 'btn-maroon' : 'btn-gold'} onClick={() => { setScope('search'); setPick(null); }}>In search</button>
@@ -181,7 +138,7 @@ export default function Dashboard() {
       </div>
       <VerticalChart title="By community" rows={religionRows(scoped)} kind="religion" pick={pick} onPick={choose} />
       <VerticalChart title="By qualification" rows={qualificationRows(scoped)} kind="qualification" pick={pick} onPick={choose} />
-      <Matrix title="By job" rows={jobRows(scoped)} kind="job" pick={pick} onPick={choose} />
+      <VerticalChart title="By job" rows={jobRows(scoped)} kind="job" pick={pick} onPick={choose} minimum={0} />
       {pick && (
         <section className="panel">
           <h2>{pickTitle(pick)} · {chosen.length}</h2>
