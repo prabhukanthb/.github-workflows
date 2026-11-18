@@ -5,6 +5,7 @@ import { useAuth } from '../AuthContext';
 import ProfileSheet from '../components/ProfileSheet';
 import { fullName, genderLabel } from '../siteConfig';
 import {
+  barsWithAtLeast,
   genderTotals,
   matchesPick,
   pickTitle,
@@ -38,6 +39,73 @@ function BarRow({ count, gender, max, selected, onClick }) {
       </span>
       <span className="dash-bar-count">{count} {gender === 'male' ? 'Male' : 'Female'}</span>
     </button>
+  );
+}
+
+function VerticalBar({ count, gender, max, selected, label, onClick }) {
+  const height = max > 0 ? Math.round((count / max) * 100) : 0;
+  const name = gender === 'male' ? 'Male' : 'Female';
+  return (
+    <button
+      type="button"
+      className={`dash-vbar${selected ? ' is-selected' : ''}`}
+      aria-pressed={selected}
+      aria-label={`${count} ${name} ${label}`}
+      onClick={onClick}
+    >
+      <span className="dash-vbar-count">{count}</span>
+      <span className="dash-vbar-track">
+        <span className={`dash-vbar-fill ${gender}`} style={{ height: `${height}%` }} />
+      </span>
+      <span className="dash-vbar-name">{name}</span>
+    </button>
+  );
+}
+
+function VerticalChart({ title, rows, kind, pick, onPick }) {
+  const visible = barsWithAtLeast(rows);
+  const max = Math.max(1, ...visible.flatMap((row) => [
+    row.showMale ? row.male : 0,
+    row.showFemale ? row.female : 0
+  ]));
+  return (
+    <section className="panel dash-panel">
+      <h2>{title}</h2>
+      <div className="dash-legend">
+        <span><i className="dash-swatch male" /> Male</span>
+        <span><i className="dash-swatch female" /> Female</span>
+      </div>
+      {visible.length === 0 && <p>No group has 2 or more profiles yet.</p>}
+      <div className="dash-columns">
+        {visible.map((row) => (
+          <div className="dash-column" key={row.label}>
+            <div className="dash-column-bars">
+              {row.showMale && (
+                <VerticalBar
+                  count={row.male}
+                  gender="male"
+                  max={max}
+                  label={row.label}
+                  selected={samePick(pick, { kind, label: row.label, gender: 'male' })}
+                  onClick={() => onPick({ kind, label: row.label, gender: 'male' })}
+                />
+              )}
+              {row.showFemale && (
+                <VerticalBar
+                  count={row.female}
+                  gender="female"
+                  max={max}
+                  label={row.label}
+                  selected={samePick(pick, { kind, label: row.label, gender: 'female' })}
+                  onClick={() => onPick({ kind, label: row.label, gender: 'female' })}
+                />
+              )}
+            </div>
+            <div className="dash-label">{row.label}</div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -101,7 +169,7 @@ export default function Dashboard() {
     <div className="page dash-board">
       <div className="kicker">Vijayawada office</div>
       <h2>Dashboard</h2>
-      <p>Male and female counts by community, qualification, and job. Click a bar to see those profiles. Deleted profiles are not counted. <Link to="/admin">Back to the office list</Link>.</p>
+      <p>Male and female counts by community, qualification, and job. Community and qualification use upright bars, and a bar is shown only when that side has at least 2 profiles. Click a bar to see those profiles. Deleted profiles are not counted. <Link to="/admin">Back to the office list</Link>.</p>
       {error && <div className="error">{error}</div>}
       <div className="dash-scope">
         <button type="button" className={scope === 'search' ? 'btn-maroon' : 'btn-gold'} onClick={() => { setScope('search'); setPick(null); }}>In search</button>
@@ -111,8 +179,8 @@ export default function Dashboard() {
         <Count count={totals.male} label="Male" selected={samePick(pick, { kind: 'gender', gender: 'male' })} onClick={() => choose({ kind: 'gender', gender: 'male' })} />
         <Count count={totals.female} label="Female" selected={samePick(pick, { kind: 'gender', gender: 'female' })} onClick={() => choose({ kind: 'gender', gender: 'female' })} />
       </div>
-      <Matrix title="By community" rows={religionRows(scoped)} kind="religion" pick={pick} onPick={choose} />
-      <Matrix title="By qualification" rows={qualificationRows(scoped)} kind="qualification" pick={pick} onPick={choose} />
+      <VerticalChart title="By community" rows={religionRows(scoped)} kind="religion" pick={pick} onPick={choose} />
+      <VerticalChart title="By qualification" rows={qualificationRows(scoped)} kind="qualification" pick={pick} onPick={choose} />
       <Matrix title="By job" rows={jobRows(scoped)} kind="job" pick={pick} onPick={choose} />
       {pick && (
         <section className="panel">

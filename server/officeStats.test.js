@@ -5,6 +5,7 @@ import {
   matchesPick,
   profilesInScope,
   jobKey,
+  barsWithAtLeast,
   jobRows,
   qualificationRows,
   religionRows
@@ -34,6 +35,23 @@ test('religion rows count male and female, including a community with nobody', (
   assert.deepEqual(both, { label: 'Christian/Hindu', male: 0, female: 1 });
   assert.deepEqual(buddhist, { label: 'Buddhist', male: 0, female: 0 });
   assert.deepEqual(missing, { label: 'Not given', male: 0, female: 1 });
+});
+
+test('community and qualification bars keep only a side with at least 2 profiles', () => {
+  const scoped = profilesInScope(profiles, 'search');
+  const communities = barsWithAtLeast(religionRows(scoped));
+  const hindu = communities.find((row) => row.label === 'Hindu');
+  assert.equal(hindu.showMale, true);
+  assert.equal(hindu.showFemale, false);
+  assert.equal(communities.some((row) => row.label === 'Buddhist'), false);
+  assert.equal(communities.some((row) => row.label === 'Christian'), true);
+  const christian = communities.find((row) => row.label === 'Christian');
+  assert.equal(christian.showMale, false);
+  assert.equal(christian.showFemale, true);
+  const degrees = barsWithAtLeast(qualificationRows(scoped));
+  assert.deepEqual(degrees.map((row) => row.label), ['B.Tech']);
+  assert.equal(degrees[0].showMale, true);
+  assert.equal(degrees[0].showFemale, false);
 });
 
 test('qualification rows list only groups that have someone, largest first', () => {

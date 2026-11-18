@@ -67,6 +67,16 @@ export function jobRows(profiles) {
   return missing && missing.male + missing.female > 0 ? [...known, ...extras, missing] : [...known, ...extras];
 }
 
+export function barsWithAtLeast(rows, minimum = 2) {
+  return (rows || [])
+    .map((row) => ({
+      ...row,
+      showMale: row.male >= minimum,
+      showFemale: row.female >= minimum
+    }))
+    .filter((row) => row.showMale || row.showFemale);
+}
+
 export function genderTotals(profiles) {
   return {
     male: (profiles || []).filter((profile) => profile.gender === 'male').length,

@@ -1741,6 +1741,93 @@ table.admin a.btn-maroon {
   color: var(--maroon-mid);
 }
 
+.dash-columns {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  max-width: 100%;
+}
+
+.dash-column {
+  flex: 1 0 96px;
+  min-width: 96px;
+  max-width: 150px;
+  text-align: center;
+}
+
+.dash-column-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+  height: 190px;
+}
+
+.dash-vbar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  width: 40px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.dash-vbar-count {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.dash-vbar-track {
+  width: 28px;
+  height: 140px;
+  display: flex;
+  align-items: flex-end;
+  background: #f3f0e6;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.dash-vbar-fill {
+  display: block;
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+  min-height: 4px;
+}
+
+.dash-vbar-fill.male {
+  background: var(--maroon-mid);
+}
+
+.dash-vbar-fill.female {
+  background: var(--maroon-deep);
+}
+
+.dash-vbar-name {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dash-vbar.is-selected .dash-vbar-track {
+  outline: 2px solid var(--maroon-deep);
+  outline-offset: 2px;
+}
+
+.dash-column .dash-label {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 1.3;
+}
+
 @media (max-width: 700px) {
   .dash-genders,
   .dash-row {
