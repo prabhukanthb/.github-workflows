@@ -135,12 +135,15 @@ export function robotsTxt() {
 }
 
 export function sitemapXml() {
-  const urls = publicPages().map((page) => [
-    '  <url>',
-    `    <loc>${absoluteUrl(page.path)}</loc>`,
-    `    <priority>${page.priority}</priority>`,
-    '  </url>'
-  ].join('\n'));
+  const urls = publicPages().map((page) => {
+    const lines = [
+      '  <url>',
+      `    <loc>${absoluteUrl(page.path)}</loc>`
+    ];
+    if (page.lastmod) lines.push(`    <lastmod>${page.lastmod}</lastmod>`);
+    lines.push(`    <priority>${page.priority}</priority>`, '  </url>');
+    return lines.join('\n');
+  });
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',

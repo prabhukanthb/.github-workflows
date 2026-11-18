@@ -34,6 +34,7 @@ export const LANDINGS = [
     description: 'Mala matrimony for Telugu families in Andhra Pradesh. Vijayawada, Guntur, Visakhapatnam, Tirupati and Rajahmundry. Register with the Vijayawada office. Call 94405 45049.',
     h1: 'Mala matrimony in Andhra Pradesh',
     priority: '0.9',
+    lastmod: '2026-11-18',
     paragraphs: [
       'Telugu Kalyanamala introduces Mala brides and grooms for families across Andhra Pradesh. The only office is in Vijayawada, at Manohara Apartments, Machavaram, and parents from every district call the same helpline.',
       'Hindu, Christian, Ambedkarist and Buddhist Mala families can register. Phone numbers stay hidden until both houses agree. Registration is ₹3,000/-. Mothers and fathers often complete the biodata.'
@@ -46,6 +47,7 @@ export const LANDINGS = [
     description: 'Mala matrimony for Telugu families in Telangana. Hyderabad, Warangal, Karimnagar, Khammam and Nizamabad. The Vijayawada office helps both states. Call 94405 45049.',
     h1: 'Mala matrimony in Telangana',
     priority: '0.9',
+    lastmod: '2026-11-18',
     paragraphs: [
       'Telugu families in Telangana use the same Mala matrimony service. Parents in Hyderabad, Warangal, Karimnagar, Khammam and Nizamabad register from home and speak with the Vijayawada office.',
       'The search stays inside the Mala community. A Hindu family sees Hindu matches. A Christian family sees Christian matches. Ambedkarist and Buddhist families can see the wider Mala list.'
@@ -58,6 +60,7 @@ export const LANDINGS = [
     description: 'Hindu Mala matrimony for Telugu families in Andhra Pradesh and Telangana. Search stays among Hindu Mala brides and grooms. Vijayawada office: 94405 45049.',
     h1: 'Hindu Mala matrimony',
     priority: '0.8',
+    lastmod: '2026-11-18',
     paragraphs: [
       'Hindu Mala families search among Hindu Mala brides and grooms. Telugu Kalyanamala does not mix a Hindu search with Christian profiles.',
       'Parents in Andhra Pradesh and Telangana register the candidate, add the biodata, and call the Vijayawada office when they want an introduction.'
@@ -70,6 +73,7 @@ export const LANDINGS = [
     description: 'Christian Mala matrimony for Telugu families in Andhra Pradesh and Telangana. Search stays among Christian Mala brides and grooms. Call 94405 45049.',
     h1: 'Christian Mala matrimony',
     priority: '0.8',
+    lastmod: '2026-11-18',
     paragraphs: [
       'Christian Mala families search among Christian Mala brides and grooms. The office in Vijayawada understands that shared faith matters to both houses.',
       'Families from Andhra Pradesh and Telangana use one register. Phone numbers stay private until both sides are ready to speak.'
@@ -83,7 +87,8 @@ export const PAGES = {
     title: 'Telugu Mala Matrimony in Andhra Pradesh and Telangana | Telugu Kalyanamala',
     description: 'Telugu Mala matrimony for Andhra Pradesh and Telangana. Hindu, Christian, Ambedkarist and Buddhist families register with the Vijayawada office. Call 94405 45049.',
     index: true,
-    priority: '1.0'
+    priority: '1.0',
+    lastmod: '2026-11-18'
   },
   '/register': {
     title: 'Register for Telugu Mala Matrimony | Telugu Kalyanamala',

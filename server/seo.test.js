@@ -42,6 +42,8 @@ test('state pages are indexable and name the cities families search for', () => 
   assert.match(sitemap, /\/telangana/);
   assert.match(sitemap, /\/hindu-mala-matrimony/);
   assert.match(sitemap, /\/christian-mala-matrimony/);
+  assert.match(sitemap, /<loc>https:\/\/www\.telugukalyanamala\.com\/andhra-pradesh<\/loc>\n    <lastmod>2026-11-18<\/lastmod>/);
+  assert.equal((sitemap.match(/<loc>/g) || []).length, 9);
 });
 
 test('member and office pages stay out of search results', () => {
