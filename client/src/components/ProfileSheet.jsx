@@ -232,8 +232,6 @@ function paintPhotoEdges(ctx, box) {
   ctx.fillStyle = '#ffffff';
   const x = box.x + box.w / 2;
   const pad = Math.max(fontSize * 0.7, 14);
-  ctx.strokeText(BRAND, x, box.y + pad);
-  ctx.fillText(BRAND, x, box.y + pad);
   ctx.strokeText(BRAND, x, box.y + box.h - pad);
   ctx.fillText(BRAND, x, box.y + box.h - pad);
   ctx.restore();
@@ -368,7 +366,7 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
                 />
                 <Row label="Father" value={joinParts([profile.fatherName, profile.fatherOccupation, profile.fatherNativePlace])} />
                 <Row label="Mother" value={joinParts([profile.motherName, profile.motherOccupation, profile.motherNativePlace])} />
-                {profile.aboutMe && <p className="sheet-note"><strong>About me. </strong>{profile.aboutMe}</p>}
+                {profile.aboutMe && <p className="sheet-note"><strong>About candidate and family. </strong>{profile.aboutMe}</p>}
                 {profile.partnerRequirement && <p className="sheet-note"><strong>Partner requirement. </strong>{profile.partnerRequirement}</p>}
               </div>
               <div className={photo ? 'sheet-photo' : 'sheet-photo sheet-photo-empty'}>

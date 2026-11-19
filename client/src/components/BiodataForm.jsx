@@ -427,7 +427,7 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
       <AddressFields title="Current address" prefix="current" form={form} setForm={setForm} />
       <h3 className="form-section wide">About & Preferences</h3>
       <div className="wide">
-        <label>About the candidate</label>
+        <label>About the candidate and family</label>
         <textarea value={form.aboutMe} onChange={set('aboutMe')} required />
       </div>
       <div className="wide">
