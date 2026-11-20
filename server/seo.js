@@ -29,6 +29,8 @@ function jsonLd(page) {
         '@type': 'ProfessionalService',
         name: 'Telugu Kalyanamala',
         url: `${SITE_ORIGIN}/`,
+        logo: `${SITE_ORIGIN}/logo-512.png`,
+        image: `${SITE_ORIGIN}/logo-512.png`,
         telephone: '+919440545049',
         email: 'office@newkalyanamala.org',
         description: page.description,

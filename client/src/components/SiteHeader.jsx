@@ -62,7 +62,7 @@ export default function SiteHeader() {
       </div>
       <div className="site-header-inner">
         <Link to="/" className="site-logo" onClick={() => setOpen(false)}>
-          <span className="site-mark" aria-hidden="true">TK</span>
+          <img className="site-mark" src="/logo.svg" alt="" width="32" height="32" />
           {BRAND}
         </Link>
         <nav className={open ? 'site-nav open' : 'site-nav'} aria-label="Main">

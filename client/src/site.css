@@ -89,19 +89,11 @@
 }
 
 .site-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
   width: 32px;
   height: 32px;
   margin-right: 8px;
-  border-radius: 50%;
-  background: #fff;
-  color: var(--maroon-mid);
-  box-shadow: 0 0 0 2px var(--gold);
-  font-family: var(--serif);
-  font-size: 13px;
-  font-weight: 700;
+  border-radius: 8px;
   vertical-align: -6px;
 }
 

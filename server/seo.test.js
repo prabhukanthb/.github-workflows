@@ -22,6 +22,7 @@ test('the homepage is indexable and names both Telugu states and the Mala commun
   assert.match(html, /<html lang="en-IN" translate="no" class="notranslate">/);
   assert.match(html, /meta name="google" content="notranslate"/);
   assert.match(html, /application\/ld\+json/);
+  assert.match(html, /https:\/\/www\.telugukalyanamala\.com\/logo-512\.png/);
   assert.match(html, /Andhra Pradesh/);
   assert.match(html, /Telangana/);
   assert.equal(html.includes('Old description'), false);
