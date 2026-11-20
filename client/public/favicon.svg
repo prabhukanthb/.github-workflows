@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Telugu Kalyanamala">
+  <rect width="64" height="64" rx="14" fill="#C42336"/>
+  <circle cx="27" cy="15" r="4.2" fill="none" stroke="#F7F4EC" stroke-width="1.7"/>
+  <circle cx="37" cy="15" r="4.2" fill="none" stroke="#F7F4EC" stroke-width="1.7"/>
+  <path d="M15 27.5h14M22 27.5v18" fill="none" stroke="#F7F4EC" stroke-width="3.4" stroke-linecap="round"/>
+  <path d="M34 27.5v18M34 36.5L46 27.5M34 36.5L46 45.5" fill="none" stroke="#F7F4EC" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
