@@ -155,7 +155,7 @@ export default function Admin() {
           ))}
         </div>
       )}
-      <p><Link to="/admin/dashboard">Dashboard</Link> shows male and female counts by community, qualification, and job. <Link to="/admin/interests">Interest notifications</Link> are on their own page. Each one is removed after 7 days.</p>
+      <p><Link to="/admin/dashboard">Dashboard</Link> shows male and female counts by community, qualification, and job. <Link to="/admin/logins">Logins</Link> shows who signed in each day for the last 30 days. <Link to="/admin/interests">Interest notifications</Link> are on their own page. Each one is removed after 7 days.</p>
       {isFullAdmin && (
       <form className="panel" onSubmit={async (event) => {
         event.preventDefault();

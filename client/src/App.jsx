@@ -13,6 +13,7 @@ import Profile from './pages/Profile';
 import Interests, { OfficeInterests } from './pages/Interests';
 import Admin, { CreateProfile, EditProfile } from './pages/Admin';
 import Dashboard from './pages/Dashboard';
+import Logins from './pages/Logins';
 import { Privacy, Refund, Terms } from './pages/Legal';
 import Place from './pages/Place';
 import { useAuth } from './AuthContext';
@@ -60,6 +61,7 @@ function Shell() {
             <Route path="/interests" element={<Interests />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/dashboard" element={<Dashboard />} />
+            <Route path="/admin/logins" element={<Logins />} />
             <Route path="/admin/interests" element={<OfficeInterests />} />
             <Route path="/admin/create" element={<CreateProfile />} />
             <Route path="/admin/profiles/:id/edit" element={<EditProfile />} />

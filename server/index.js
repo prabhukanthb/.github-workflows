@@ -12,6 +12,7 @@ import { TELUGU_DOMAINS } from './deployGuard.js';
 import { communityName, getDb, initDb, presentProfile, publicUser, religionToStore, update } from './store.js';
 import { reactivateDeleted } from './reactivate.js';
 import { limitAuth, LOGIN_FAILURE } from './rateLimit.js';
+import { clientIp, loginReport, placeForIp, recordLogin, withPrunedLogins } from './logins.js';
 import { applySeo, robotsTxt, sitemapXml } from './seo.js';
 
 const PORT = Number(process.env.PORT || 4000);
@@ -342,6 +343,15 @@ app.post('/api/auth/login', limitAuth('login', (req) => [req.body?.emailOrPhone 
     ? await bcrypt.compare(password, user.passwordHash)
     : await bcrypt.compare(password, DUMMY_PASSWORD_HASH);
   if (!active || !ok) return res.status(401).json({ message: LOGIN_FAILURE });
+  const ip = clientIp(req);
+  const place = await placeForIp(ip);
+  await update((state) => recordLogin(state, {
+    id: crypto.randomUUID(),
+    userId: user.id,
+    at: new Date().toISOString(),
+    ip,
+    place
+  }));
   return res.json({ token: sign(user), user: publicUser(user) });
 });
 
@@ -596,6 +606,13 @@ app.post('/api/interests/:id/respond', auth, async (req, res) => {
       ? 'Accepted. The Vijayawada office will share contact only when both families are ready.'
       : 'Declined.'
   });
+});
+
+app.get('/api/admin/logins', auth, adminOnly, async (req, res) => {
+  const now = new Date();
+  await update((state) => withPrunedLogins(state, now));
+  const day = String(req.query.day || '');
+  res.json(loginReport(getDb(), day, getDb().users, now));
 });
 
 app.get('/api/admin/summary', auth, adminOnly, async (_req, res) => {

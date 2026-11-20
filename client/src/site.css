@@ -1591,6 +1591,31 @@ table.admin a.btn-maroon {
   min-width: 0;
 }
 
+.login-day {
+  display: grid;
+  gap: 6px;
+  max-width: 320px;
+  font-weight: 700;
+}
+
+.login-day select {
+  font: inherit;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.dash-board .panel {
+  min-width: 0;
+}
+
+.login-table {
+  overflow-x: auto;
+  max-width: 100%;
+  min-width: 0;
+}
+
 .dash-scope,
 .dash-genders {
   display: flex;
