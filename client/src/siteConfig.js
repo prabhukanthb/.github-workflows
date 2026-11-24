@@ -1,3 +1,7 @@
+import { properName } from './names.js';
+
+export { properName };
+
 export const BRAND = 'Telugu Kalyanamala';
 export const MOTTO = 'Introduction is Ours - Inspection is yours';
 export const ORG = 'Kalyanamala Seva Samstha';
@@ -107,5 +111,5 @@ export function maxDobFor18(today = new Date()) {
 }
 
 export function fullName(profile) {
-  return [profile?.firstName, profile?.lastName || profile?.surname].filter(Boolean).join(' ');
+  return [properName(profile?.firstName), properName(profile?.lastName || profile?.surname)].filter(Boolean).join(' ');
 }

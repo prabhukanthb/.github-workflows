@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import { HEIGHT_OPTIONS, SUB_CASTES, heightToValue, incomeToLacsInput, lookupIndianPincode, normalizePhotos } from '../profileFields';
-import { EDUCATION, EMPLOYMENT, MARITAL, MOTHER_TONGUES, RELIGIONS, SIBLINGS, COMPLEXIONS, ageFromDob, communityLabel, maxDobFor18 } from '../siteConfig';
+import { EDUCATION, EMPLOYMENT, MARITAL, MOTHER_TONGUES, RELIGIONS, SIBLINGS, COMPLEXIONS, ageFromDob, communityLabel, maxDobFor18, properName } from '../siteConfig';
 
 export function profileToForm(profile = {}, user = {}) {
   return {
@@ -202,11 +202,11 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
     <div className="form-grid">
       <div className={mark('firstName')}>
         <label htmlFor="field-firstName">Full Name</label>
-        <input id="field-firstName" value={form.firstName || ''} onChange={set('firstName')} />
+        <input id="field-firstName" value={form.firstName || ''} onChange={set('firstName')} onBlur={(event) => setForm({ ...form, firstName: properName(event.target.value) })} />
       </div>
       <div className={mark('surname')}>
         <label htmlFor="field-surname">Surname</label>
-        <input id="field-surname" value={form.surname || ''} onChange={set('surname')} />
+        <input id="field-surname" value={form.surname || ''} onChange={set('surname')} onBlur={(event) => setForm({ ...form, surname: properName(event.target.value) })} />
       </div>
       {!includeAccount && !includePhone && (
         <div className={mark('phone')}>
@@ -361,7 +361,7 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
       </div>
       <div>
         <label>Father’s name</label>
-        <input value={form.fatherName} onChange={set('fatherName')} />
+        <input value={form.fatherName} onChange={set('fatherName')} onBlur={(event) => setForm({ ...form, fatherName: properName(event.target.value) })} />
       </div>
       <div>
         <label>Father’s occupation</label>
@@ -373,7 +373,7 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
       </div>
       <div>
         <label>Mother’s name</label>
-        <input value={form.motherName} onChange={set('motherName')} />
+        <input value={form.motherName} onChange={set('motherName')} onBlur={(event) => setForm({ ...form, motherName: properName(event.target.value) })} />
       </div>
       <div>
         <label>Mother’s occupation</label>

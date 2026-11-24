@@ -7,6 +7,7 @@ import { alignProfileIds, communityName, normalizeStoredReligions, religionToSto
 import { buildSeed, withOfficePhone } from './seedData.js';
 import { assertTeluguMongoUri, TELUGU_DB } from './deployGuard.js';
 import { normalizeStoredEducation } from './education.js';
+import { normalizeStoredNames, properName } from './names.js';
 
 const FILE = path.join(process.cwd(), 'data', 'db.json');
 const SITE_ID = 'telugu-kalyanamala';
@@ -103,11 +104,20 @@ async function applyEducation() {
   return db;
 }
 
+async function applyNames() {
+  const next = normalizeStoredNames(db);
+  if (next === db) return db;
+  db = next;
+  await persist();
+  return db;
+}
+
 async function settleDb() {
   await applyOfficePhone();
   await applyProfileIds();
   await applyCommunityNames();
-  return applyEducation();
+  await applyEducation();
+  return applyNames();
 }
 
 export async function initDb() {
@@ -140,9 +150,9 @@ export function publicUser(user) {
     email: user.email,
     phone: user.phone,
     alternativePhone: user.alternativePhone || '',
-    firstName: user.firstName,
-    lastName: user.lastName,
-    surname: user.surname,
+    firstName: properName(user.firstName),
+    lastName: properName(user.lastName || user.surname),
+    surname: properName(user.surname || user.lastName),
     role: user.role,
     status: user.status
   };
@@ -159,9 +169,11 @@ export function presentProfile(profile, users, { contact = false } = {}) {
     ...rest,
     religion: communityName(profile.religion),
     earlierProfileId: contact && earlierProfileId ? earlierProfileId : undefined,
-    firstName: owner?.firstName || '',
-    lastName: owner?.lastName || '',
-    surname: owner?.surname || '',
+    firstName: properName(owner?.firstName),
+    lastName: properName(owner?.lastName || owner?.surname),
+    surname: properName(owner?.surname || owner?.lastName),
+    fatherName: properName(profile.fatherName),
+    motherName: properName(profile.motherName),
     email: contact ? owner?.email : undefined,
     phone: contact ? owner?.phone : undefined,
     alternativePhone: contact ? (owner?.alternativePhone || '') : undefined

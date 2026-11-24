@@ -238,6 +238,11 @@ export default function Home() {
               ['City · Guntur', 'city=Guntur'],
               ['City · Bangalore', 'city=Bangalore'],
               ['Profession', 'q=engineer'],
+              ['Job · Software', 'job=Software'],
+              ['Job · Teaching', 'job=Teaching'],
+              ['Job · Medical', 'job=Medical'],
+              ['Job · Government', 'job=Government'],
+              ['Job · Bank', 'job=Bank'],
               ['Education', 'q=b.tech'],
               ['NRI', 'city=NRI'],
               ['Second marriage', 'q=divorced']

@@ -1,3 +1,5 @@
+import { properName } from './names.js';
+
 export function ageFromDob(dob, today = new Date()) {
   if (!dob) return null;
   const match = String(dob).match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -263,7 +265,7 @@ export function cityMatches(profile, city) {
 
 export function fullName(profile) {
   return [profile?.firstName, profile?.lastName || profile?.surname]
-    .map((part) => String(part || '').trim())
+    .map((part) => properName(part))
     .filter(Boolean)
     .join(' ');
 }

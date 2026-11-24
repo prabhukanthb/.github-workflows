@@ -1,3 +1,5 @@
+import { properName } from './names.js';
+
 export const LOGIN_KEEP_DAYS = 30;
 const IST_OFFSET_MS = (5 * 60 + 30) * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -49,7 +51,7 @@ export function recentDayKeys(now = new Date()) {
 
 export function personName(user) {
   if (!user) return 'Removed account';
-  return [user.firstName, user.surname || user.lastName].filter(Boolean).join(' ') || 'Member';
+  return [properName(user.firstName), properName(user.surname || user.lastName)].filter(Boolean).join(' ') || 'Member';
 }
 
 function genderLabel(gender) {

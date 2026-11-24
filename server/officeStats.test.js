@@ -5,6 +5,7 @@ import {
   matchesPick,
   profilesInScope,
   jobKey,
+  profileMatchesJob,
   barsWithAtLeast,
   jobRows,
   qualificationRows,
@@ -96,6 +97,9 @@ test('job rows group government, bank, and the other kinds of work', () => {
   assert.deepEqual(rows.find((row) => row.label === 'Business'), { label: 'Business', male: 0, female: 0 });
   assert.equal(jobKey({ employmentType: 'govt', occupation: 'Teacher' }), 'Government');
   assert.equal(jobKey({ occupation: 'SBI clerk' }), 'Bank');
+  assert.equal(profileMatchesJob({ occupation: 'Teacher' }, 'Teaching'), true);
+  assert.equal(profileMatchesJob({ occupation: 'Teacher' }, 'Bank'), false);
+  assert.equal(profileMatchesJob({ occupation: 'Teacher' }, ''), true);
   assert.deepEqual(people.filter((profile) => matchesPick(profile, { kind: 'job', label: 'Bank', gender: 'female' })).map((profile) => profile.id), ['b']);
 });
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
-import { REGISTRATION_FEE } from '../siteConfig';
+import { REGISTRATION_FEE, properName } from '../siteConfig';
 
 const empty = {
   email: '',
@@ -37,7 +37,9 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await register({ ...form, lastName: form.surname });
+      const firstName = properName(form.firstName);
+      const surname = properName(form.surname);
+      await register({ ...form, firstName, surname, lastName: surname });
       navigate('/profile');
     } catch (err) {
       setError(err.message || 'Registration failed');
@@ -60,9 +62,9 @@ export default function Register() {
         <label htmlFor="reg-alt">Alternate mobile (optional)</label>
         <input id="reg-alt" inputMode="numeric" value={form.alternativePhone} onChange={(e) => digits('alternativePhone', e.target.value)} />
         <label htmlFor="reg-first">Full Name</label>
-        <input id="reg-first" value={form.firstName} onChange={(e) => set('firstName', e.target.value)} required />
+        <input id="reg-first" value={form.firstName} onChange={(e) => set('firstName', e.target.value)} onBlur={() => set('firstName', properName(form.firstName))} required />
         <label htmlFor="reg-surname">Surname</label>
-        <input id="reg-surname" value={form.surname} onChange={(e) => set('surname', e.target.value)} required />
+        <input id="reg-surname" value={form.surname} onChange={(e) => set('surname', e.target.value)} onBlur={() => set('surname', properName(form.surname))} required />
         <label htmlFor="reg-password">Password</label>
         <input id="reg-password" type="password" value={form.password} onChange={(e) => set('password', e.target.value)} autoComplete="new-password" required />
         <label htmlFor="reg-confirm">Confirm password</label>

@@ -59,6 +59,14 @@ export function qualificationRows(profiles) {
     .sort((a, b) => (b.male + b.female) - (a.male + a.female) || a.label.localeCompare(b.label));
 }
 
+export function profileMatchesJob(profile, job) {
+  const wanted = String(job || '').trim();
+  if (!wanted) return true;
+  return jobKey(profile) === wanted;
+}
+
+export const JOB_FILTERS = [...JOBS, 'Public', 'Other work'];
+
 export function jobRows(profiles) {
   const rows = rowsFor(profiles, jobKey, JOBS);
   const known = JOBS.map((label) => rows.find((row) => row.label === label));

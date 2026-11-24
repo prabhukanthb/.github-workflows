@@ -15,6 +15,8 @@ import { limitAuth, LOGIN_FAILURE } from './rateLimit.js';
 import { clientIp, loginReport, placeForIp, recordLogin, withPrunedLogins } from './logins.js';
 import { applySeo, robotsTxt, sitemapXml } from './seo.js';
 import { missingProfileFields } from './profileRequired.js';
+import { nameFields, properName } from './names.js';
+import { profileMatchesJob } from '../client/src/officeStats.js';
 
 const PORT = Number(process.env.PORT || 4000);
 const SECRET = process.env.JWT_SECRET || 'dev-telugu-kalyanamala-secret-change-me';
@@ -106,9 +108,9 @@ function limitedProfile(profile, users) {
     occupation: profile.occupation || '',
     currentAddress: { city: profile.currentAddress?.city || '' },
     photos,
-    firstName: owner?.firstName || '',
-    lastName: owner?.surname || owner?.lastName || '',
-    surname: owner?.surname || '',
+    firstName: properName(owner?.firstName),
+    lastName: properName(owner?.surname || owner?.lastName),
+    surname: properName(owner?.surname),
     restricted: true
   };
 }
@@ -240,9 +242,9 @@ function readBiodata(body, current = {}) {
     maritalStatus: body.maritalStatus ?? current.maritalStatus,
     siblingsCount: readSiblings(body.siblingsCount, current.siblingsCount),
     aboutSiblings: String(body.aboutSiblings ?? current.aboutSiblings ?? '').trim().slice(0, 1000),
-    fatherName: String(body.fatherName ?? current.fatherName ?? '').trim(),
+    fatherName: properName(body.fatherName ?? current.fatherName ?? ''),
     fatherOccupation: String(body.fatherOccupation ?? current.fatherOccupation ?? '').trim(),
-    motherName: String(body.motherName ?? current.motherName ?? '').trim(),
+    motherName: properName(body.motherName ?? current.motherName ?? ''),
     motherOccupation: String(body.motherOccupation ?? current.motherOccupation ?? '').trim(),
     highestEducation: body.highestEducation ?? current.highestEducation,
     fieldOfStudy: String(body.fieldOfStudy ?? current.fieldOfStudy ?? '').trim(),
@@ -302,8 +304,7 @@ app.post('/api/uploads', auth, async (req, res) => {
 app.post('/api/auth/register', limitAuth('register', (req) => [req.body?.email, req.body?.phone]), async (req, res) => {
   const email = String(req.body.email || '').trim().toLowerCase();
   const phone = String(req.body.phone || '').replace(/\D/g, '');
-  const firstName = String(req.body.firstName || '').trim();
-  const surname = String(req.body.surname || req.body.lastName || '').trim();
+  const { firstName, surname } = nameFields(req.body.firstName, req.body.surname || req.body.lastName);
   const password = String(req.body.password || '');
   const confirm = String(req.body.confirmPassword || '');
   if (!email.includes('@') || phone.length !== 10 || firstName.length < 2 || surname.length < 2) {
@@ -431,8 +432,10 @@ app.put('/api/profiles/me', auth, async (req, res) => {
   const current = getDb().profiles.find((item) => item.userId === req.user.id);
   if (!current) return res.status(404).json({ message: 'Profile not found' });
   const next = { ...current, ...readBiodata(req.body, current) };
-  const firstName = String(req.body.firstName ?? req.user.firstName ?? '').trim();
-  const surname = String(req.body.surname ?? req.user.surname ?? req.user.lastName ?? '').trim();
+  const { firstName, surname } = nameFields(
+    req.body.firstName ?? req.user.firstName,
+    req.body.surname ?? req.user.surname ?? req.user.lastName
+  );
   const missing = [
     ...missingProfileFields({
       firstName,
@@ -516,6 +519,7 @@ app.get('/api/profiles/browse', auth, (req, res) => {
     const age = ageFromDob(item.dateOfBirth);
     if (ageMin && age && age < ageMin) return false;
     if (ageMax && age && age > ageMax) return false;
+    if (!profileMatchesJob(item, req.query.job)) return false;
     return true;
   });
   const allowed = canViewMatches(req.user, mine);
@@ -690,8 +694,7 @@ app.get('/api/admin/profiles', auth, adminOnly, (_req, res) => {
 app.post('/api/admin/profiles', auth, adminOnly, async (req, res) => {
   const email = String(req.body.email || '').trim().toLowerCase();
   const phone = String(req.body.phone || '').replace(/\D/g, '');
-  const firstName = String(req.body.firstName || '').trim();
-  const surname = String(req.body.surname || '').trim();
+  const { firstName, surname } = nameFields(req.body.firstName, req.body.surname);
   if (!email.includes('@')) {
     return res.status(400).json({ message: 'Member needs a valid email.' });
   }
@@ -765,8 +768,7 @@ app.get('/api/admin/staff', auth, fullAdmin, (_req, res) => {
 app.post('/api/admin/staff', auth, fullAdmin, async (req, res) => {
   const email = String(req.body.email || '').trim().toLowerCase();
   const phone = String(req.body.phone || '').replace(/\D/g, '');
-  const firstName = String(req.body.firstName || '').trim();
-  const surname = String(req.body.surname || '').trim();
+  const { firstName, surname } = nameFields(req.body.firstName, req.body.surname);
   const role = req.body.role === 'admin' || req.body.role === 'subadmin' ? req.body.role : '';
   if (!role) return res.status(400).json({ message: 'Choose Admin or Subadmin.' });
   if (!email.includes('@') || phone.length !== 10 || firstName.length < 2 || surname.length < 2) {
@@ -825,11 +827,14 @@ app.patch('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
     const nextUser = { ...item };
     if (mobilePatch) nextUser.phone = mobilePatch;
     if (phonePatch !== undefined) nextUser.alternativePhone = phonePatch;
-    if (Object.prototype.hasOwnProperty.call(req.body, 'firstName')) nextUser.firstName = String(req.body.firstName || '').trim();
-    if (Object.prototype.hasOwnProperty.call(req.body, 'surname')) {
-      const surname = String(req.body.surname || '').trim();
-      nextUser.surname = surname;
-      nextUser.lastName = surname;
+    if (Object.prototype.hasOwnProperty.call(req.body, 'firstName') || Object.prototype.hasOwnProperty.call(req.body, 'surname')) {
+      const named = nameFields(
+        Object.prototype.hasOwnProperty.call(req.body, 'firstName') ? req.body.firstName : item.firstName,
+        Object.prototype.hasOwnProperty.call(req.body, 'surname') ? req.body.surname : (item.surname || item.lastName)
+      );
+      nextUser.firstName = named.firstName;
+      nextUser.surname = named.surname;
+      nextUser.lastName = named.lastName;
     }
     return nextUser;
   });

@@ -6,11 +6,13 @@ import ProfileModal from '../components/ProfileModal';
 import Watermark from '../components/Watermark';
 import { mainPhotoUrl } from '../profileFields';
 import { ageFromDob, communityLabel, fullName, REGISTER_CTA, REGISTRATION_FEE } from '../siteConfig';
+import { JOB_FILTERS } from '../officeStats';
 
 export default function Browse() {
   const { token, user, isAuthenticated, loading } = useAuth();
   const [params] = useSearchParams();
   const [query, setQuery] = useState(params.get('q') || '');
+  const [job, setJob] = useState(params.get('job') || '');
   const [profiles, setProfiles] = useState([]);
   const [viewer, setViewer] = useState(null);
   const [error, setError] = useState('');
@@ -28,6 +30,8 @@ export default function Browse() {
     let active = true;
     const search = new URLSearchParams(params);
     if (query) search.set('q', query);
+    if (job) search.set('job', job);
+    else search.delete('job');
     api.browse(token, search.toString())
       .then((data) => {
         if (!active) return;
@@ -50,7 +54,7 @@ export default function Browse() {
     return () => {
       active = false;
     };
-  }, [token, loading, params, query, user]);
+  }, [token, loading, params, query, job, user]);
 
   if (loading || busy) return <div className="page">Loading profiles…</div>;
 
@@ -96,6 +100,13 @@ export default function Browse() {
         <div>
           <label htmlFor="browse-q">Name, work or profile ID</label>
           <input id="browse-q" value={query} onChange={(e) => setQuery(e.target.value)} />
+        </div>
+        <div>
+          <label htmlFor="browse-job">Job</label>
+          <select id="browse-job" value={job} onChange={(event) => setJob(event.target.value)}>
+            <option value="">Any job</option>
+            {JOB_FILTERS.map((label) => <option key={label} value={label}>{label}</option>)}
+          </select>
         </div>
       </div>
       <p>{profiles.length} profile(s) found</p>
