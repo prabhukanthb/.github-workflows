@@ -1583,6 +1583,17 @@ table.admin a.btn-maroon {
   min-width: 0;
 }
 
+.field-missing input,
+.field-missing select {
+  border-color: var(--maroon-mid);
+  box-shadow: 0 0 0 2px var(--maroon-mid);
+}
+
+.missing-fields {
+  margin: 0 0 16px;
+  padding-left: 18px;
+}
+
 .login-day {
   display: grid;
   gap: 6px;

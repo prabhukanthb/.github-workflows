@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import BiodataForm, { profileToForm } from '../components/BiodataForm';
+import { RequiredFieldsPopup, stopIfProfileIncomplete } from '../components/RequiredFields';
 import ProfileSheet from '../components/ProfileSheet';
 
 export default function Profile() {
@@ -16,6 +17,7 @@ export default function Profile() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
+  const [missing, setMissing] = useState([]);
 
   useEffect(() => {
     if (!token) return undefined;
@@ -80,12 +82,13 @@ export default function Profile() {
       {message && <div className="ok">{message}</div>}
       {!form ? <p>Loading biodata…</p> : (
         <form className="panel" onSubmit={save}>
-          <BiodataForm form={form} setForm={setForm} />
-          <button className="btn-maroon" style={{ marginTop: 16 }} disabled={busy} type="submit">
+          <BiodataForm form={form} setForm={setForm} missingKeys={missing.map((item) => item.key)} />
+          <button className="btn-maroon" style={{ marginTop: 16 }} disabled={busy} type="submit" onClick={stopIfProfileIncomplete(form, setMissing)}>
             {busy ? 'Saving…' : 'Submit for review'}
           </button>
         </form>
       )}
+      <RequiredFieldsPopup missing={missing} onClose={() => setMissing([])} />
 
       {viewing && profile && (
         <ProfileSheet profile={profile} onClose={() => setViewing(false)} />

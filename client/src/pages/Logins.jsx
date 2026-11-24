@@ -59,7 +59,8 @@ export default function Logins() {
       <h2>Logins</h2>
       <p>
         People who signed in on the chosen day, in India time. The same person counts once.
-        The list shows every login, with the network address and the rough city for that address.
+        A profile with an ID is listed by that ID and gender. A new registration or a profile that is not
+        approved has no profile ID, so that login is listed below by name.
         A day older than 30 days is removed. <Link to="/admin">Back to the office list</Link>.
       </p>
       {error && <div className="error">{error}</div>}
@@ -79,27 +80,48 @@ export default function Logins() {
       </div>
       <section className="panel">
         <h2>{report ? dayLabel(report.day) : 'Today'}</h2>
-        {!report?.logins?.length ? <p>Nobody logged in on this day.</p> : (
-          <div className="login-table">
-            <table className="admin">
-              <thead>
-                <tr><th>Time</th><th>Person</th><th>Account</th><th>IP address</th><th>Place</th></tr>
-              </thead>
-              <tbody>
-                {report.logins.map((item) => (
-                  <tr key={item.id}>
-                    <td>{timeLabel(item.at)}</td>
-                    <td>{item.name}</td>
-                    <td>{item.role}</td>
-                    <td>{item.ip || '—'}</td>
-                    <td>{item.place || 'Not available'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        {!report?.logins?.length ? <p>Nobody with a profile ID logged in on this day.</p> : (
+          <LoginRows rows={report.logins} showProfile />
         )}
       </section>
+      <section className="panel">
+        <h2>No profile ID yet</h2>
+        <p>New registration and profiles that are not approved. The name is shown because a profile ID is not assigned.</p>
+        {!report?.pending?.length ? <p>Nobody in this group logged in on this day.</p> : (
+          <LoginRows rows={report.pending} />
+        )}
+      </section>
+    </div>
+  );
+}
+
+function LoginRows({ rows, showProfile = false }) {
+  return (
+    <div className="login-table">
+      <table className="admin">
+        <thead>
+          <tr>
+            <th>Time</th>
+            {showProfile ? <th>Profile ID</th> : <th>Person</th>}
+            {showProfile && <th>Gender</th>}
+            <th>Account</th>
+            <th>IP address</th>
+            <th>Place</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((item) => (
+            <tr key={item.id}>
+              <td>{timeLabel(item.at)}</td>
+              {showProfile ? <td>{item.profileId}</td> : <td>{item.name}</td>}
+              {showProfile && <td>{item.gender || '—'}</td>}
+              <td>{item.role}</td>
+              <td>{item.ip || '—'}</td>
+              <td>{item.place || 'Not available'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

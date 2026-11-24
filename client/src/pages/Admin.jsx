@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../AuthContext';
 import BiodataForm, { profileToForm } from '../components/BiodataForm';
+import { RequiredFieldsPopup, stopIfProfileIncomplete } from '../components/RequiredFields';
 import ProfileSheet from '../components/ProfileSheet';
 import { ageFromDob, fullName, genderLabel } from '../siteConfig';
 
@@ -315,6 +316,7 @@ export function CreateProfile() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [missing, setMissing] = useState([]);
   const isAdmin = user?.role === 'admin' || user?.role === 'subadmin';
 
   if (loading) return <div className="page">Loading…</div>;
@@ -351,10 +353,11 @@ export function CreateProfile() {
         </p>
       )}
       <form className="panel" onSubmit={create}>
-        <BiodataForm form={form} setForm={setForm} includeAccount />
+        <BiodataForm form={form} setForm={setForm} includeAccount missingKeys={missing.map((item) => item.key)} />
         <p>Leave the password empty and the family can login with the first 4 letters of the full name, @, and the last 4 digits of the mobile. Profiles created here are approved immediately.</p>
-        <button className="btn-maroon" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Create profile'}</button>
+        <button className="btn-maroon" type="submit" disabled={busy} onClick={stopIfProfileIncomplete(form, setMissing)}>{busy ? 'Saving…' : 'Create profile'}</button>
       </form>
+      <RequiredFieldsPopup missing={missing} onClose={() => setMissing([])} />
       {viewing && created && (
         <ProfileSheet profile={created} allowDownload onClose={() => setViewing(false)} />
       )}
@@ -371,6 +374,7 @@ export function EditProfile() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [missing, setMissing] = useState([]);
   const isAdmin = user?.role === 'admin' || user?.role === 'subadmin';
 
   useEffect(() => {
@@ -431,10 +435,11 @@ export function EditProfile() {
       )}
       {!form ? <p>Loading biodata…</p> : (
         <form className="panel" onSubmit={save}>
-          <BiodataForm form={form} setForm={setForm} includeName includePhone />
-          <button className="btn-maroon" style={{ marginTop: 16 }} type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save profile'}</button>
+          <BiodataForm form={form} setForm={setForm} includePhone missingKeys={missing.map((item) => item.key)} />
+          <button className="btn-maroon" style={{ marginTop: 16 }} type="submit" disabled={busy} onClick={stopIfProfileIncomplete(form, setMissing)}>{busy ? 'Saving…' : 'Save profile'}</button>
         </form>
       )}
+      <RequiredFieldsPopup missing={missing} onClose={() => setMissing([])} />
       {viewing && profile && (
         <ProfileSheet profile={profile} allowDownload onClose={() => setViewing(false)} />
       )}

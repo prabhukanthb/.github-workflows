@@ -52,6 +52,18 @@ export function personName(user) {
   return [user.firstName, user.surname || user.lastName].filter(Boolean).join(' ') || 'Member';
 }
 
+function genderLabel(gender) {
+  if (gender === 'female') return 'Female';
+  if (gender === 'male') return 'Male';
+  return '';
+}
+
+function assignedProfile(state, userId) {
+  const active = (state?.profiles || []).find((item) => item.userId === userId);
+  if (active) return active.profileId ? active : null;
+  return (state?.deletedProfiles || []).find((item) => item.userId === userId && item.profileId) || null;
+}
+
 export function loginReport(state, day, users = [], now = new Date()) {
   const logins = pruneLogins(state?.logins, now);
   const wanted = recentDayKeys(now).includes(day) ? day : istDayKey(now);
@@ -64,11 +76,14 @@ export function loginReport(state, day, users = [], now = new Date()) {
     .sort((a, b) => Date.parse(b.at) - Date.parse(a.at))
     .map((item) => {
       const user = users.find((person) => person.id === item.userId);
+      const profile = assignedProfile(state, item.userId);
       const role = user?.role === 'admin' || user?.role === 'subadmin' ? 'Office' : 'Member';
       return {
         id: item.id,
         at: item.at,
         name: personName(user),
+        profileId: profile?.profileId || '',
+        gender: profile?.profileId ? (genderLabel(profile.gender) || '—') : '',
         role: user ? role : 'Member',
         ip: item.ip || '',
         place: item.place || 'Not available'
@@ -78,7 +93,8 @@ export function loginReport(state, day, users = [], now = new Date()) {
     day: wanted,
     count: new Set(logins.filter((item) => istDayKey(item.at) === wanted).map((item) => item.userId)).size,
     days,
-    logins: rows
+    logins: rows.filter((item) => item.profileId),
+    pending: rows.filter((item) => !item.profileId)
   };
 }
 

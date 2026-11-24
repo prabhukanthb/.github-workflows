@@ -147,7 +147,8 @@ async function fileToDataUrl(file, max = 1400) {
   return canvas.toDataURL('image/jpeg', 0.85);
 }
 
-export default function BiodataForm({ form, setForm, includeAccount = false, includeName = false, includePhone = false }) {
+export default function BiodataForm({ form, setForm, includeAccount = false, includePhone = false, missingKeys = [] }) {
+  const mark = (key) => (missingKeys.includes(key) ? 'field-missing' : undefined);
   const { token } = useAuth();
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoError, setPhotoError] = useState('');
@@ -199,17 +200,20 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
 
   return (
     <div className="form-grid">
-      {(includeAccount || includeName) && (
-        <>
-          <div>
-            <label>Full Name</label>
-            <input value={form.firstName} onChange={set('firstName')} required />
-          </div>
-          <div>
-            <label>Surname</label>
-            <input value={form.surname} onChange={set('surname')} required />
-          </div>
-        </>
+      <div className={mark('firstName')}>
+        <label htmlFor="field-firstName">Full Name</label>
+        <input id="field-firstName" value={form.firstName || ''} onChange={set('firstName')} />
+      </div>
+      <div className={mark('surname')}>
+        <label htmlFor="field-surname">Surname</label>
+        <input id="field-surname" value={form.surname || ''} onChange={set('surname')} />
+      </div>
+      {!includeAccount && !includePhone && (
+        <div className={mark('phone')}>
+          <label htmlFor="field-phone">Phone</label>
+          <input id="field-phone" value={form.phone || ''} readOnly />
+          <p className="pin-note">This is the login mobile. The office can change it.</p>
+        </div>
       )}
       {includeAccount && (
         <>
@@ -217,9 +221,9 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
             <label>Email</label>
             <input type="email" value={form.email} onChange={set('email')} required />
           </div>
-          <div>
-            <label>Phone</label>
-            <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} required />
+          <div className={mark('phone')}>
+            <label htmlFor="field-phone">Phone</label>
+            <input id="field-phone" value={form.phone || ''} inputMode="numeric" onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} />
           </div>
           <div>
             <label>Alternate mobile</label>
@@ -232,9 +236,9 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
         </>
       )}
       {includePhone && !includeAccount && (
-        <div>
-          <label>Mobile number</label>
-          <input value={form.phone || ''} inputMode="numeric" onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} required />
+        <div className={mark('phone')}>
+          <label htmlFor="field-phone">Phone</label>
+          <input id="field-phone" value={form.phone || ''} inputMode="numeric" onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })} />
         </div>
       )}
       {!includeAccount && (
@@ -244,18 +248,18 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
         </div>
       )}
       <h3 className="form-section wide">Basic Details</h3>
-      <div>
-        <label>Looking to introduce</label>
-        <select value={form.gender} onChange={set('gender')} translate="no" required>
+      <div className={mark('gender')}>
+        <label htmlFor="field-gender">Looking to introduce</label>
+        <select id="field-gender" value={form.gender} onChange={set('gender')} translate="no">
           <option value="">Select</option>
           <option value="female">Female</option>
           <option value="male">Male</option>
         </select>
       </div>
       <div className="wide birth-row">
-        <div>
-          <label>Date of birth</label>
-          <input type="date" max={maxDobFor18()} value={form.dateOfBirth} onChange={set('dateOfBirth')} required />
+        <div className={mark('dateOfBirth')}>
+          <label htmlFor="field-dateOfBirth">Date of birth</label>
+          <input id="field-dateOfBirth" type="date" max={maxDobFor18()} value={form.dateOfBirth} onChange={set('dateOfBirth')} />
           {form.dateOfBirth && (
             <p className="pin-note">
               {ageFromDob(form.dateOfBirth) >= 18 ? `Age ${ageFromDob(form.dateOfBirth)}` : 'The candidate must be 18 or older.'}

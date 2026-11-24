@@ -14,6 +14,7 @@ import { reactivateDeleted } from './reactivate.js';
 import { limitAuth, LOGIN_FAILURE } from './rateLimit.js';
 import { clientIp, loginReport, placeForIp, recordLogin, withPrunedLogins } from './logins.js';
 import { applySeo, robotsTxt, sitemapXml } from './seo.js';
+import { missingProfileFields } from './profileRequired.js';
 
 const PORT = Number(process.env.PORT || 4000);
 const SECRET = process.env.JWT_SECRET || 'dev-telugu-kalyanamala-secret-change-me';
@@ -430,7 +431,18 @@ app.put('/api/profiles/me', auth, async (req, res) => {
   const current = getDb().profiles.find((item) => item.userId === req.user.id);
   if (!current) return res.status(404).json({ message: 'Profile not found' });
   const next = { ...current, ...readBiodata(req.body, current) };
-  const missing = validateBiodata(next);
+  const firstName = String(req.body.firstName ?? req.user.firstName ?? '').trim();
+  const surname = String(req.body.surname ?? req.user.surname ?? req.user.lastName ?? '').trim();
+  const missing = [
+    ...missingProfileFields({
+      firstName,
+      surname,
+      phone: req.user.phone,
+      gender: next.gender,
+      dateOfBirth: next.dateOfBirth
+    }),
+    ...validateBiodata(next).filter((item) => item !== 'gender' && item !== 'date of birth' && item !== 'age 18 or above')
+  ];
   if (missing.length) return res.status(400).json({ message: `Please add: ${missing.join(', ')}.` });
   const reviewing = !current.profileId;
   if (reviewing) {
@@ -450,8 +462,16 @@ app.put('/api/profiles/me', auth, async (req, res) => {
     return {
       ...state,
       seq: assigned.seq,
-      users: phonePatch === undefined ? state.users : state.users.map((item) => (
-        item.id === req.user.id ? { ...item, alternativePhone: phonePatch } : item
+      users: state.users.map((item) => (
+        item.id === req.user.id
+          ? {
+            ...item,
+            firstName,
+            surname,
+            lastName: surname,
+            ...(phonePatch !== undefined ? { alternativePhone: phonePatch } : {})
+          }
+          : item
       )),
       profiles: state.profiles.map((item) => (item.id === current.id ? saved : item))
     };
@@ -672,14 +692,17 @@ app.post('/api/admin/profiles', auth, adminOnly, async (req, res) => {
   const phone = String(req.body.phone || '').replace(/\D/g, '');
   const firstName = String(req.body.firstName || '').trim();
   const surname = String(req.body.surname || '').trim();
-  if (!email.includes('@') || phone.length !== 10 || firstName.length < 2 || surname.length < 2) {
-    return res.status(400).json({ message: 'Member needs email, 10-digit phone, full name and surname.' });
+  if (!email.includes('@')) {
+    return res.status(400).json({ message: 'Member needs a valid email.' });
   }
   if (getDb().users.some((user) => user.email === email || user.phone === phone)) {
     return res.status(409).json({ message: 'This email or phone is already registered.' });
   }
   const biodata = readBiodata(req.body, {});
-  const missing = validateBiodata(biodata);
+  const missing = [
+    ...missingProfileFields({ firstName, surname, phone, gender: biodata.gender, dateOfBirth: biodata.dateOfBirth }),
+    ...validateBiodata(biodata).filter((item) => item !== 'gender' && item !== 'date of birth' && item !== 'age 18 or above')
+  ];
   if (missing.length) return res.status(400).json({ message: `Please add: ${missing.join(', ')}.` });
   const alternativePhone = optionalPhone(req.body.alternativePhone);
   if (alternativePhone && alternativePhone.length !== 10) {
@@ -810,6 +833,20 @@ app.patch('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
     }
     return nextUser;
   });
+  const editingDetails = ['firstName', 'surname', 'phone', 'gender', 'dateOfBirth'].some((key) => (
+    Object.prototype.hasOwnProperty.call(req.body, key)
+  ));
+  if (editingDetails) {
+    const owner = getDb().users.find((user) => user.id === current.userId) || {};
+    const requiredMissing = missingProfileFields({
+      firstName: Object.prototype.hasOwnProperty.call(req.body, 'firstName') ? req.body.firstName : owner.firstName,
+      surname: Object.prototype.hasOwnProperty.call(req.body, 'surname') ? req.body.surname : (owner.surname || owner.lastName),
+      phone: Object.prototype.hasOwnProperty.call(req.body, 'phone') ? req.body.phone : owner.phone,
+      gender: next.gender,
+      dateOfBirth: next.dateOfBirth
+    });
+    if (requiredMissing.length) return res.status(400).json({ message: `Please add: ${requiredMissing.join(', ')}.` });
+  }
   if (Object.prototype.hasOwnProperty.call(req.body, 'firstName') && String(req.body.firstName || '').trim().length < 2) {
     return res.status(400).json({ message: 'Full name must be at least 2 letters.' });
   }
