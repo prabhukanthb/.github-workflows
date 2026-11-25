@@ -6,7 +6,6 @@ import BiodataForm, { profileToForm } from '../components/BiodataForm';
 import { RequiredFieldsPopup, stopIfProfileIncomplete } from '../components/RequiredFields';
 import ProfileSheet from '../components/ProfileSheet';
 import { ageFromDob, fullName, genderLabel, properName } from '../siteConfig';
-import { duplicateGroups } from '../duplicates';
 
 function ActionIcon({ name }) {
   if (name === 'view') {
@@ -88,7 +87,6 @@ export default function Admin() {
     ? deleted
     : profiles.filter((profile) => filter === 'all' || profile.approvalStatus === filter);
   const visible = filter === 'all' ? [...matched].reverse() : matched;
-  const duplicates = duplicateGroups([...profiles, ...deleted]);
 
   const decide = async (profile, approvalStatus) => {
     setError('');
@@ -158,24 +156,7 @@ export default function Admin() {
           ))}
         </div>
       )}
-      <p><Link to="/admin/dashboard">Dashboard</Link> shows male and female counts by community, qualification, and job. <Link to="/admin/logins">Logins</Link> shows who signed in each day for the last 30 days. <Link to="/admin/interests">Interest notifications</Link> are on their own page. Each one is removed after 7 days.</p>
-      <section className="panel">
-        <h2>Duplicate entries</h2>
-        {duplicates.length === 0 ? (
-          <p>No duplicate phone, email, or same name and date of birth.</p>
-        ) : (
-          <ul className="interest-list">
-            {duplicates.map((group) => (
-              <li key={`${group.reason}-${group.key}`}>
-                <strong>{group.reason}</strong>
-                {group.reason === 'Same phone' || group.reason === 'Same email' ? ` · ${group.key}` : ''}
-                {': '}
-                {group.profiles.map((profile) => `${fullName(profile)} (${profile.profileId || 'no ID'})`).join('; ')}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <p><Link to="/admin/dashboard">Dashboard</Link> shows male and female counts by community, qualification, and job. <Link to="/admin/logins">Logins</Link> shows who signed in each day for the last 30 days. <Link to="/admin/duplicates">Duplicate entries</Link> are on their own page and keep a daily list for 30 days. <Link to="/admin/interests">Interest notifications</Link> are on their own page. Each one is removed after 7 days.</p>
       {isFullAdmin && (
       <form className="panel" onSubmit={async (event) => {
         event.preventDefault();

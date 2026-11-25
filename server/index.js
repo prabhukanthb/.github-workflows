@@ -17,6 +17,7 @@ import { applySeo, robotsTxt, sitemapXml } from './seo.js';
 import { missingProfileFields } from './profileRequired.js';
 import { nameFields, properName } from './names.js';
 import { profileMatchesJob } from '../client/src/officeStats.js';
+import { duplicateReport, withDuplicateSnapshot } from './duplicateDays.js';
 
 const PORT = Number(process.env.PORT || 4000);
 const SECRET = process.env.JWT_SECRET || 'dev-telugu-kalyanamala-secret-change-me';
@@ -462,7 +463,7 @@ app.put('/api/profiles/me', auth, async (req, res) => {
   await update((state) => {
     const assigned = assignProfileId(state, next);
     saved = assigned.profile;
-    return {
+    return withDuplicateSnapshot({
       ...state,
       seq: assigned.seq,
       users: state.users.map((item) => (
@@ -477,7 +478,7 @@ app.put('/api/profiles/me', auth, async (req, res) => {
           : item
       )),
       profiles: state.profiles.map((item) => (item.id === current.id ? saved : item))
-    };
+    });
   });
   const idNote = current.profileId && saved.profileId && current.profileId !== saved.profileId
     ? ` Profile ID is now ${saved.profileId}.`
@@ -639,6 +640,12 @@ app.get('/api/admin/logins', auth, adminOnly, async (req, res) => {
   res.json(loginReport(getDb(), day, getDb().users, now));
 });
 
+app.get('/api/admin/duplicates', auth, adminOnly, async (req, res) => {
+  const now = new Date();
+  await update((state) => withDuplicateSnapshot(state, now));
+  res.json(duplicateReport(getDb(), String(req.query.day || ''), now));
+});
+
 app.get('/api/admin/summary', auth, adminOnly, async (_req, res) => {
   const interests = await currentInterests();
   const state = getDb();
@@ -744,12 +751,12 @@ app.post('/api/admin/profiles', auth, adminOnly, async (req, res) => {
       approvalStatus: 'approved',
       showInSearch: true
     };
-    return {
+    return withDuplicateSnapshot({
       ...state,
       seq,
       users: [...state.users, user],
       profiles: [...state.profiles, created]
-    };
+    });
   });
   res.status(201).json({
     profile: presentProfile(created, getDb().users, { contact: true }),
@@ -873,12 +880,12 @@ app.patch('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
     }
     const assigned = assignProfileId({ ...state, seq }, working);
     saved = assigned.profile;
-    return {
+    return withDuplicateSnapshot({
       ...state,
       seq: assigned.seq,
       users: usersWithAccount(state.users),
       profiles: state.profiles.map((item) => (item.id === current.id ? saved : item))
-    };
+    });
   });
   return res.json({ profile: presentProfile(saved, getDb().users, { contact: true }) });
 });
@@ -917,7 +924,7 @@ app.delete('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
     deletedAt: new Date().toISOString(),
     deletedBy: req.user.id
   };
-  await update((state) => ({
+  await update((state) => withDuplicateSnapshot({
     ...state,
     profiles: state.profiles.filter((item) => item.id !== current.id),
     deletedProfiles: [...(state.deletedProfiles || []), removed]
@@ -938,7 +945,7 @@ app.post('/api/admin/profiles/:id/reactivate', auth, adminOnly, async (req, res)
       return state;
     }
     restored = result.profile;
-    return result.state;
+    return withDuplicateSnapshot(result.state);
   });
   if (error === 'not-found') return res.status(404).json({ message: 'Deleted profile not found' });
   if (error === 'already-active') return res.status(409).json({ message: 'This profile is already active.' });
