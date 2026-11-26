@@ -4,7 +4,7 @@ import { missingProfileFields } from './profileRequired.js';
 
 test('a profile is not complete until name, phone, introduction and date of birth are filled', () => {
   assert.deepEqual(missingProfileFields({}), [
-    'Full Name',
+    'Full Name of Bride or Groom',
     'Surname',
     'Phone',
     'Looking to introduce',

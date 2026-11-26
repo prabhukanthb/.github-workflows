@@ -860,7 +860,7 @@ app.patch('/api/admin/profiles/:id', auth, adminOnly, async (req, res) => {
     if (requiredMissing.length) return res.status(400).json({ message: `Please add: ${requiredMissing.join(', ')}.` });
   }
   if (Object.prototype.hasOwnProperty.call(req.body, 'firstName') && String(req.body.firstName || '').trim().length < 2) {
-    return res.status(400).json({ message: 'Full name must be at least 2 letters.' });
+    return res.status(400).json({ message: 'Full Name of Bride or Groom must be at least 2 letters.' });
   }
   if (Object.prototype.hasOwnProperty.call(req.body, 'surname') && String(req.body.surname || '').trim().length < 2) {
     return res.status(400).json({ message: 'Surname must be at least 2 letters.' });

@@ -201,7 +201,7 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
   return (
     <div className="form-grid">
       <div className={mark('firstName')}>
-        <label htmlFor="field-firstName">Full Name</label>
+        <label htmlFor="field-firstName">Full Name of Bride or Groom</label>
         <input id="field-firstName" value={form.firstName || ''} onChange={set('firstName')} onBlur={(event) => setForm({ ...form, firstName: properName(event.target.value) })} />
       </div>
       <div className={mark('surname')}>
@@ -343,17 +343,6 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
         </select>
       </div>
       <div>
-        <label>Siblings</label>
-        <select value={form.siblingsCount || ''} onChange={set('siblingsCount')}>
-          <option value="">Select</option>
-          {SIBLINGS.map((item) => <option key={item} value={item}>{item}</option>)}
-        </select>
-      </div>
-      <div className="wide">
-        <label>About Siblings</label>
-        <textarea value={form.aboutSiblings || ''} onChange={set('aboutSiblings')} maxLength={1000} />
-      </div>
-      <div>
         <label>Marital status</label>
         <select value={form.maritalStatus} onChange={set('maritalStatus')}>
           {MARITAL.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
@@ -382,6 +371,17 @@ export default function BiodataForm({ form, setForm, includeAccount = false, inc
       <div>
         <label>Mother’s native place</label>
         <input value={form.motherNativePlace || ''} onChange={set('motherNativePlace')} />
+      </div>
+      <div className="row-start">
+        <label>Siblings</label>
+        <select value={form.siblingsCount || ''} onChange={set('siblingsCount')}>
+          <option value="">Select</option>
+          {SIBLINGS.map((item) => <option key={item} value={item}>{item}</option>)}
+        </select>
+      </div>
+      <div className="wide">
+        <label>About Siblings</label>
+        <textarea value={form.aboutSiblings || ''} onChange={set('aboutSiblings')} maxLength={1000} />
       </div>
       <h3 className="form-section wide">Education & Professional</h3>
       <div>

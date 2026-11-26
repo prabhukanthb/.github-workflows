@@ -351,8 +351,6 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
                 <Row label="Height" value={heightText(profile)} />
                 <Row label="Skin complexion" value={profile.complexion} />
                 <Row label="Marital status" value={maritalLabel(profile.maritalStatus)} />
-                <Row label="Siblings" value={profile.siblingsCount} />
-                <Row label="About Siblings" value={profile.aboutSiblings} />
                 <Row label="Sub-community" value={communityLabel(profile.religion)} />
                 <Row label="Caste" value="Mala" />
                 <Row label="Mother tongue" value={profile.motherTongue} />
@@ -366,6 +364,8 @@ export default function ProfileSheet({ profile, onClose, allowDownload = false }
                 />
                 <Row label="Father" value={joinParts([profile.fatherName, profile.fatherOccupation, profile.fatherNativePlace])} />
                 <Row label="Mother" value={joinParts([profile.motherName, profile.motherOccupation, profile.motherNativePlace])} />
+                <Row label="Siblings" value={profile.siblingsCount} />
+                <Row label="About Siblings" value={profile.aboutSiblings} />
                 {profile.aboutMe && <p className="sheet-note"><strong>About candidate and family. </strong>{profile.aboutMe}</p>}
                 {profile.partnerRequirement && <p className="sheet-note"><strong>Partner requirement. </strong>{profile.partnerRequirement}</p>}
               </div>

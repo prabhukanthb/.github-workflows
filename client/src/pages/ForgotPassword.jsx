@@ -27,7 +27,7 @@ export default function ForgotPassword() {
       <div className="panel auth-card">
         <div className="kicker">Telugu Kalyanamala</div>
         <h2>Reset password</h2>
-        <p>Enter the registered email or mobile. The password becomes the first 4 letters of the Full Name, then @, then the last 4 digits of the registered mobile. Full Name Prabhu and mobile 9876543210 becomes Prab@3210.</p>
+        <p>Enter the registered email or mobile. The password becomes the first 4 letters of the Full Name of Bride or Groom, then @, then the last 4 digits of the registered mobile. Full Name of Bride or Groom Prabhu and mobile 9876543210 becomes Prab@3210.</p>
         {error && <div className="error">{error}</div>}
         {password && (
           <div className="ok">

@@ -934,6 +934,10 @@ textarea {
   grid-column: 1 / -1;
 }
 
+.form-grid .row-start {
+  grid-column: 1;
+}
+
 .birth-row {
   display: grid;
   grid-template-columns: 1.1fr 1.2fr 1.1fr;

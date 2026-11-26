@@ -354,7 +354,7 @@ export function CreateProfile() {
       )}
       <form className="panel" onSubmit={create}>
         <BiodataForm form={form} setForm={setForm} includeAccount missingKeys={missing.map((item) => item.key)} />
-        <p>Leave the password empty and the family can login with the first 4 letters of the full name, @, and the last 4 digits of the mobile. Profiles created here are approved immediately.</p>
+        <p>Leave the password empty and the family can login with the first 4 letters of the Full Name of Bride or Groom, @, and the last 4 digits of the mobile. Profiles created here are approved immediately.</p>
         <button className="btn-maroon" type="submit" disabled={busy} onClick={stopIfProfileIncomplete(form, setMissing)}>{busy ? 'Saving…' : 'Create profile'}</button>
       </form>
       <RequiredFieldsPopup missing={missing} onClose={() => setMissing([])} />

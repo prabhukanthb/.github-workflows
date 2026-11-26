@@ -3,7 +3,7 @@ import { ageFromDob } from '../siteConfig';
 
 export function missingRequiredProfileFields(form = {}) {
   const missing = [];
-  if (String(form.firstName || '').trim().length < 2) missing.push({ key: 'firstName', label: 'Full Name' });
+  if (String(form.firstName || '').trim().length < 2) missing.push({ key: 'firstName', label: 'Full Name of Bride or Groom' });
   if (String(form.surname || '').trim().length < 2) missing.push({ key: 'surname', label: 'Surname' });
   if (String(form.phone || '').replace(/\D/g, '').length !== 10) missing.push({ key: 'phone', label: 'Phone' });
   if (form.gender !== 'male' && form.gender !== 'female') missing.push({ key: 'gender', label: 'Looking to introduce' });
